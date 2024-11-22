@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   apiUrl: 'https://seceduepitacio.azurewebsites.net/api',
-  docsApiURL: 'https://seceduepitacio.azurewebsites.net/docs/',
+  docsApiURL: 'https://seceduepitacio.azurewebsites.net/docs',
 };
 
 /*
