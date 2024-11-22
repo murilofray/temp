@@ -1,0 +1,53 @@
+.tabela-container {
+  margin: 20px;
+}
+
+.titulo-tabela {
+  font-size: 24px; /* Tamanho da fonte */
+  font-weight: bold; /* Negrito */
+  color: #333; /* Cor do texto */
+  text-align: center; /* Centraliza o texto */
+  margin-bottom: 15px; /* Espaçamento abaixo do título */
+}
+.titulo-infos {
+  font-size: 16px; /* Tamanho da fonte */
+  font-weight: bold; /* Negrito */
+  color: #333; /* Cor do texto */
+  text-align: center; /* Centraliza o texto */
+  margin-bottom: 10px; /* Espaçamento abaixo do título */
+}
+
+.p-toolbar {
+  background: none;
+  border: none;
+  margin-top: 1.25rem;
+  padding: 0;
+  padding-bottom: 1.25rem;
+  border-radius: 0;
+  gap: 0;
+  display: flex;
+  justify-content: space-between; /* Certifica que os elementos se distribuem no espaço disponível */
+}
+
+.toolbar-flex-spacing {
+  display: flex;
+  gap: 1rem; /* Define o espaçamento entre os itens (botões) */
+}
+
+
+
+/* Estilos para tornar o container responsivo */
+@media (max-width: 768px) {
+  .tabela-container {
+    margin: 10px; /* Reduzir a margem em telas menores */
+  }
+
+  .titulo-tabela {
+    font-size: 20px; /* Reduzir o tamanho da fonte em telas menores */
+  }
+
+  .toolbar-flex-spacing {
+    flex-direction: column; /* Empilha os botões verticalmente */
+    align-items: stretch; /* Faz os botões ocuparem toda a largura */
+  }
+}

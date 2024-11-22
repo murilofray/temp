@@ -1,0 +1,361 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Fornecedores</h2>
+  <h5 class="titulo-infos">{{ infoPesquisas }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Novo Fornecedor"
+          icon="pi pi-plus"
+          class="p-button-success"
+          (click)="createFornecedor()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterFornecedores($event)"
+            placeholder="Pesquisar"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+  </p-toolbar>
+  <p-toast></p-toast>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          #dt
+          styleClass="p-datatable-striped"
+          [value]="fornecedoresFiltrados"
+          [columns]="cols"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [paginator]="true"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} fornecedores"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pColumn="razaoSocial">Razão Social</th>
+              <th pColumn="doc">CNPJ / CPF</th>
+              <th pColumn="fantasia">Nome Fantasia</th>
+              <th pColumn="endereco">Endereço</th>
+              <th pColumn="telefone">Telefone</th>
+              <th pColumn="email">E-mail</th>
+              <th pColumn="acoes">Ações</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-fornecedor>
+            <tr [pSelectableRow]="fornecedor">
+              <td class="p-wrap-text" style="width: 20%; min-width: 10rem">
+                <span class="p-column-title">Razão Social</span>
+                {{ fornecedor.razaoSocial }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 15%; min-width: 10rem">
+                <span class="p-column-title">CNPJ / CPF</span>
+                {{ apresentarDOC(fornecedor) }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 10%; min-width: 10rem">
+                <span class="p-column-title">Nome Fantasia</span>
+                {{ fornecedor.nomeFantasia }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 15%; min-width: 10rem">
+                <span class="p-column-title">Endereço</span>
+                {{ apresentarEndereco(fornecedor) }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 15%; min-width: 10rem">
+                <span class="p-column-title">Telefone</span>
+                {{ formatarTelefone(fornecedor.telefone) }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 10%; min-width: 10rem">
+                <span class="p-column-title">Email</span>
+                {{ fornecedor.email }}
+              </td>
+
+              <!-- Ações -->
+              <td class="p-wrap-text" style="width: 15%; min-width: 12rem">
+                <span class="p-column-title">Ações</span>
+
+                <div>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-eye"
+                    class="p-button-outlined p-button-rounded p-button-help mr-2"
+                    (click)="viewFornecedor(fornecedor)"
+                    pTooltip="Visualizar fornecedor"
+                    tooltipPosition="top"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-pencil"
+                    class="p-button-outlined p-button-rounded p-button-success mr-2"
+                    (click)="editFornecedor(fornecedor)"
+                    pTooltip="Editar Fornecedor"
+                    tooltipPosition="top"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-trash"
+                    class="p-button-outlined p-button-rounded p-button-danger"
+                    (click)="deleteFornecedor(fornecedor)"
+                    pTooltip="Remover Fornecedor"
+                    tooltipPosition="top"
+                  ></button>
+                </div>
+
+                <!-- <button
+                  pButton
+                  pRipple
+                  icon="pi pi-chevron-right"
+                  class="p-button-outlined p-button-rounded p-button-info mr-2"
+                  (click)="acessarPesquisa(pesquisa.id)"
+                  label="Acessar Pesquisa"
+                ></button>
+                <button
+                  pButton
+                  pRipple
+                  icon="pi pi-trash"
+                  class="p-button-outlined p-button-rounded p-button-danger"
+                  (click)="deletePesquisa(pesquisa.id)"
+                  pTooltip="Remover Fornecedor"
+                  tooltipPosition="top"
+                  label="Deletar Pesquisa"
+                ></button> -->
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog para Adicionar Fornecedor -->
+  <p-dialog
+    [(visible)]="fornecedorDialog"
+    header="Fornecedor"
+    [modal]="true"
+    [style]="{ width: '750px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid"
+  >
+    <ng-template pTemplate="content">
+      <!-- CNPJ / CPF -->
+      <div class="field">
+        <label for="cnpjCpfFornecedor">CNPJ / CPF</label>
+        <input
+          [readonly]="isViewMode"
+          [disabled]="isEditMode"
+          id="cnpjCpfFornecedor"
+          class="p-inputmask"
+          type="text"
+          pInputText
+          [(ngModel)]="fornecedorDOC"
+          (input)="updateMask()"
+          (blur)="verificarFornecedor()"
+          autofocus
+          required
+          maxlength="14"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && !fornecedorDOC }"
+        />
+      </div>
+
+      <!-- Razão Social -->
+      <div class="field">
+        <label for="razaoSocialFornecedor">Razão Social</label>
+        <input
+          id="razaoSocialFornecedor"
+          type="text"
+          pInputText
+          [(ngModel)]="fornecedor.razaoSocial"
+          required
+          [readonly]="isViewMode"
+        />
+      </div>
+
+      <!-- Nome -->
+      <div class="field">
+        <label for="nomeFantasiaFornecedor">Nome Fantasia</label>
+        <input
+          id="nomeFantasiaFornecedor"
+          type="text"
+          pInputText
+          [(ngModel)]="fornecedor.nomeFantasia"
+          required
+          [readonly]="isViewMode"
+        />
+      </div>
+
+      <!-- Responsável -->
+      <div class="field">
+        <label for="responsavelFornecedor">Responsável</label>
+        <input
+          id="responsavelFornecedor"
+          type="text"
+          pInputText
+          [(ngModel)]="fornecedor.responsavel"
+          required
+          [readonly]="isViewMode"
+        />
+      </div>
+
+      <!-- Endereço -->
+      <div class="field">
+        <label for="enderecoFornecedor">Endereço</label>
+        <input
+          id="enderecoFornecedor"
+          type="text"
+          placeholder="Lougradouro, 999"
+          pInputText
+          [(ngModel)]="fornecedor.endereco"
+          required
+          [readonly]="isViewMode"
+        />
+      </div>
+
+      <!-- Cidade -->
+      <div class="field">
+        <label for="cidadeFornecedor">Cidade</label>
+        <input
+          id="cidadeFornecedor"
+          type="text"
+          pInputText
+          [(ngModel)]="fornecedor.cidade"
+          required
+          [readonly]="isViewMode"
+        />
+      </div>
+
+      <!-- Telefone -->
+      <div class="field">
+        <label for="telefoneFornecedor">Telefone</label>
+        <p-inputMask
+          id="telefoneFornecedor"
+          [(ngModel)]="fornecedor.telefone"
+          mask="(99) 9?9999-9999"
+          required
+          [readonly]="isViewMode"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && !fornecedor.telefone }"
+        >
+        </p-inputMask>
+        <div *ngIf="submitted && !fornecedor.telefone" class="p-invalid">
+          <span>Informe um telefone válido</span>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label for="emailFornecedor">Email</label>
+        <input
+          id="emailFornecedor"
+          type="email"
+          pInputText
+          [(ngModel)]="fornecedor.email"
+          [readonly]="isViewMode"
+          required
+          email
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && !fornecedor.email }"
+        />
+        <div *ngIf="submitted && !fornecedor.email" class="p-invalid">
+          <span>Informe um email válido</span>
+        </div>
+        <div *ngIf="fornecedor.email && !validateEmail(fornecedor.email)" class="p-invalid">
+          <span>Informe um email válido</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="coletarDadosFornecedors()"
+        ></button>
+        <button
+          *ngIf="isViewMode"
+          pButton
+          pRipple
+          label="Fechar"
+          icon="pi pi-times"
+          class="p-button-info"
+          (click)="hideDialog()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Remover Fornecedor -->
+  <p-dialog
+    [(visible)]="deleteFornecedorDialog"
+    header="Confirmação"
+    [modal]="true"
+    [style]="{ width: '350px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+  >
+    <ng-template pTemplate="content">
+      <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span
+          >Tem certeza que deseja remover o Fornecedor <b>{{ fornecedor.razaoSocial }}</b
+          >? <br />
+          <br />
+          Esta operação afetará todas as unidades escolares.
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDeleteFornecedor()"
+        ></button>
+        <button pButton pRipple icon="pi pi-times" class="p-button-info" label="Não" (click)="hideDialog()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

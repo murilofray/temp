@@ -1,0 +1,201 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Últimas atas</h2>
+  <h5 class="titulo-infos"></h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Cadastrar Ata"
+          icon="pi pi-plus"
+          class="p-button"
+          (click)="openAtaModal()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Cadastrar Processo"
+          icon="pi pi-plus"
+          class="p-button"
+          (click)="openGerirAtaModal()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <!-- <ng-template pTemplate="right">
+        <div class="my-2 toolbar-flex-spacing">
+      <span class="p-input-icon-left ml-auto">
+        <i class="pi pi-search"></i>
+        <input
+          pinputtext=""
+          type="text"
+          (input)="filterPesquisas($event)"
+          placeholder="Pesquisar"
+          class="p-inputtext p-component p-element w-full"
+        />
+      </span>
+    </div>
+    </ng-template> -->
+  </p-toolbar>
+
+  <!-- Modal para cadastro de Ata -->
+  <p-dialog header="Cadastrar Nova Ata" [(visible)]="isAtaModalOpen" modal="true" [style]="{ width: '400px' }">
+    <ng-template pTemplate="content">
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <form [formGroup]="ataForm" (ngSubmit)="createGerirAtaAndAta()">
+        <!-- Campo de seleção de Processo -->
+        <div class="form-group">
+          <label for="processo">Processo</label>
+          <p-dropdown
+            [options]="processos"
+            optionLabel="titulo"
+            optionValue="id"
+            formControlName="processo"
+          ></p-dropdown>
+        </div>
+
+        <!-- Campo de seleção de documento -->
+        <div class="form-group">
+          <label for="documento">Documento</label>
+          <input type="file" (change)="onFileSelected($event)" />
+        </div>
+
+        <!-- Outros campos -->
+        <div class="form-group">
+          <label for="titulo">Título</label>
+          <input type="text" pInputText formControlName="titulo" />
+        </div>
+
+        <div class="form-group">
+          <label for="ata">Ata</label>
+          <textarea pInputTextarea formControlName="ata"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="data">Data</label>
+          <p-calendar formControlName="data" dateFormat="dd/mm/yy"></p-calendar>
+        </div>
+
+        <!-- Aqui aplicar o valor como int, e alterar no banco, para melhor ordenação das atas -->
+        <div class="form-group">
+          <label for="tipo">Tipo</label>
+          <p-dropdown
+            [options]="[
+              { label: 'Ata de Convocação', value: 'Ata de Convocação' },
+              { label: 'Ata 2', value: 'Ata 2' },
+              { label: 'Ata 3', value: 'Ata 3' },
+            ]"
+            formControlName="tipo"
+          >
+          </p-dropdown>
+        </div>
+      </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          class="p-button-success"
+          label="Salvar"
+          icon="pi pi-check"
+          type="submit"
+          [disabled]="ataForm.invalid"
+        ></button>
+        <button
+          pButton
+          pRipple
+          class="p-button-warning"
+          label="Cancelar"
+          icon="pi pi-times"
+          (onClick)="closeAtaModal()"
+        ></button>
+      </div> </ng-template
+  ></p-dialog>
+
+  <!-- Modal para cadastro de GerirAta (CADASTRAR PROCESSO)-->
+  <p-dialog header="Cadastrar Processo" [(visible)]="isGerirAtaModalOpen" modal="true" [style]="{ width: '400px' }">
+    <ng-template pTemplate="content">
+      <form [formGroup]="gerirAtaForm" (ngSubmit)="onSubmitGerirAta()">
+        <div class="form-group">
+          <label for="titulo">Título do Processo</label>
+          <input type="text" pInputText formControlName="titulo" />
+        </div>
+      </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          type="submit"
+          [disabled]="gerirAtaForm.invalid"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (onClick)="closeGerirAtaModal()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Tabela e paginação para Atas -->
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          [value]="displayedAtas"
+          responsiveLayout="scroll"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Número</th>
+              <th>Título</th>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Processo</th>
+              <th>Visualizar</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-ata>
+            <tr>
+              <td>{{ ata.id }}</td>
+              <td>{{ ata.titulo }}</td>
+              <td>
+                <span class="data-badge">{{ ata.data | date: 'dd/MM/yyyy' }}</span>
+              </td>
+              <td>{{ ata.tipo }}</td>
+              <td>{{ ata.gerirAtaId }}</td>
+              <td>
+                <p-button
+                  label="Ver"
+                  icon="pi pi-eye"
+                  (onClick)="verDocumento(ata.documentosScanId)"
+                  class="p-button-text"
+                ></p-button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>

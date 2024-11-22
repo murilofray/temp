@@ -1,0 +1,108 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">PDDEs e Contas disponíveis</h2>
+  <h5 class="titulo-infos"></h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Cadastrar Conta"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          (click)="createMovimentacao()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Cadastrar PDDE"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          (click)="deleteSelectedMovimentacao()"
+          [disabled]="!movimentacaoSelecionada"
+        ></button>
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <div *ngFor="let pdde of pddeList" class="pdde-card">
+          <div class="pdde-card-content">
+            <img src="/assets/pdde-logo.png" alt="PDDE Logo" class="pdde-logo" />
+            <div class="pdde-info">
+              <h3>PDDE: {{ pdde.tipo }}</h3>
+              <p *ngIf="pdde.contaBancaria">Conta: {{ pdde.contaBancaria.numeroConta }}</p>
+              <p *ngIf="!pdde.contaBancaria">Conta: Informação indisponível</p>
+              <div class="pdde-financial-info">
+                <div>Custeio: {{ pdde.custeio | currency: 'BRL' }}</div>
+                <div>Capital: {{ pdde.capital | currency: 'BRL' }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="pdde-card-actions">
+            <button
+              pButton
+              label="Checklist e Documentos"
+              class="p-button-primary"
+              (click)="verificarChecklist(pdde.id)"
+            ></button>
+            <button
+              pButton
+              label="Selecionar Conta"
+              class="p-button-secondary"
+              (click)="selecionarConta(pdde)"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p-dialog
+    [dismissableMask]="true"
+    [(visible)]="dialogAcessar"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    [closable]="true"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content">
+      <!-- Botões de acesso a funcionalidades -->
+      <div class="p-fluid grid">
+        <div class="col-12 md:col-6">
+          <button
+            pButton
+            pRipple
+            label="Pesquisa de Preço"
+            class="p-button-lg p-button-info"
+            (click)="navegarParaPesquisaPreco()"
+          ></button>
+        </div>
+        <div class="col-12 md:col-6">
+          <button
+            pButton
+            pRipple
+            label="Movimentações"
+            class="p-button-lg p-button-info"
+            (click)="navegarParaMovimentacoes()"
+          ></button>
+        </div>
+        <div class="col-12 md:col-6">
+          <button pButton pRipple label="Atas" class="p-button-lg p-button-info" (click)="navegarParaAtas()"></button>
+        </div>
+        <div class="col-12 md:col-6">
+          <button
+            pButton
+            pRipple
+            label="Ofícios"
+            class="p-button-lg p-button-info"
+            (click)="navegarParaOficios()"
+          ></button>
+        </div>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

@@ -1,0 +1,31 @@
+/*
+Para dialogs de criação de dados, edição ou visualização
+Os botões do footer serão apresentados na seguinte ordem:
+
+1. Botão de "Confirmar a ação"
+    Deve utilizar a classe p-button-success
+
+2. Botão de "Fechar o dialog"
+    Deve utilizar a classe p-button-info
+
+3. Botão de "Cancelar a ação"
+    Deve utilizar a classe p-button-warning
+
+
+Para dialogs de confirmação de REMOÇÃO
+Os botões do footer serão apresentados na seguinte ordem:
+
+1. Botão de "Confirmar a ação"
+    Deve utilizar as classes p-button-danger p-button-outlined
+
+2. Botão de "Cancelar a ação"
+    Deve utilizar a classe p-button-info
+*/
+
+.dialog-footer-button {
+  display: flex; /* Utiliza flexbox para o layout */
+  justify-content: space-between; /* Espaça os itens ao longo do eixo principal */
+}
+.p-dialog .p-dialog-content {
+  padding: 0 1.5rem 1rem 1.5rem;
+}

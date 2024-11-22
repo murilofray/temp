@@ -1,0 +1,117 @@
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Ocorrências</h2>
+
+  <p-table [value]="filteredOcorrencias" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterOcorrencias($event)"
+            placeholder="Pesquisar por Nome"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome">Nome <p-sortIcon [field]="'nome'"></p-sortIcon></th>
+        <th pSortableColumn="matricula">Matrícula <p-sortIcon [field]="'matricula'"></p-sortIcon></th>
+        <th pSortableColumn="data">Data <p-sortIcon [field]="'data'"></p-sortIcon></th>
+        <th pSortableColumn="status">Status <p-sortIcon [field]="'status'"></p-sortIcon></th>
+        <th pSortableColumn="abonada">Abonada <p-sortIcon [field]="'abonada'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-ocorrencia>
+      <tr>
+        <td>{{ ocorrencia.nome }}</td>
+        <td>{{ ocorrencia.matricula }}</td>
+        <td>{{ ocorrencia.data | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ ocorrencia.status }}</td>
+        <td>{{ ocorrencia.abonada }}</td>
+        <td>
+          <div class="button-group">
+            <button
+              *ngIf="ocorrencia.status === 'Justificada' && ocorrencia.abonada === 'Não'"
+              pButton
+              type="button"
+              label="Abonar"
+              class="p-button-success button-spacing"
+            ></button>
+            <button
+              *ngIf="ocorrencia.status === 'Justificada' && ocorrencia.abonada === 'Não'"
+              pButton
+              type="button"
+              label="Não Abonar"
+              class="p-button-warning button-spacing"
+            ></button>
+            <button pButton type="button" label="Deletar" class="p-button-danger button-spacing"></button>
+            <button
+              *ngIf="ocorrencia.status === 'Justificada'"
+              pButton
+              type="button"
+              label="Detalhes"
+              (click)="showDialog(ocorrencia)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog header="Detalhe da Ocorrência" [(visible)]="displayDialog" [style]="{ width: '70vw' }" modal="true">
+  <div *ngIf="selectedOcorrencia" class="dialog-content">
+    <div class="field">
+      <label>Nome:</label>
+      <span>{{ selectedOcorrencia.nome }}</span>
+    </div>
+    <div class="field">
+      <label>Matrícula:</label>
+      <span>{{ selectedOcorrencia.matricula }}</span>
+    </div>
+    <div class="field">
+      <label>Data:</label>
+      <span>{{ selectedOcorrencia.data }}</span>
+    </div>
+    <div class="field">
+      <label>Status:</label>
+      <span>{{ selectedOcorrencia.status }}</span>
+    </div>
+    <div class="field">
+      <label>Tipo:</label>
+      <span>{{ selectedOcorrencia.tipo }}</span>
+    </div>
+    <div class="field">
+      <label>Observação:</label>
+      <span>{{ selectedOcorrencia.observacao }}</span>
+    </div>
+    <div class="field">
+      <label>Atestado:</label>
+      <a href="{{ selectedOcorrencia.document }}" class="document-link">
+        <i class="pi pi-file" aria-hidden="true"></i> {{ selectedOcorrencia.atestado }}
+      </a>
+    </div>
+    <div class="button-group">
+      <button
+        *ngIf="selectedOcorrencia.abonada === 'Não'"
+        pButton
+        type="button"
+        label="Abonar"
+        class="p-button-success button-spacing"
+      ></button>
+      <button
+        *ngIf="selectedOcorrencia.abonada === 'Não'"
+        pButton
+        type="button"
+        label="Não Abonar"
+        class="p-button-warning button-spacing"
+      ></button>
+      <button pButton type="button" label="Voltar" (click)="displayDialog = false" class="p-button-secondary"></button>
+    </div>
+  </div>
+</p-dialog>

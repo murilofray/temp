@@ -1,0 +1,85 @@
+<div class="tabela-container">
+    <h2 class="titulo-tabela">APM's Ativos</h2>
+    <h5 class="titulo-infos"></h5>
+  
+    <p-toolbar>
+      <ng-template pTemplate="left">
+        <div class="my-2 toolbar-flex-spacing">
+          <button
+            pButton
+            pRipple
+            label="Cadastrar APM"
+            icon="pi pi-plus"
+            class="p-button"
+
+          ></button>
+        </div>
+      </ng-template>
+  
+      <!-- <ng-template pTemplate="right">
+          <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterPesquisas($event)"
+            placeholder="Pesquisar"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+      </ng-template> -->
+    </p-toolbar>
+  
+  
+    <!-- Tabela e paginação para Atas -->
+    <div class="grid">
+      <div class="col-12">
+        <div class="card">
+          <p-table
+            responsiveLayout="scroll"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[10, 20, 30]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+            [rowHover]="true"
+            dataKey="id"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>CPF</th>
+                <th>Nome</th>
+                <th>Data de Contratação</th>
+                <th>Categoria</th>
+                <th>Grau</th>
+                <th>Pontuação Anual</th>
+                <th>Pontuação Assiduidade</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-servidor>
+              <!-- <tr>
+                <td>{{ servidor.cpf }}</td>
+                <td>{{ servidor.nome }}</td>
+                <td>{{ servidor.dataContratacao | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ servidor.categoria }}</td>
+                <td>{{ servidor.grau }}</td>
+                <td>{{ servidor.pontuacaoAnual }}</td>
+                <td>{{ servidor.pontuacaoAssiduidade }}</td>
+                <td>
+                  <p-button
+                    label="Ver"
+                    icon="pi pi-eye"
+
+                    class="p-button-text"
+                  ></p-button>
+                </td>
+              </tr> -->
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </div>
+  

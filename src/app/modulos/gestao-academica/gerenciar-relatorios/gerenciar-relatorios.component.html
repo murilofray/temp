@@ -1,0 +1,32 @@
+<div class="card">
+    <p-toast></p-toast>
+
+    <h2 class="titulo">Relatórios</h2>
+
+    <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="right">
+        <p-button icon="pi pi-cloud-download" severity="info" label="Beneficiários do Bolsa Família por turma"
+            (click)="relatorioBeneficiariosDialogVisivel = true" />
+    </ng-template>
+    </p-toolbar>
+</div>
+
+<p-dialog
+  styleClass="p-fluid"
+  [modal]="true"
+  header="Gerar relatório de beneficiários do Bolsa Família"
+  [(visible)]="relatorioBeneficiariosDialogVisivel"
+  [style]="{ width: '50rem', height: '28rem' }"
+>
+  <p-listbox
+    [(ngModel)]="turmaRelatorio"
+    [filter]="true"
+    [options]="turmasRelatorio"
+    optionLabel="descricao"
+  ></p-listbox>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Download" icon="pi pi-download" (onClick)="downloadRelatorio()" type="button" />
+    <p-button label="Imprimir" icon="pi pi-print" (onClick)="imprimirRelatorio()" type="button" />
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,173 @@
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Lançar Títulos</h2>
+
+  <div class="flex">
+    <button pButton type="button" label="Lançar Título" (click)="openModal()" class="p-button-success ml-auto"></button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        (input)="filterTitulosByNome($event)"
+        placeholder="Pesquisar por Nome"
+        class="p-inputtext p-component p-element"
+      />
+    </span>
+
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        (input)="filterTitulosByInstituicao($event)"
+        placeholder="Pesquisar por Instituição"
+        class="p-inputtext p-component p-element"
+      />
+    </span>
+
+    <select (change)="filterTitulosByTipo($event)" class="tipo-select">
+      <option value="">Todos os Tipos</option>
+      <option value="Mestrado">Mestrado</option>
+      <option value="Doutorado">Doutorado</option>
+      <option value="Curso">Curso</option>
+    </select>
+  </div>
+
+  <p-dialog header="Lançar Novo Título" [(visible)]="isModalOpen" [style]="{ width: '60vw' }" modal="true">
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="tituloForm" (ngSubmit)="createTitulo()">
+      <div class="field">
+        <label for="servidorId">Servidor:</label>
+        <p>{{ servidorNome }}</p>
+        <input type="hidden" formControlName="servidorId" [value]="servidorId" />
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="documento">Documento:</label>
+          <input type="file" (change)="onFileSelected($event)" />
+        </div>
+
+        <div class="field">
+          <label for="nome">Nome:</label>
+          <input type="text" pInputText formControlName="nome" placeholder="Digite o nome" />
+          <div *ngIf="tituloForm.get('nome')?.invalid && tituloForm.get('nome')?.touched" class="error-message">
+            Nome é obrigatório.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="instituicao">Instituição:</label>
+          <input type="text" pInputText formControlName="instituicao" placeholder="Digite a instituição" />
+          <div
+            *ngIf="tituloForm.get('instituicao')?.invalid && tituloForm.get('instituicao')?.touched"
+            class="error-message"
+          >
+            Instituição é obrigatória.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="tipo">Tipo:</label>
+          <select formControlName="tipo" pInputText>
+            <option value="Mestrado">Mestrado</option>
+            <option value="Doutorado">Doutorado</option>
+            <option value="Cursos">Cursos</option>
+          </select>
+          <div *ngIf="tituloForm.get('tipo')?.invalid && tituloForm.get('tipo')?.touched" class="error-message">
+            Tipo é obrigatório.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cargaHoraria">Carga Horária:</label>
+          <input type="number" pInputText formControlName="cargaHoraria" placeholder="Digite a carga horária" />
+          <div
+            *ngIf="tituloForm.get('cargaHoraria')?.invalid && tituloForm.get('cargaHoraria')?.touched"
+            class="error-message"
+          >
+            Carga Horária é obrigatória e deve ser maior que 0.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="pontos">Pontos:</label>
+          <input type="number" pInputText formControlName="pontos" placeholder="" />
+          <div *ngIf="tituloForm.get('pontos')?.invalid && tituloForm.get('pontos')?.touched" class="error-message">
+            Pontos são obrigatórios e devem ser maiores que 0.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="dataConclusao">Data de Conclusão:</label>
+          <input type="date" formControlName="dataConclusao" pInputText />
+          <div
+            *ngIf="tituloForm.get('dataConclusao')?.invalid && tituloForm.get('dataConclusao')?.touched"
+            class="error-message"
+          >
+            Data de Conclusão é obrigatória.
+          </div>
+          <div *ngIf="dataConclusaoInvalida" class="error-message">A data de conclusão não pode ser futura.</div>
+        </div>
+
+        <div class="field">
+          <label for="validade">Validade:</label>
+          <input type="date" formControlName="validade" pInputText />
+          <div *ngIf="tituloForm.get('validade')?.invalid && tituloForm.get('validade')?.touched" class="error-message">
+            Validade é obrigatória.
+          </div>
+          <div
+            *ngIf="tituloForm.errors?.['dataValidadeAntesConclusao'] && tituloForm.get('validade')?.touched"
+            class="error-message"
+          >
+            A data de validade não pode ser anterior à data de conclusão.
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" (click)="closeModal()" pButton label="Cancelar" class="p-button-secondary"></button>
+        <button type="submit" pButton label="Salvar" [disabled]="tituloForm.invalid" class="p-button-success"></button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- Tabela para Títulos -->
+  <p-table [value]="filteredTitulos" [paginator]="true" [rows]="10" [sortMode]="'multiple'">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome">Nome <p-sortIcon field="nome"></p-sortIcon></th>
+        <th pSortableColumn="instituicao">Instituição <p-sortIcon field="instituicao"></p-sortIcon></th>
+        <th pSortableColumn="tipo">Tipo <p-sortIcon field="tipo"></p-sortIcon></th>
+        <th pSortableColumn="cargaHoraria">Carga Horária <p-sortIcon field="cargaHoraria"></p-sortIcon></th>
+        <th pSortableColumn="pontos">Pontos <p-sortIcon field="pontos"></p-sortIcon></th>
+        <th pSortableColumn="dataConclusao">Data Conclusão <p-sortIcon field="dataConclusao"></p-sortIcon></th>
+        <th pSortableColumn="validade">Validade <p-sortIcon field="validade"></p-sortIcon></th>
+        <th pSortableColumn="status">Status <p-sortIcon field="status"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-titulo>
+      <tr>
+        <td>{{ titulo.nome }}</td>
+        <td>{{ titulo.instituicao }}</td>
+        <td>{{ titulo.tipo }}</td>
+        <td>{{ titulo.cargaHoraria }}</td>
+        <td>{{ titulo.pontos }}</td>
+        <td>{{ titulo.dataConclusao | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ titulo.validade | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ titulo.status }}</td>
+        <td>
+          <button pButton type="button" (click)="verDocumento(titulo.documentoScanId)" label="Ver Documento"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

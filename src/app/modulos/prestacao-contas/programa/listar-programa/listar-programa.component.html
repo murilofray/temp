@@ -1,0 +1,157 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Programas</h2>
+  <h5 class="titulo-infos">{{ infoPDDE }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Novo Programa"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          (click)="createPrograma()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="center">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterProgramas($event)"
+            placeholder="Pesquisar"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterProgramas($event)"
+            placeholder="ANO"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <p-toast></p-toast>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          styleClass="p-datatable-striped"
+          [value]="programaFiltrados"
+          [paginator]="true"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} programas"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="nome">Descricao <p-sortIcon [field]="'nome'"></p-sortIcon></th>
+              <th>Ações</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-programa>
+            <tr [pSelectableRow]="programa">
+              <td>{{ programa.nome }}</td>
+              <td>
+                <div class="button-group">
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-pencil"
+                    class="p-button-outlined p-button-rounded p-button-success mr-2"
+                    label="Editar"
+                    (click)="editarPrograma(programa)"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-file-pdf"
+                    class="p-button-outlined p-button-rounded p-button-info mr-2"
+                    label="Acessar Prestação de Contas"
+                    (click)="visualizarMovimentacao(programa)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog para adicionar uma MOVIMENTAÇÃO FINANCEIRA -->
+  <p-dialog
+    header="Programa"
+    [(visible)]="dialogPrograma"
+    [modal]="true"
+    [style]="{ width: '750px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="card p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content" class="mb-1">
+      <div class="field">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" class="form-control" [(ngModel)]="programa.nome" required />
+        <div *ngIf="submitted && !programa.nome" class="p-invalid">
+          <span>Informe um nome.</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Botões de Ação -->
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          *ngIf="isViewMode"
+          pButton
+          pRipple
+          label="Fechar"
+          icon="pi pi-times"
+          class="p-button-info"
+          (click)="hideDialog()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="submmit()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

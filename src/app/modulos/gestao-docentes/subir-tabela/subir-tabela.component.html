@@ -1,0 +1,11 @@
+<div class="upload-container">
+  <h2>Subir Tabela de Vencimentos</h2>
+
+  <input type="file" (change)="onFileSelected($event)" accept=".pdf" />
+  <button pButton label="Subir PDF" (click)="uploadFile()" [disabled]="!selectedFile"></button>
+
+  <div class="view-document-container">
+    <br /><br />
+    <button pButton label="Ver Documento" (click)="verDocumento()"></button>
+  </div>
+</div>

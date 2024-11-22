@@ -1,0 +1,87 @@
+<p-toast></p-toast>
+
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Ocorrências dos Docentes</h2>
+
+  <!-- Dropdown para selecionar o professor -->
+  <div class="field">
+    <label for="professor">Selecione o Professor: </label>
+    <p-dropdown
+      [options]="professores"
+      [(ngModel)]="selectedProfessor"
+      placeholder="Selecione um Professor"
+      optionLabel="nome"
+      (onChange)="filtrarOcorrenciasPorProfessor()"
+    >
+    </p-dropdown>
+  </div>
+
+  <p-table *ngIf="selectedProfessor" [value]="ocorrencias" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption"> </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="docente">Docentes <p-sortIcon [field]="'docente'"></p-sortIcon></th>
+        <th pSortableColumn="data">Data <p-sortIcon [field]="'data'"></p-sortIcon></th>
+        <th pSortableColumn="status">Status <p-sortIcon [field]="'status'"></p-sortIcon></th>
+        <th pSortableColumn="abonada">Abona? <p-sortIcon [field]="'abonada'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-ocorrencia>
+      <tr>
+        <td>{{ selectedProfessor.nome }}</td>
+        <td>{{ formatarData(ocorrencia.dataOcorrencia) }}</td>
+        <td>{{ ocorrencia.status }}</td>
+        <td *ngIf="ocorrencia.status === 'Aceito'">{{ buscarAbono(ocorrencia.abonoId) }}</td>
+        <td *ngIf="ocorrencia.status === 'Recusado'">Não</td>
+        <td *ngIf="ocorrencia.status === 'Não Justificado' || ocorrencia.status === 'Não Avaliado'">Inválido</td>
+        <td>
+          <button
+            *ngIf="ocorrencia.abonoId && (ocorrencia.status === 'Aceito' || ocorrencia.status === 'Recusado')"
+            pButton
+            type="button"
+            label="Detalhes"
+            (click)="mostrarDialogDetalhes(ocorrencia)"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Dialog de detalhes-->
+<p-dialog header="Detalhe da Ocorrência" [(visible)]="displayDialogDetalhes" [style]="{ width: '50vw' }" modal="true">
+  <div *ngIf="selectedOcorrencia" class="dialog-content">
+    <div class="field">
+      <label>Nome do Docente:</label>
+      <span>{{ selectedProfessor.nome }}</span>
+    </div>
+    <div class="field">
+      <label>Data:</label>
+      <span>{{ formatarData(selectedOcorrencia.dataOcorrencia) }}</span>
+    </div>
+    <div class="field">
+      <label>Status:</label>
+      <span>{{ selectedOcorrencia.status }}</span>
+    </div>
+    <div class="field">
+      <label>Tipo:</label>
+      <span>{{ selectedAbono?.nome }}</span>
+    </div>
+    <div class="field">
+      <label>Abonada:</label>
+      <span *ngIf="selectedAbono?.abona"> Sim </span>
+      <span *ngIf="!selectedAbono?.abona"> Não </span>
+    </div>
+    <div class="field">
+      <label>Descrição:</label>
+      <span>{{ selectedOcorrencia.descricao }}</span>
+    </div>
+    <div class="field">
+      <label>Atestado:</label>
+      <a href="{{ selectedOcorrencia.document }}" class="document-link">
+        <i class="pi pi-file" aria-hidden="true"></i> {{ selectedOcorrencia.atestado }}
+      </a>
+    </div>
+  </div>
+</p-dialog>

@@ -1,0 +1,139 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+  }
+  
+  .modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+  }
+  
+  .form-group input[type='file'] {
+    padding: 5px;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+    height: 100px;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 15px;
+  }
+  
+  .error-message {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .atas-table-container {
+    display: flex;
+    justify-content: center; /* Centraliza a tabela */
+  }
+  
+  .atas-table {
+    width: 100%;
+    max-width: 800px; /* Define a largura máxima da tabela */
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .atas-table th {
+    text-align: left;
+    padding: 12px;
+    color: gray;
+    font-weight: normal;
+  }
+  
+  .atas-table td {
+    padding: 12px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .data-badge {
+    background-color: #f1f1f1;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  
+  .btn-visualizar {
+    background-color: #9086e9;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-visualizar:hover {
+    background-color: #6b5db5;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
+    color: gray;
+  }
+  
+  .pagination a {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    margin: 0 5px;
+  }
+  
+  .pagination a:hover {
+    text-decoration: underline;
+  }
+  

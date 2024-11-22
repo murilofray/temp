@@ -1,0 +1,128 @@
+/* Estilo geral da Sidebar */
+:host ::ng-deep .p-sidebar {
+  background-color: #ffffff !important; /* Cor de fundo branca */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important; /* Sombra para dar destaque */
+  border-right: 1px solid #e0e0e0 !important; /* Borda sutil à direita */
+}
+
+/* Título do Menu */
+.menu-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin: 20px 10px;
+}
+
+/* Texto "Cadastro" */
+.cadastro-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  margin: 10px 10px;
+}
+
+/* Estilo dos botões */
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px;
+}
+
+:host ::ng-deep .menu-buttons .p-button {
+  width: 100% !important;
+  justify-content: flex-start; /* Alinha o texto à esquerda */
+  padding: 10px 15px;
+  background-color: #007bff !important; /* Cor de fundo azul */
+  border: none; /* Remove a borda */
+  border-radius: 5px; /* Arredondamento */
+  color: white !important;
+  font-weight: bold;
+  transition: background-color 0.3s ease; /* Efeito de transição ao passar o mouse */
+}
+
+:host ::ng-deep .menu-buttons .p-button:hover {
+  background-color: #0056b3 !important; /* Cor de fundo ao passar o mouse */
+}
+
+:host ::ng-deep .menu-buttons .p-button:focus {
+  box-shadow: 0 0 0 2px #0056b3 !important; /* Destaque ao focar */
+}
+
+/* Ícone de fechamento da Sidebar */
+:host ::ng-deep .p-sidebar-close {
+  font-size: 1.5rem;
+  color: #555 !important; /* Cor do ícone de fechamento */
+  transition: color 0.3s ease;
+}
+
+:host ::ng-deep .p-sidebar-close:hover {
+  color: #007bff !important; /* Cor do ícone de fechamento ao passar o mouse */
+}
+
+/* Estilo geral do container da Home */
+.home-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Estilo para cada card de PDDE */
+.pdde-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo do conteúdo de cada card */
+.pdde-card-content {
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo da imagem do logo */
+.pdde-logo {
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
+  border-radius: 8px;
+}
+
+/* Estilo das informações do PDDE */
+.pdde-info {
+  text-align: left;
+}
+
+.pdde-info h3 {
+  margin: 0 0 5px;
+}
+
+.pdde-financial-info {
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+}
+
+/* Estilização dos botões dentro de cada card */
+.pdde-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.p-button {
+  padding: 10px 20px !important;
+}
+
+/* Garantir que o botão para abrir a Sidebar fique visível */
+button.p-button.p-button-text {
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  z-index: 1000 !important; /* Maior prioridade para o z-index */
+}

@@ -1,0 +1,38 @@
+<p-toast></p-toast>
+
+<div class="form-container">
+  <h2>Lançar ocorrência</h2>
+
+  <!-- Dropdown de professores -->
+  <p-dropdown
+    [options]="professores"
+    [(ngModel)]="novaOcorrencia.professor"
+    optionLabel="nome"
+    placeholder="Selecione um docente"
+    [filter]="true"
+    [filterBy]="'nome'"
+    (onFilter)="filterProfessores($event)"
+    class="form-field"
+  ></p-dropdown>
+
+  <!-- Campo de Observação -->
+  <textarea
+    rows="5"
+    cols="30"
+    [(ngModel)]="novaOcorrencia.observacao"
+    placeholder="Observação"
+    pinputtextarea=""
+    class="p-inputtextarea p-inputtext p-component p-element"
+  ></textarea>
+
+  <!-- Campo de Data -->
+  <p-calendar
+    [(ngModel)]="novaOcorrencia.data"
+    placeholder="Escolha uma data"
+    [showIcon]="true"
+    class="form-field"
+  ></p-calendar>
+
+  <!-- Botão para enviar a ocorrência -->
+  <button pButton type="button" (click)="enviarOcorrencia()" label="Enviar" class="submit-button"></button>
+</div>

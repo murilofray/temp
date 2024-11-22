@@ -1,0 +1,170 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Pesquisa de Preços</h2>
+  <h5 class="titulo-infos">Consolidação de proponentes - {{ tituloPesquisa }}</h5>
+
+  <p-toolbar class="footer-toolbar">
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing"></div>
+    </ng-template>
+  </p-toolbar>
+  <p-toast></p-toast>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          #dt
+          [value]="listaBens"
+          [columns]="cols"
+          [rows]="10"
+          [paginator]="true"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pColumn="descricao">Descrição</th>
+              <th pColumn="quantidade">Quantidade</th>
+              <th pColumn="proponenteA">
+                Proponente A
+                <ng-container *ngIf="proponentesTopo(0) as propA">
+                  <div *ngIf="propA.existe">
+                    <div>{{ propA.nome }}</div>
+                    <div>CNPJ / CPF: {{ propA.doc }}</div>
+                  </div>
+                </ng-container>
+              </th>
+
+              <th pColumn="proponenteB">
+                Proponente B
+                <ng-container *ngIf="proponentesTopo(1) as propB">
+                  <div *ngIf="propB.existe">
+                    <div>{{ propB.nome }}</div>
+                    <div>CNPJ / CPF: {{ propB.doc }}</div>
+                  </div>
+                </ng-container>
+              </th>
+
+              <th pColumn="proponenteC">
+                Proponente C
+                <ng-container *ngIf="proponentesTopo(2) as propC">
+                  <div *ngIf="propC.existe">
+                    <div>{{ propC.nome }}</div>
+                    <div>CNPJ / CPF: {{ propC.doc }}</div>
+                  </div>
+                </ng-container>
+              </th>
+
+              <th>Menor Preço</th>
+              <!-- Nova coluna para menor preço -->
+              <th>Selecionar</th>
+              <!-- Nova coluna para selecionar proponente -->
+              <th>Justificativa</th>
+              <!-- Nova coluna para justificativa -->
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-bem let-i="rowIndex">
+            <tr>
+              <td style="width: 15%; min-width: 10rem">
+                {{ bem.descricao }}
+              </td>
+
+              <td style="width: 10%; min-width: 10rem">
+                {{ bem.quantidade }}
+              </td>
+
+              <!-- Proponente A -->
+              <td style="width: 15%; min-width: 12rem">
+                <div *ngIf="proponentesTopo(0).existe">
+                  <div style="display: flex; align-items: center">
+                    <div>{{ valorProponente(bem, 0).valor | currency: 'BRL' }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Proponente B -->
+              <td style="width: 1cqmin; min-width: 12rem">
+                <div *ngIf="proponentesTopo(1).existe">
+                  <div style="display: flex; align-items: center">
+                    <div>{{ valorProponente(bem, 1).valor | currency: 'BRL' }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Proponente C -->
+              <td style="width: 15%; min-width: 12rem">
+                <div *ngIf="proponentesTopo(2).existe">
+                  <div style="display: flex; align-items: center">
+                    <div>{{ valorProponente(bem, 2).valor | currency: 'BRL' }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td style="width: 10%; min-width: 12rem">
+                <div>{{ menorPreco(bem).fornecedorMenorValor.razaoSocial }}</div>
+                <div>{{ menorPreco(bem).menorValor | currency: 'BRL' }}</div>
+              </td>
+
+              <!-- Dropdown de Fornecedores para cada bem -->
+              <!-- <td style="width: 20%; min-width: 10rem">
+              <p-dropdown
+                [options]="listaFornecedores"
+                optionLabel="nomeFantasia"
+                optionValue="id"
+                [virtualScroll]="true"
+                [(ngModel)]="bem.selectedFornecedorId"
+                (onChange)="onFornecedorChange(bem, i)"
+              >
+              </p-dropdown>
+            </td> -->
+
+              <td style="width: 10%; min-width: 10rem">
+                <select [(ngModel)]="bem.selectedFornecedorId" (change)="onFornecedorChange(bem, i)">
+                  <option *ngFor="let fornecedor of listaFornecedores" [value]="fornecedor.id">
+                    {{ fornecedor.nomeFantasia }}
+                  </option>
+                </select>
+              </td>
+
+              <!-- Campo de Justificativa, exibido apenas quando necessário -->
+              <td style="width: 10%; min-width: 10rem">
+                <input
+                  *ngIf="bem.showJustificativa"
+                  type="text"
+                  placeholder="Justificativa"
+                  [(ngModel)]="bem.justificativa"
+                  #justificativaInput
+                  required
+                />
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <div class="my-2 toolbar-flex-spacing">
+    <button
+      pButton
+      pRipple
+      label="Voltar"
+      icon="pi pi-times"
+      class="p-button-info"
+      (click)="navigateToPesquisa()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      label="Confirmar/Próxima Etapa"
+      icon="pi pi-check"
+      class="p-button-info"
+      (click)="navigateTo()"
+      style="margin-left: 1rem"
+    ></button>
+  </div>
+</div>

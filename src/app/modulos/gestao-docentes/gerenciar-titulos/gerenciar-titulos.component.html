@@ -1,0 +1,127 @@
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Gerenciar Títulos</h2>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        (input)="filterTitulosByNome($event)"
+        placeholder="Pesquisar por Nome"
+        class="p-inputtext p-component p-element"
+      />
+    </span>
+
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        (input)="filterTitulosByInstituicao($event)"
+        placeholder="Pesquisar por Instituição"
+        class="p-inputtext p-component p-element"
+      />
+    </span>
+
+    <select (change)="filterTitulosByTipo($event)" class="tipo-select">
+      <option value="">Todos os Tipos</option>
+      <option value="Mestrado">Mestrado</option>
+      <option value="Doutorado">Doutorado</option>
+      <option value="Curso">Curso</option>
+    </select>
+
+    <select (change)="filterTitulosByStatus($event)" class="tipo-select">
+      <option value="">Todos os Status</option>
+      <option value="Aceito">Aceito</option>
+      <option value="Não Aceito">Não Aceito</option>
+      <option value="Excluido">Excluido</option>
+      <!-- Nova opção para deletados -->
+    </select>
+  </div>
+
+  <!-- Tabela para Títulos -->
+  <p-table [value]="filteredTitulos" [paginator]="true" [rows]="10" [sortMode]="'multiple'">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome">Nome <p-sortIcon field="nome"></p-sortIcon></th>
+        <th pSortableColumn="instituicao">Instituição <p-sortIcon field="instituicao"></p-sortIcon></th>
+        <th pSortableColumn="tipo">Tipo <p-sortIcon field="tipo"></p-sortIcon></th>
+        <th pSortableColumn="cargaHoraria">Carga Horária <p-sortIcon field="cargaHoraria"></p-sortIcon></th>
+        <th pSortableColumn="pontos">Pontos <p-sortIcon field="pontos"></p-sortIcon></th>
+        <th pSortableColumn="dataConclusao">Data Conclusão <p-sortIcon field="dataConclusao"></p-sortIcon></th>
+        <th pSortableColumn="validade">Validade <p-sortIcon field="validade"></p-sortIcon></th>
+        <th pSortableColumn="status">Status <p-sortIcon field="status"></p-sortIcon></th>
+        <th>Documento</th>
+        <!-- Nova coluna para o botão Ver Documento -->
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-titulo>
+      <tr>
+        <td>{{ titulo.nome }}</td>
+        <td>{{ titulo.instituicao }}</td>
+        <td>{{ titulo.tipo }}</td>
+        <td>{{ titulo.cargaHoraria }}</td>
+        <td>{{ titulo.pontos }}</td>
+        <td>{{ titulo.dataConclusao | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ titulo.validade | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ titulo.status }}</td>
+
+        <!-- Coluna do Documento com o botão Ver -->
+        <td>
+          <button
+            *ngIf="titulo.documentoScanId"
+            pButton
+            type="button"
+            (click)="verDocumento(titulo.documentoScanId)"
+            label="Ver"
+            class="p-button-info"
+          ></button>
+        </td>
+
+        <td>
+          <!-- Botão Aceitar: Só aparece se o status não for 'Aceito' e não for 'Não Aceito' -->
+          <button
+            *ngIf="titulo.status !== 'Aceito' && titulo.status !== 'Não Aceito' && titulo.status !== 'Excluido'"
+            pButton
+            type="button"
+            (click)="aceitarTitulo(titulo.id)"
+            label="Aceitar"
+            class="p-button-success mr-2"
+          ></button>
+
+          <!-- Botão Recusar: Só aparece se o status não for 'Não Aceito' e não for 'Aceito' -->
+          <button
+            *ngIf="titulo.status !== 'Não Aceito' && titulo.status !== 'Aceito' && titulo.status !== 'Excluido'"
+            pButton
+            type="button"
+            (click)="recusarTitulo(titulo.id)"
+            label="Recusar"
+            class="p-button-warning mr-2"
+          ></button>
+
+          <!-- Botão Deletar: Só aparece se o status não for 'Aceito' -->
+          <button
+            *ngIf="titulo.status !== 'Aceito' && titulo.status !== 'Excluido'"
+            pButton
+            type="button"
+            (click)="deletarTitulo(titulo.id)"
+            label="Deletar"
+            class="p-button-danger mr-2"
+          ></button>
+
+          <button
+            *ngIf="titulo.status == 'Excluido'"
+            pButton
+            type="button"
+            (click)="restaurarTitulo(titulo.id)"
+            label="Restaurar"
+            class="p-button-warning"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

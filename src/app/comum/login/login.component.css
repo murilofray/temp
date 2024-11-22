@@ -1,0 +1,19 @@
+.login-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 2em;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.system-title {
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 24px;
+}
+
+.p-field {
+  margin-bottom: 1em;
+}

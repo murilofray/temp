@@ -1,0 +1,46 @@
+.form-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  // Responsivo
+  @media (max-width: 768px) {
+    max-width: 100%;
+    padding: 10px;
+  }
+}
+
+.form-field {
+  width: 200%;
+  font-size: 16px;
+
+  // Estilos adicionais para o campo de observação
+  p-inputTextarea {
+    width: 100%;
+  }
+}
+
+h2 {
+  text-align: center;
+}
+.submit-button {
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #6a62d2;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 10px;
+
+  &:hover {
+    background-color: #5849d1;
+  }
+}

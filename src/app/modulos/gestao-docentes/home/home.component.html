@@ -1,0 +1,42 @@
+<p-toast></p-toast>
+
+<div *ngIf="docente; else loading">
+  <div class="profile-info">
+    <div class="user-details">
+      <div>
+        <h3>{{ docente.nome }}</h3>
+        <p>{{ docente.categoria }}</p>
+      </div>
+    </div>
+    <div class="user-stats">
+      <p>Grau: {{ docente.grau }}</p>
+      <p>Referência: {{ docente.referencia }}</p>
+      <button
+        pButton
+        type="button"
+        label="Visualizar Tabela de Vencimentos"
+        class="p-button-secondary"
+        (click)="verDocumento()"
+      ></button>
+    </div>
+  </div>
+
+  <div class="progression-notice" *ngIf="!emAndamento && docente.pontuacaoAssiduidade >= 6">
+    <p>Você está apto a progressão por ASSIDUIDADE</p>
+    <button
+      pButton
+      type="button"
+      (click)="iniciarProgressao()"
+      label="Iniciar Processo"
+      class="p-button-primary"
+    ></button>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p>Carregando dados do docente...</p>
+</ng-template>
+
+<div *ngIf="errorMessage" class="error-message">
+  {{ errorMessage }}
+</div>

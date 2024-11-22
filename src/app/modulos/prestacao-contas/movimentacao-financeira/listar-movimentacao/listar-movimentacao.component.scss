@@ -1,0 +1,11 @@
+
+
+/* Estilo para saída em vermelho */
+.valor-saida {
+  color: var(--danger-color); /* Mantém o tom de erro do tema PrimeNG */
+}
+
+/* Estilo para entrada em azul */
+.valor-entrada {
+  color: var(--primary-color); /* Mantém o tom primário do tema PrimeNG */
+}
