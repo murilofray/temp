@@ -1,0 +1,51 @@
+.apm-container {
+    max-width: 80%;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    color: #000000;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #000000;
+  }
+  
+  input,
+  p-inputMask,
+  p-calendar,
+  p-inputNumber,
+  p-dropdown {
+    width: 100%;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  
+  button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    margin: 0.75rem;
+  }
+  
+  .three-fields-row {
+    display: flex;
+    gap: 10rem;
+  }
+  

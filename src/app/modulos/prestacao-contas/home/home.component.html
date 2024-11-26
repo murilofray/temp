@@ -1,0 +1,364 @@
+<p-toast></p-toast>
+
+<div class="tabela-container">
+  <h2 class="titulo-tabela">PDDEs e Contas disponíveis</h2>
+  <h5 class="titulo-infos"></h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          *ngIf="nivelAcessoId === NivelAcessoEnum.DIRETOR.id || nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id || nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id || nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id"
+          pButton
+          pRipple
+          label="Cadastrar Conta Bancária"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          pTooltip="Cadastrar Conta Bancária"
+          tooltipPosition="top"
+          (click)="createConta()"
+        ></button>
+        <button
+        *ngIf="nivelAcessoId === NivelAcessoEnum.DIRETOR.id || nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id || nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id || nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id"
+        pButton
+          pRipple
+          label="Cadastrar PDDE"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          pTooltip="Cadastrar um novo PDDE"
+          tooltipPosition="top"
+          (click)="abrirCadastroPDDE()"
+        ></button>
+        <button
+        *ngIf="nivelAcessoId === NivelAcessoEnum.DIRETOR.id || nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id || nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id || nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id"
+        pButton
+          pRipple
+          label="Cadastrar Programa"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          pTooltip="Cadastrar um novo programa"
+          tooltipPosition="top"
+          (click)="abrirCadastroPrograma()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Atas"
+          class="p-button p-button-info"
+          pTooltip="Visualizar Atas da APM"
+          tooltipPosition="top"
+          (click)="navegarParaAtas()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Ofícios e Memorandos"
+          class="p-button p-button-info"
+          pTooltip="Visualizar o Oficios e Memorandos"
+          tooltipPosition="top"
+          (click)="navegarParaOficios()"
+        ></button>
+      </div>
+      
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <!-- Select de Ano -->
+        <!-- <label for="anoSelecionado" style="margin-right: 10px">Ano:</label> -->
+        <button pButton pRipple label="Ano" disabled="true" class="p-button-outlined p-button-secondary"></button>
+
+        <div class="select-ano-container" style="text-align: right">
+          <select
+            id="anoSelecionado"
+            [(ngModel)]="anoSelecionado"
+            (ngModelChange)="onAnoSelecionadoChange($event)"
+            class="form-control"
+            style="width: auto; display: inline-block"
+          >
+            <option *ngFor="let ano of anosDisponiveis" [value]="ano">{{ ano }}</option>
+          </select>
+        </div>
+        
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="pdde-card" *ngFor="let pdde of pddeList">
+        <!-- <div *ngFor="let pdde of pddeList" class="pdde-card"> -->
+        <div class="pdde-card-content">
+          <div class="pdde-info">
+            <h3>PDDE: {{ pdde.tipo }}</h3>
+            <p *ngIf="pdde.contaBancaria">Conta: {{ pdde.contaBancaria.numeroConta }}</p>
+            <p *ngIf="!pdde.contaBancaria">Conta: Informação indisponível</p>
+            <div class="pdde-financial-info">
+              <div>Custeio: {{ pdde.SaldoPDDE[0].custeioValor | currency: 'BRL' }}</div>
+              <div>Capital: {{ pdde.SaldoPDDE[0].capitalValor | currency: 'BRL' }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="pdde-card-actions">
+          <button
+            pButton
+            label="Checklist e Documentos"
+            class="p-button-primary"
+            (click)="verificarChecklist(pdde.id)"
+          ></button>
+          <button
+            pButton
+            pRipple
+            label="Pesquisa de Preço"
+            class="p-button p-button-info"
+            pTooltip="Acessar as pesquisas de preços"
+            tooltipPosition="top"
+            (click)="navegarParaPesquisaPreco(pdde)"
+          ></button>
+          <button
+            pButton
+            pRipple
+            label="Movimentações"
+            class="p-button p-button-info"
+            pTooltip="Acessar as movimentações financeiras"
+            tooltipPosition="top"
+            (click)="navegarParaMovimentacoes(pdde)"
+          ></button>
+        </div>
+      </div>
+    </div>
+    <!-- </div> -->
+  </div>
+
+  <!--Modal Cadastro Conta Bancaria-->
+  <p-dialog
+    [(visible)]="dialogCadastrarConta"
+    [modal]="true"
+    [style]="{ width: '400px' }"
+    header="Cadastrar Conta Bancária"
+    [closable]="true"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content">
+      <div class="modal-content">
+        <form (ngSubmit)="salvarContaBancaria()" class="form-container">
+          <div class="form-row">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="agencia">Agência</label>
+                <input
+                  id="agencia"
+                  type="text"
+                  pInputText
+                  [(ngModel)]="novaConta.agencia"
+                  name="agencia"
+                  placeholder="Digite a agência"
+                  pattern="[0-9]*"
+                  (keypress)="permitirSomenteNumeros($event)"
+                  required
+                />
+              </div>
+              <div class="form-group col-md-6">
+                <label for="numeroConta">Número da Conta</label>
+                <input
+                  id="numeroConta"
+                  type="text"
+                  pInputText
+                  [(ngModel)]="novaConta.numeroConta"
+                  name="numeroConta"
+                  placeholder="Digite o número da conta"
+                  pattern="[0-9]*"
+                  (keypress)="permitirSomenteNumeros($event)"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="banco">Banco</label>
+            <input
+              id="banco"
+              type="text"
+              pInputText
+              [(ngModel)]="novaConta.banco"
+              name="banco"
+              value="Banco do Brasil"
+              readonly
+            />
+          </div>
+          <div class="modal-actions">
+            <button type="submit" pButton class="btn-save" label="Salvar" icon="pi pi-check"></button>
+            <button
+              type="button"
+              pButton
+              class="btn-cancel"
+              label="Cancelar"
+              icon="pi pi-times"
+              (click)="cancelarCadastroConta()"
+            ></button>
+          </div>
+        </form>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Modal cadastro PDDE-->
+
+  <p-dialog
+    [(visible)]="dialogCadastrarPDDE"
+    [modal]="true"
+    [style]="{ width: '600px' }"
+    header="Cadastrar PDDE"
+    [closable]="true"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content">
+      <div class="modal-content">
+        <form (ngSubmit)="salvarPDDE()" class="form-container" #pddeForm="ngForm">
+          <!-- Campo Conta Bancária ID (Select) -->
+          <div class="form-group">
+            <label for="contaBancariaId">Conta Bancária</label>
+            <select
+              id="contaBancariaId"
+              name="contaBancariaId"
+              class="form-control"
+              [(ngModel)]="pddeData.contaBancariaId"
+              required
+            >
+              <option value="" disabled selected>Selecione uma conta bancária</option>
+              <option *ngFor="let conta of contasBancarias" [value]="conta.id">
+                Agência: {{ conta.agencia }} - Conta: {{ conta.numeroConta }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Campo Tipo -->
+          <div class="form-group">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" name="tipo" class="form-control" [(ngModel)]="pddeData.tipo" required>
+              <option value="" disabled selected>Selecione o tipo</option>
+              <option value="basico">Básico</option>
+              <option value="qualidade">Qualidade</option>
+              <option value="estrutura">Estrutura</option>
+            </select>
+          </div>
+
+          <!-- Campo Valor -->
+          <div class="form-group">
+            <label for="valor">Valor</label>
+            <input
+              type="number"
+              step="0.01"
+              id="valor"
+              name="valor"
+              class="form-control"
+              [(ngModel)]="saldoData.valor"
+              placeholder="Digite o valor"
+              required
+            />
+          </div>
+
+          <!-- Campo Custeio -->
+          <div class="form-group">
+            <label for="custeio">Custeio (%)</label>
+            <input
+              type="number"
+              step="0.01"
+              id="custeio"
+              name="custeio"
+              class="form-control"
+              [(ngModel)]="saldoData.custeio"
+              placeholder="Digite o percentual de custeio"
+              required
+            />
+          </div>
+
+          <!-- Campo Capital -->
+          <div class="form-group">
+            <label for="capital">Capital (%)</label>
+            <input
+              type="number"
+              step="0.01"
+              id="capital"
+              name="capital"
+              class="form-control"
+              [(ngModel)]="saldoData.capital"
+              placeholder="Digite o percentual de capital"
+              required
+            />
+          </div>
+
+          <!-- Botões -->
+          <div class="modal-actions">
+            <button
+              type="submit"
+              pButton
+              class="btn-save"
+              label="Salvar"
+              icon="pi pi-check"
+              [disabled]="!pddeForm.valid"
+            ></button>
+            <button
+              type="button"
+              pButton
+              class="btn-cancel"
+              label="Cancelar"
+              icon="pi pi-times"
+              (click)="cancelarCadastroPDDE()"
+            ></button>
+          </div>
+        </form>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!--Modal Cadastro Programa-->
+  <p-dialog
+    [(visible)]="dialogCadastrarPrograma"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    header="Cadastrar Programa"
+    [closable]="true"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content">
+      <form (ngSubmit)="salvarPrograma()" #programaForm="ngForm">
+        <!-- Campo PDDE -->
+        <div class="form-group">
+          <label for="pddeId">PDDE</label>
+          <select id="pddeId" name="pddeId" class="form-control" [(ngModel)]="programaData.pddeId" required>
+            <option *ngFor="let pdde of pddeList" [value]="pdde.id">
+              {{ pdde.tipo }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Campo Nome -->
+        <div class="form-group">
+          <label for="nome">Nome do Programa</label>
+          <input id="nome" type="text" class="form-control" [(ngModel)]="programaData.nome" name="nome" required />
+        </div>
+
+        <!-- Botões -->
+        <div class="modal-actions">
+          <button
+            type="submit"
+            pButton
+            class="p-button p-button-success"
+            label="Salvar"
+            icon="pi pi-check"
+            [disabled]="!programaForm.valid"
+          ></button>
+          <button
+            type="button"
+            pButton
+            class="p-button p-button-danger"
+            label="Cancelar"
+            icon="pi pi-times"
+            (click)="cancelarCadastroPrograma()"
+          ></button>
+        </div>
+      </form>
+    </ng-template>
+  </p-dialog>
+</div>

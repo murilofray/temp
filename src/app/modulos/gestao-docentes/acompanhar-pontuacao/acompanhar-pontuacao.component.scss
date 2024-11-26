@@ -1,0 +1,32 @@
+.pontuacao-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.titulo-pagina {
+  font-size: 1.5em;
+  margin-bottom: 1em;
+}
+
+.tabela-container {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 1.5em;
+}
+
+.tabela-footer {
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+.botao-ocorrencias,
+.botao-titulos,
+.botao-voltar {
+  margin-top: 1em;
+}
+
+.botao-voltar {
+  background-color: #f0f0f0;
+  color: #333;
+}

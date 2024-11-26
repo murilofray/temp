@@ -1,0 +1,234 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Pesquisas de Preço</h2>
+  <h5 class="titulo-infos">{{ infoPesquisas }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Nova Pesquisa de Bens"
+          icon="pi pi-plus"
+          class="p-button-success"
+          (click)="createPesquisa('B')"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Nova Pesquisa de Serviços"
+          icon="pi pi-plus"
+          class="p-button-sucess"
+          (click)="createPesquisa('S')"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterPesquisas($event)"
+            placeholder="Pesquisar"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+  </p-toolbar>
+  <p-toast></p-toast>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          #dt
+          styleClass="p-datatable-striped"
+          [value]="pesquisasFiltradas"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [paginator]="true"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+          [(selection)]="pesquisaSelecionada"
+          selectionMode="single"
+          (onRowSelect)="onRowSelect($event)"
+          (onRowUnselect)="onRowUnselect($event)"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="data">Data de Inicio<p-sortIcon [field]="'data'"></p-sortIcon></th>
+              <th pSortableColumn="tipo">Tipo<p-sortIcon [field]="'tipo'"></p-sortIcon></th>
+              <th pSortableColumn="descricao">Descrição <p-sortIcon [field]="'descricao'"></p-sortIcon></th>
+              <th pSortableColumn="programa">Programa<p-sortIcon [field]="'programa'"></p-sortIcon></th>
+              <th pSortableColumn="estado">Estado <p-sortIcon [field]="'estado'"></p-sortIcon></th>
+              <th>Ações</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-pesquisa>
+            <tr [pSelectableRow]="pesquisa">
+
+              <td style="width: 10%; min-width: 12rem">
+                <span class="p-column-title">Data de Início</span>
+                {{ pesquisa.createdAt | date: 'dd/MM/yyyy' }}
+              </td>
+
+              <td style="width: 10%; min-width: 10rem">
+                <span class="p-column-title">Tipo</span>
+                {{ pesquisa.tipo == 'B' ? 'Bem' : 'Serviço' }}
+              </td>
+
+              <td style="width: 25%; min-width: 10rem">
+                <span class="p-column-title">Descrição</span>
+                {{ pesquisa.titulo }}
+              </td>
+
+              <td style="width: 25%; min-width: 10rem">
+                <span class="p-column-title">Programa</span>
+                {{ apresentarPrograma(pesquisa) }}
+              </td>
+
+              <td style="width: 10%; min-width: 10rem">
+                <span class="p-column-title">Estado</span>
+                {{ pesquisa.consolidado ? 'Consolidada' : 'Em Andamento' }}
+              </td>
+
+              <!-- Ações -->
+              <td style="width: 20%; min-width: 10rem">
+                <span class="p-column-title">Ações</span>
+                <button
+                  pButton
+                  pRipple
+                  icon="pi pi-chevron-right"
+                  label="Acessar"
+                  class="p-button-outlined p-button-rounded p-button-info mr-2"
+                  pTooltip="Acessar a Pesquisa de Preço"
+                  tooltipPosition="top"
+                  (click)="acessarPesquisa(pesquisa.id)"
+                ></button>
+                <button
+                  pButton
+                  pRipple
+                  icon="pi pi-trash"
+                  label="Deletar"
+                  class="p-button-outlined p-button-rounded p-button-danger"
+                  pTooltip="Remover a Pesquisa de Preço"
+                  tooltipPosition="top"
+                  (click)="deletePesquisa(pesquisa.id)"
+                ></button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog para inserir o nome da nova pesquisa -->
+  <p-dialog
+    [(visible)]="createPesquisaDialog"
+    [style]="{ width: '25%' }"
+    header="{{ headerDialogNew }}"
+    [modal]="true"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="programa">Programa</label>
+        <p-dropdown
+          [showClear]="true"
+          [options]="programasDropdown"
+          [(ngModel)]="programaSelecionado"
+          optionLabel="nome"
+          placeholder="Selecione um programa"
+        >
+          <!-- Validação do campo Programa-->
+          <div *ngIf="submitted && !programaSelecionado" class="p-invalid">
+            <span>Selecione um Programa para a pesquisa.</span>
+          </div>
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="descricao">Descrição</label>
+        <input
+          id="descricao"
+          type="text"
+          pInputText
+          [(ngModel)]="tituloPesquisa"
+          required
+          maxlength="60"
+          autofocus
+          placeholder="Uma descrição breve"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && !tituloPesquisa }"
+        />
+
+        <!-- Validação do campo Descrição -->
+        <div *ngIf="submitted && !tituloPesquisa" class="p-invalid">
+          <span>Informe uma Descrição para a pesquisa.</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="salvarPesquisa()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Deletar Pesquisa -->
+  <p-dialog [(visible)]="deletePesquisaDialog" header="DELETAR" [modal]="true" [style]="{ width: '450px' }">
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="pesquisaSelecionada"
+        >Tem certeza que deseja deletar a Pesquisa de Preço: <br />
+        <b>{{ pesquisaSelecionada.titulo }}</b
+        >?</span
+      >
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDelete()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          icon="pi pi-times"
+          class="p-button-info"
+          label="Cancelar"
+          (click)="hideDialog()"
+        ></button></div
+    ></ng-template>
+  </p-dialog>
+</div>

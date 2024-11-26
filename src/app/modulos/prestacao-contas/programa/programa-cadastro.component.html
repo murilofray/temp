@@ -1,0 +1,30 @@
+<p-toast></p-toast>
+
+<div class="programa-cadastro-container">
+  <h2>Cadastro de Programa</h2>
+
+  <form (ngSubmit)="onSubmit()" #programaForm="ngForm">
+    <div class="form-group">
+      <label for="pddeId">PDDE</label>
+      <select id="pddeId" name="pddeId" class="form-control" [(ngModel)]="programaData.pddeId" required>
+        <option *ngFor="let pdde of pddeList" [value]="pdde.id">{{ pdde.tipo }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="nome">Nome</label>
+      <input type="text" id="nome" name="nome" class="form-control" [(ngModel)]="programaData.nome" required />
+    </div>
+
+    <button type="submit" class="p-button p-button-primary" [disabled]="!programaForm.valid">Cadastrar</button>
+
+    <button
+      pButton
+      type="button"
+      label="Cancelar"
+      class="p-button-danger custom-cancel-button"
+      (click)="navigateToHome()"
+      style="margin-top: 10px"
+    ></button>
+  </form>
+</div>

@@ -1,0 +1,108 @@
+<div class="card">
+  <p-toast></p-toast>
+
+  <h2 class="titulo">Relatórios</h2>
+
+  <p-toolbar *ngIf="!isLoading" styleClass="mb-4">
+      <ng-template pTemplate="right">
+          <div class="button-group">
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.DIRETOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Beneficiários do Bolsa Família por turma"
+                  (click)="relatorioBeneficiariosDialogVisivel = true"  
+              ></p-button>
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.DIRETOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Meninos e meninas por turma"
+                  (click)="relatorioMeninosMeninasDialogVisivel = true" 
+              ></p-button>
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.DIRETOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Alunos por bairro"
+                  (click)="downloadRelatorioBairros()" 
+              ></p-button>
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.DIRETOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Distribuição Racial dos Alunos"
+                  (click)="downloadRelatorioDistribuicaoRacial()" 
+              ></p-button>
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ADMINISTRADOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Beneficiários do Bolsa Família por Escola"
+                  (click)="downloadRelatorioBeneficiariosAdmin()" 
+              ></p-button>
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ADMINISTRADOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Quantidade de Meninos e Meninas por Escola"
+                  (click)="downloadRelatorioMeninosEMeninasAdmin()" 
+              ></p-button>
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ADMINISTRADOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Alunos por Bairro por Escola"
+                  (click)="downloadRelatorioBairrosAdmin()" 
+              ></p-button>
+              <p-button 
+                  *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ADMINISTRADOR])"
+                  icon="pi pi-cloud-download" 
+                  severity="info" 
+                  label="Distribuição Racial dos Alunos por Escola"
+                  (click)="downloadRelatorioDistribuicaoRacialAdmin()" 
+              ></p-button>
+          </div>
+      </ng-template>
+  </p-toolbar>
+</div>
+
+<p-dialog
+  styleClass="p-fluid"
+  [modal]="true"
+  header="Gerar relatório de beneficiários do Bolsa Família"
+  [(visible)]="relatorioBeneficiariosDialogVisivel"
+  [style]="{ width: '50rem', height: '28rem' }"
+>
+  <p-listbox
+    [(ngModel)]="turmaRelatorio"
+    [filter]="true"
+    [options]="turmasRelatorio"
+    optionLabel="descricao"
+  ></p-listbox>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Download" icon="pi pi-download" (onClick)="downloadRelatorioBeneficiarios()" type="button" />
+    <p-button label="Imprimir" icon="pi pi-print" (onClick)="imprimirRelatorioBeneficiarios()" type="button" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  styleClass="p-fluid"
+  [modal]="true"
+  header="Gerar relatório de meninos e meninas"
+  [(visible)]="relatorioMeninosMeninasDialogVisivel"
+  [style]="{ width: '50rem', height: '28rem' }"
+>
+  <p-listbox
+    [(ngModel)]="turmaRelatorio"
+    [filter]="true"
+    [options]="turmasRelatorio"
+    optionLabel="descricao"
+  ></p-listbox>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Download" icon="pi pi-download" (onClick)="downloadRelatorioMeninosMeninas()" type="button" />
+    <p-button label="Imprimir" icon="pi pi-print" (onClick)="imprimirRelatorioMeninosMeninas()" type="button" />
+  </ng-template>
+</p-dialog>

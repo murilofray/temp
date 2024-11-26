@@ -1,0 +1,66 @@
+<p-toast></p-toast>
+
+<div class="apm-container">
+  <h2>Cadastro de APM</h2>
+
+  <form (ngSubmit)="onSubmit()" #cadastrarApmForm="ngForm">
+    <div align="center">
+      <h4>Informações Obrigatórias</h4>
+    </div>
+
+    <div class="three-fields-row" align="center">
+      <div class="form-group">
+        <label for="vigente">Ano de Vigência *</label>
+        <p-inputNumber
+          [(ngModel)]="newApm.vigente"
+          id="vigente"
+          name="vigente"
+          required
+        ></p-inputNumber>
+      </div>
+
+      <div class="form-group">
+        <label for="dataFormacao">Data de Formação *</label>
+        <p-calendar
+          [(ngModel)]="newApm.dataFormacao"
+          id="dataFormacao"
+          name="dataFormacao"
+          dateFormat="dd/mm/yy"
+          [maxDate]="today"
+          required
+        ></p-calendar>
+      </div>
+
+      <div class="form-group">
+        <label for="escola">Escola *</label>
+        <p-dropdown
+          id="escola"
+          [options]="escolas"
+          [(ngModel)]="newApm.escolaId"
+          optionLabel="nome"
+          optionValue="id"
+          placeholder="Selecionar Escola"
+          name="escola"
+          required
+        ></p-dropdown>
+      </div>
+    </div>
+
+    <div class="button-container">
+      <button
+        type="submit"
+        [disabled]="isInvalid()"
+        pButton
+        label="Cadastrar"
+        class="p-button-primary"
+      ></button>
+      <button
+        pButton
+        label="Voltar"
+        class="p-button-danger"
+        (click)="navigateToListaApms()"
+      ></button>
+    </div>
+  </form>
+</div>
+

@@ -1,0 +1,11 @@
+label {
+    display: block; /* Garante que o label fique em linha separada */
+    padding: 10px 0px;
+    margin-top: 10px; /* Adiciona espaçamento entre o label e o campo */
+    font-weight: bold; /* Torna o texto do label em negrito */
+  }
+
+  .p-form input,
+  .p-form .p-calendar {
+    margin-bottom: 16px; /* Adiciona espaçamento entre os campos */
+  }

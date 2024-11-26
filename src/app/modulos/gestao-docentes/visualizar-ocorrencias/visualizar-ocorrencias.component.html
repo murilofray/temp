@@ -1,0 +1,115 @@
+<p-toast></p-toast>
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Minhas Ocorrências</h2>
+
+  <p-table [value]="filteredOcorrencias" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption"> </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="data">Data da Ocorrência<p-sortIcon [field]="'data'"></p-sortIcon></th>
+        <th pSortableColumn="status">Estado <p-sortIcon [field]="'status'"></p-sortIcon></th>
+        <th pSortableColumn="abonada">É Abonada? <p-sortIcon [field]="'abonada'"></p-sortIcon></th>
+        <th pSortableColumn="tipoAbono">Tipo de Abono <p-sortIcon [field]="'tipoabonada'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-ocorrencia>
+      <tr>
+        <td>{{ formatData(ocorrencia.dataOcorrencia) }}</td>
+        <td>{{ ocorrencia.status }}</td>
+        <td *ngIf="ocorrencia.status.toLowerCase()==='aceita'">{{ buscarAbono(ocorrencia.abonoId) }}</td>
+        <td *ngIf="ocorrencia.status.toLowerCase()==='recusada'"> Não </td>
+        <td *ngIf="ocorrencia.status.toLowerCase()!=='aceita'&&ocorrencia.status.toLowerCase()!=='recusada'">
+          Indeterminado </td>
+        <td *ngIf="ocorrencia.status.toLowerCase()=='aceita'||ocorrencia.status.toLowerCase()=='recusada'">{{
+          buscarNomeAbono(ocorrencia.abonoId) }}</td>
+        <td *ngIf="ocorrencia.status.toLowerCase()!=='aceita'&&ocorrencia.status.toLowerCase()!=='recusada'">
+          Indeterminado </td>
+        <td>
+          <button *ngIf="ocorrencia.status.toLowerCase() === 'não justificada'" pButton type="button" label="Justificar"
+            class="p-button-success button-spacing" (click)="mostrarDialogJustificar(ocorrencia)"></button>
+
+          <button *ngIf="ocorrencia.abonoId && (ocorrencia.status.toLowerCase() !== 'não justificada')" pButton
+            type="button" label="Detalhes" (click)="mostrarDialogDetalhes(ocorrencia)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Dialog de detalhes-->
+<p-dialog header="Detalhe da Ocorrência" [(visible)]="displayDialogDetalhes" [style]="{ width: '50vw' }" modal="true">
+  <div *ngIf="selectedOcorrencia" class="dialog-content">
+    <div class="field">
+      <label>Data da Ocorrência: </label>
+      <span>{{ formatData(selectedOcorrencia.dataOcorrencia) }}</span>
+    </div>
+    <div class="field">
+      <label>Registrada por: </label>
+      <span>{{buscarDocente(selectedOcorrencia.lancadoPor)}}</span>
+    </div>
+    <div class="field">
+      <label>Estado: </label>
+      <span>{{selectedOcorrencia.status}}</span>
+    </div>
+    <div class="field">
+      <label>É Abonada? </label>
+      <span>{{buscarAbono(selectedOcorrencia.abonoId)}}</span>
+    </div>
+    <div class="field">
+      <label>Tipo de Abono: </label>
+      <span>{{buscarNomeAbono(selectedOcorrencia.abonoId)}}</span>
+    </div>
+    <div class="field" *ngIf="selectedOcorrencia.descricao">
+      <label>Descrição: </label>
+      <span>{{selectedOcorrencia.descricao}}</span>
+    </div>
+    <div class="field" *ngIf="selectedOcorrencia.aprovadoPor">
+      <label>Ocorrência analisada por: </label>
+      <span>{{buscarDocente(selectedOcorrencia.aprovadoPor)}}</span>
+    </div>
+    <div class="field" *ngIf="selectedOcorrencia.motivo">
+      <label>Motivo: </label>
+      <span>{{selectedOcorrencia.motivo}}</span>
+    </div>
+
+    <div class="field">
+      <label>Atestado: </label>
+      <br>
+      <button *ngIf="selectedOcorrencia.documentoScanId" pButton label="Baixar Atestado" icon="pi pi-download"
+        (click)="verDocumento(selectedOcorrencia.documentoScanId)"></button>
+
+
+      <span *ngIf="!selectedOcorrencia.documentoScanId"> Não há atestado </span>
+    </div>
+
+
+
+  </div>
+</p-dialog>
+
+<!-- Dialog p justificar-->
+<p-dialog header="Justificar Ocorrência" [(visible)]="displayDialogJustificar"
+  [style]="{ width: '50vw', height: '35vw' }" modal="true">
+  <div *ngIf="selectedOcorrencia" class="dialog-content" [style]="{ height: '25vw' }">
+    <div class="field">
+      <label>Data da Falta:</label>
+      <span>{{ formatData(selectedOcorrencia.dataOcorrencia) }}</span>
+    </div>
+    <div class="field">
+      <label for="tipo">Tipo de Abono:</label>
+      <p-dropdown [options]="abonos" [(ngModel)]="selectedAbono" placeholder="Selecione" optionLabel="nome">
+      </p-dropdown>
+    </div>
+    <div class="field">
+      <label for="tipo">Atestado:</label>
+      <input type="file" (change)="onFileSelected($event)" accept=".pdf" />
+    </div>
+
+    <div class="button-group">
+      <button pButton type="button" label="Salvar" (click)="salvar()" class="p-button-success"></button>
+      <button pButton type="button" label="Cancelar" (click)="displayDialogJustificar = false && selectedAbono = null"
+        class="p-button-secondary"></button>
+    </div>
+  </div>
+</p-dialog>

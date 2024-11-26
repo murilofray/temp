@@ -1,0 +1,49 @@
+.caption-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search-container {
+  width: 300px; /* Define um tamanho apropriado para o campo de pesquisa */
+}
+
+.titulo-categorias {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-weight: bold;
+}
+
+.flex {
+  align-items: center;
+  gap: 10px;
+}
+
+:host ::ng-deep .p-toast {
+  z-index: 10000;
+}
+
+.spaced-buttons {
+  display: flex;
+  gap: 5px; /* Adiciona espaço uniforme entre os botões */
+}
+
+.button-group button {
+  margin: 0 5px; /* Adiciona espaço lateral entre os botões */
+}

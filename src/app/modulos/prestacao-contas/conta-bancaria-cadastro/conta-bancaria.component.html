@@ -1,0 +1,83 @@
+<p-toast></p-toast>
+<div class="conta-bancaria-container">
+  <h2>Cadastro Conta Bancária</h2>
+
+  <form (ngSubmit)="onSubmit()" #contaBancariaForm="ngForm">
+    <!-- Campo Escola -->
+    <div class="form-group">
+      <label for="escolaId">Escola ID</label>
+      <input
+        type="number"
+        id="escolaId"
+        name="escolaId"
+        class="form-control"
+        [(ngModel)]="contaBancaria.escolaId"
+        required
+      />
+    </div>
+
+    <!-- Campo Agência -->
+    <div class="form-group">
+      <label for="agencia">Agência</label>
+      <input
+        type="text"
+        id="agencia"
+        name="agencia"
+        class="form-control"
+        [(ngModel)]="contaBancaria.agencia"
+        required
+      />
+    </div>
+
+    <!-- Campo Número da Conta -->
+    <div class="form-group">
+      <label for="numeroConta">Número da Conta</label>
+      <input
+        type="text"
+        id="numeroConta"
+        name="numeroConta"
+        class="form-control"
+        [(ngModel)]="contaBancaria.numeroConta"
+        required
+      />
+    </div>
+
+    <!-- Campo Banco -->
+    <div class="form-group">
+      <label for="banco">Banco</label>
+      <input type="text" id="banco" name="banco" class="form-control" [(ngModel)]="contaBancaria.banco" required />
+    </div>
+
+    <!-- Botão de Submit -->
+    <button type="submit" class="p-button p-button-primary" [disabled]="!contaBancariaForm.valid">Cadastrar</button>
+
+    <button
+      pButton
+      type="button"
+      label="Cancelar"
+      class="p-button-danger custom-cancel-button"
+      (click)="navigateToHome()"
+      style="margin-top: 10px"
+    ></button>
+  </form>
+
+  <p-dialog
+    header="Cadastro Realizado"
+    [(visible)]="displayModal"
+    [modal]="true"
+    [closable]="false"
+    [dismissableMask]="true"
+  >
+    <p>Gostaria de continuar o processo e cadastrar o PDDE?</p>
+    <div class="p-d-flex p-jc-end p-ai-center button-group">
+      <button
+        pButton
+        label="Sim"
+        class="p-button-success"
+        (click)="navigateToPDDE()"
+        style="margin-right: 10px"
+      ></button>
+      <button pButton label="Não" class="p-button-secondary" (click)="navigateToHome()"></button>
+    </div>
+  </p-dialog>
+</div>

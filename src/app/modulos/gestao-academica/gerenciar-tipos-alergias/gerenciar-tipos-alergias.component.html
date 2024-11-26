@@ -1,0 +1,112 @@
+<div class="card">
+  <p-toast></p-toast>
+  <h2 class="titulo">Categorias de Alergias</h2>
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <button pButton class="p-button-primary mr-2" (click)="cadastroDialogVisivel = true" label="Cadastrar"></button>
+      <button
+        pButton
+        (click)="deletarTipoAlergiaDialog()"
+        [disabled]="tipoAlergiaSelecionada == null"
+        type="button"
+        label="Deletar"
+        class="p-button-danger button-spacing mr-2"
+      ></button>
+      <button
+        pButton
+        class="p-button-help"
+        (click)="editarTipoAlergiaDialog()"
+        [disabled]="tipoAlergiaSelecionada == null"
+        type="button"
+        label="Editar"
+      ></button>
+    </ng-template>
+    <ng-template pTemplate="right">
+      <p-button [routerLink]="['/academico/gerenciar-alergias']" label="Alergias" />
+    </ng-template>
+  </p-toolbar>
+  <p-table
+    #dt1
+    [value]="tiposAlergias"
+    [tableStyle]="{ 'min-width': '50rem' }"
+    [rows]="5"
+    [(selection)]="tipoAlergiaSelecionada"
+    [paginator]="true"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    selectionMode="single"
+    [globalFilterFields]="['descricao']"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="dt1.filterGlobal($event.target.value, 'contains')"
+            placeholder="Pesquisar por Nome"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Código</th>
+        <th>Nome</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-tipo>
+      <tr [pSelectableRow]="tipo">
+        <td>{{ tipo.id }}</td>
+        <td>{{ tipo.descricao }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Dialog de Cadastro -->
+<p-dialog
+  styleClass="p-fluid"
+  [modal]="true"
+  header="Cadastrar categoria de alergia"
+  [(visible)]="cadastroDialogVisivel"
+  [style]="{ width: '30rem' }"
+>
+  <div class="flex align-items-center gap-3 mb-3">
+    <label for="nome" class="font-semibold w-5rem">Nome</label>
+    <input [(ngModel)]="tipoAlergiaDescricao" pInputText id="nome" class="flex-auto" autocomplete="off" />
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button (click)="cadastroDialogVisivel = false" severity="secondary" label="Cancelar"></p-button>
+    <p-button
+      (click)="cadastrarTipoAlergia()"
+      label="Cadastrar"
+      [disabled]="tipoAlergiaDescricao.trim() == ''"
+    ></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog de Deletar Alergia -->
+<p-confirmDialog [style]="{ width: '450px' }" />
+
+<p-dialog
+  styleClass="p-fluid"
+  [modal]="true"
+  header="Editar Categoria de alergia"
+  [(visible)]="editarTipoAlergiaDialogVisivel"
+>
+  <div class="flex align-items-center gap-3 mb-3">
+    <label for="nome" class="font-semibold w-5rem">Nome</label>
+    <input [(ngModel)]="editarTipoAlergiaDescricao" pInputText id="nome" class="flex-auto" autocomplete="off" />
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Confirmar"
+      (click)="editarTipoAlergia()"
+      [disabled]="editarTipoAlergiaDescricao.trim() == ''"
+      type="button"
+    />
+  </ng-template>
+</p-dialog>

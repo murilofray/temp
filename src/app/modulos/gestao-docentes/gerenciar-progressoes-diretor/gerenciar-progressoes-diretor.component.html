@@ -1,0 +1,74 @@
+<p-toast></p-toast>
+<div class="progressao-container">
+  <h2 class="titulo-progressao">Progressões</h2>
+  <p-table [value]="progressoes" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="professorNome">Professor <p-sortIcon [field]="'professorNome'"></p-sortIcon></th>
+        <th pSortableColumn="status">Status <p-sortIcon [field]="'status'"></p-sortIcon></th>
+        <th pSortableColumn="tipo">Tipo <p-sortIcon [field]="'tipo'"></p-sortIcon></th>
+        <th pSortableColumn="data">Data <p-sortIcon [field]="'data'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-progressao>
+      <tr>
+        <td>{{ buscarNomeServidor(progressao.servidorId) }}</td>
+        <td>
+          <span *ngIf="progressao.aprovado === null">Pendente</span>
+          <span *ngIf="progressao.aprovado === true">Aprovado</span>
+          <span *ngIf="progressao.aprovado === false">Recusado</span>
+        </td>
+        <td>{{ progressao.tipo }}</td>
+        <td>{{ formatarData(progressao.data) }}</td>
+        <td>
+          <button
+            *ngIf="progressao.aprovado === null"
+            pButton
+            type="button"
+            label="Aceitar"
+            class="p-button-success button-spacing"
+            (click)="confirmarAceite(progressao)"
+          ></button>
+          <button
+            *ngIf="progressao.aprovado === null"
+            pButton
+            type="button"
+            label="Recusar"
+            class="p-button-danger button-spacing"
+            (click)="confirmarRecusa(progressao)"
+          ></button>
+          <button pButton type="button" label="Detalhes" (click)="mostrarDialogDetalhes(progressao)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Dialog de detalhes-->
+<p-dialog header="Detalhe da Progressão" [(visible)]="displayDialogDetalhes" [style]="{ width: '50vw' }" modal="true">
+  <div *ngIf="selectedProgressao" class="dialog-content">
+    <div class="field">
+      <label> Docente: </label>
+      <span> {{ buscarNomeServidor(selectedProgressao.servidorId) }}</span>
+    </div>
+    <div class="field">
+      <label>Status: </label>
+      <span *ngIf="selectedProgressao.aprovado === null"> Pendente </span>
+      <span *ngIf="selectedProgressao.aprovado === true"> Aprovado </span>
+      <span *ngIf="selectedProgressao.aprovado === false"> Recusado </span>
+    </div>
+    <div class="field">
+      <label> Tipo: </label>
+      <span> {{ selectedProgressao.tipo }}</span>
+    </div>
+    <div class="field">
+      <label> Data: </label>
+      <span> {{ formatarData(selectedProgressao.data) }}</span>
+    </div>
+    <div class="field">
+      <label> Descrição: </label>
+      <span> {{ selectedProgressao.detalhes }}</span>
+    </div>
+  </div>
+</p-dialog>

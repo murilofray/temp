@@ -1,0 +1,304 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Oficios e Memorandos</h2>
+  <h5 class="titulo-infos">{{ infoEscola }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Novo Ofício / Memorando"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          (click)="newOficioMemorando()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Remover Ofício / Memorando"
+          icon="pi pi-trash"
+          class="p-button-danger"
+          (click)="deleteSelectedOfiMem()"
+          [disabled]="!ofiMemSelecionada"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterOfiMem($event)"
+            placeholder="Pesquisar"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <p-toast></p-toast>
+  <app-pdf-viewer></app-pdf-viewer>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          styleClass="p-datatable-striped"
+          [value]="ofiMemFiltradas"
+          [paginator]="true"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} documentos"
+          [(selection)]="ofiMemSelecionada"
+          selectionMode="single"
+          (onRowSelect)="onRowSelect($event)"
+          (onRowUnselect)="onRowUnselect($event)"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="data">Data <p-sortIcon [field]="'data'"></p-sortIcon></th>
+              <th pSortableColumn="tipo">Documento <p-sortIcon [field]="'tipo'"></p-sortIcon></th>
+              <th pSortableColumn="titulo">Título <p-sortIcon [field]="'titulo'"></p-sortIcon></th>
+              <th>Ações</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-ofiMem>
+            <tr [pSelectableRow]="ofiMem">
+              <td class="p-wrap-text" style="width: 20%; min-width: 10rem">{{ ofiMem.data | date: 'dd/MM/yyyy' }}</td>
+              <td class="p-wrap-text" style="width: 20%; min-width: 10rem">{{ ofiMem.tipo }}</td>
+              <td class="p-wrap-text" style="width: 40%; min-width: 10rem">{{ ofiMem.titulo }}</td>
+              <td class="p-wrap-text" style="width: 20%; min-width: 10rem">
+                <div class="button-group">
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-file-pdf"
+                    class="p-button-outlined p-button-rounded p-button-info mr-2"
+                    label="Visualizar"
+                    pTooltip="Visualizar o documento"
+                    tooltipPosition="top"
+                    (click)="visualizarOficioMemorando(ofiMem)"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-pencil"
+                    class="p-button-outlined p-button-rounded p-button-success mr-2"
+                    label="Editar"
+                    pTooltip="Realizar edição"
+                    tooltipPosition="top"
+                    (click)="editarOficioMemorando(ofiMem)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog para adicionar um OFICIO OU MEMORANDO -->
+  <p-dialog
+    header="Oficios e Memorandos"
+    [(visible)]="dialogOfiMem"
+    [modal]="true"
+    [style]="{ width: '40%' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content" class="mb-1">
+      <p-form>
+        <!-- Campo de Título -->
+        <label for="titulo">Título</label>
+        <input
+          type="text"
+          id="titulo"
+          pInputText
+          required
+          autofocus
+          maxlength="255"
+          [(ngModel)]="oficioMemorando.titulo"
+          class="p-inputtext p-component p-element"
+          [readonly]="isViewMode"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && !oficioMemorando.titulo }"
+        />
+        <!-- Validação do campo título -->
+        <div *ngIf="submitted && !oficioMemorando.titulo" class="p-invalid">
+          <span>Informe uma descrição.</span>
+        </div>
+
+        <!-- Campo de Tipo com RadioButton -->
+        <br />
+        <label>Tipo</label>
+        <div class="flex flex-wrap gap-3">
+          <div class="flex align-items-center">
+            <p-radioButton
+              name="tipo"
+              value="Ofício"
+              [(ngModel)]="oficioMemorando.tipo"
+              inputId="tipo1"
+              [readonly]="isViewMode"
+            ></p-radioButton>
+            <label for="tipo1" class="ml-2">Ofício</label>
+          </div>
+          <div class="flex align-items-center">
+            <p-radioButton
+              name="tipo"
+              value="Memorando"
+              [(ngModel)]="oficioMemorando.tipo"
+              inputId="tipo2"
+              [readonly]="isViewMode"
+            ></p-radioButton>
+            <label for="tipo2" class="ml-2">Memorando</label>
+          </div>
+        </div>
+        <!-- Validação do campo tipo -->
+        <div *ngIf="submitted && !oficioMemorando.tipo" class="p-invalid">
+          <span>Selecione um tipo.</span>
+        </div>
+
+        <!-- Campo da data -->
+        <label for="data">Data</label>
+        <p-calendar
+          id="data"
+          [(ngModel)]="oficioMemorando.data"
+          dateFormat="dd/mm/yy"
+          [showIcon]="false"
+          (onShow)="onCalendarShow()"
+          [readonly]="isViewMode"
+          required
+          [appendTo]="'body'"
+        ></p-calendar>
+        <!-- Validação do campo data -->
+        <div *ngIf="submitted && !oficioMemorando.data" class="p-invalid">
+          <span>Informe uma data.</span>
+        </div>
+
+        <!-- Arquivo -->
+        <div *ngIf="isUploadedFileObject; else uploadFile" class="file-preview">
+          <h6>
+            Arquivo carregado:
+            <a [href]="uploadedFile.caminho" target="_blank">{{ getFileName(uploadedFile.caminho) }} </a>
+          </h6>
+          <button
+            pButton
+            label="Remover arquivo"
+            icon="pi pi-times"
+            class="p-button-warning"
+            (click)="confirmarRemocao()"
+          ></button>
+        </div>
+
+        <ng-template #uploadFile>
+          <label for="upload">Arquivo</label>
+          <p-fileUpload
+            *ngIf="!uploadedFile || uploadedFile; instanceof: File"
+            name="file"
+            id="upload"
+            (onSelect)="onFileSelected($event)"
+            chooseLabel="Escolher"
+            uploadLabel="Enviar"
+            cancelLabel="Cancelar"
+            [auto]="true"
+            accept="application/pdf"
+            required
+          >
+          </p-fileUpload>
+          <!-- Validação do campo de upload -->
+          <div *ngIf="submitted && !oficioMemorando.documentoScanId" class="p-invalid">
+            <span>Anexe um arquivo.</span>
+          </div>
+        </ng-template>
+      </p-form>
+    </ng-template>
+
+    <!-- Botões de Ação -->
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          *ngIf="isViewMode"
+          pButton
+          pRipple
+          label="Fechar"
+          icon="pi pi-times"
+          class="p-button-info"
+          (click)="hideDialog()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="submitOficioMemorando()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Deletar a uma MOVIMENTAÇÃO FINANCEIRA -->
+  <p-dialog
+    header="DELETAR"
+    [dismissableMask]="true"
+    [(visible)]="dialogDeletarOfiMem"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="ofiMemSelecionada"
+        >Tem certeza que deseja remover o seguinte {{ ofiMemSelecionada.tipo }}: <br /><br />
+        Descrição: <b>{{ ofiMemSelecionada.titulo }}</b> <br />
+        Data: <b>{{ ofiMemSelecionada.data | date: 'dd/MM/yyyy' }}</b> <br />
+      </span>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDelete()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          icon="pi pi-times"
+          class="p-button-info"
+          label="Cancelar"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
+</div>

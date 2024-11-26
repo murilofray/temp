@@ -1,0 +1,505 @@
+<div class="card">
+  <p-toast></p-toast>
+
+  <h2 class="titulo">Alunos</h2>
+
+  <p-toolbar styleClass="mb-4 gap-2" *ngIf="!isLoading">
+    <ng-template pTemplate="left">
+      <button pButton class="p-button-primary mr-2" (click)="cadastroAlunoDialogVisivel = true" label="Cadastrar">
+      </button>
+      <button 
+        *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.DIRETOR, niveis.ADMINISTRADOR])"
+        pButton type="button" label="Deletar" (click)="deletarAlunoDialog()"  
+        class="p-button-danger button-spacing mr-2" [disabled]="alunoSelecionado == null">
+      </button>
+      <button pButton type="button" label="Editar" (click)="editarDialog()" class="p-button-help button-spacing mr-2"
+        [disabled]="alunoSelecionado == null">
+      </button>
+      <button pButton type="button" label="Detalhes" (click)="detalhesDialog()" class="p-button-secondary"
+        [disabled]="alunoSelecionado == null">
+      </button>
+    </ng-template>
+    <ng-template pTemplate="right">
+      <div class="mb-3">
+        <label for="ativo" style="display: block;">Mostrar alunos inativos</label>
+        <div style="text-align: right;">
+        <p-inputSwitch id="ativo" [(ngModel)]="mostrarDesabilitados" class="d-block"
+            (onChange)="onToggleMostrarDesabilitados($event)">
+        </p-inputSwitch>
+      </div>
+    </div>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table #dt1 [(selection)]="alunoSelecionado" selectionMode="single" [globalFilterFields]="['nome', 'ra']"
+    [paginator]="true" [value]="alunosFiltrados" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+    [rowsPerPageOptions]="[5, 10, 20, 50, 100]">
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left w-20rem">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="filterAlunos($event)" placeholder="Pesquisar por nome ou RA"
+            class="p-inputtext p-component p-element w-full" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome">Nome <p-sortIcon [field]="'nome'"></p-sortIcon></th>
+        <th pSortableColumn="ra">RA <p-sortIcon [field]="'ra'"></p-sortIcon></th>
+        <th pSortableColumn="nomeMae">Nome da Mãe <p-sortIcon [field]="'nomeMae'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-aluno>
+      <tr [pSelectableRow]="aluno">
+        <td>{{ aluno.nome }}</td>
+        <td>{{ aluno.ra }}</td>
+        <td>{{ aluno.nomeMae }}</td>
+        <td>
+          <div class="button-group">
+            <ng-container *ngIf="!aluno.isDisabled; else reativarButton">
+              <button pButton type="button" label="Cadastrar Alergia" (click)="cadastroAlergiaDialog(aluno)"
+                aria-label="Cadastrar Alergia" class="p-button-secondary"></button>
+              <button pButton type="button" label="Cadastrar Documento" (click)="cadastroDocumentoDialog(aluno)"
+                aria-label="Cadastrar Documento" class="p-button-secondary"></button>
+            </ng-container>
+            <ng-template #reativarButton>
+              <button pButton type="button" label="Reativar" (click)="reativarAluno(aluno)"
+                aria-label="Reativar" class="p-button-secondary"></button>
+            </ng-template>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmDialog [style]="{ width: '450px' }" />
+
+<!-- DIALOG DETALHE ALUNO -->
+<p-dialog header="Detalhes do Aluno" [(visible)]="displayDetalheDialog" [style]="{ width: '70vw' }" modal="true">
+  <div *ngIf="alunoSelecionado" class="dialog-content">
+    <div class="field">
+      <label>Nome: </label>
+      <span> {{ alunoSelecionado.nome }}</span>
+    </div>
+    <div class="field">
+      <label>CPF: </label>
+      <span> {{ formatarCPF(alunoSelecionado.cpf) }}</span>
+    </div>
+    <div class="field">
+      <label>RA: </label>
+      <span> {{ alunoSelecionado.ra }}</span>
+    </div>
+    <div class="field">
+      <label>Data de Nascimento: </label>
+      <span> {{ formatarData(alunoSelecionado.dataNascimento) }}</span>
+    </div>
+    <div class="field">
+      <label>Nome da Mãe: </label>
+      <span> {{ alunoSelecionado.nomeMae }}</span>
+    </div>
+    <div class="field">
+      <label>Celular: </label>
+      <span> {{ formatarCelular(alunoSelecionado.celular) }}</span>
+    </div>
+    <div class="field">
+      <label>Endereço: </label>
+      <span> {{ alunoSelecionado.logradouro }}, {{ alunoSelecionado.numero }}, {{ alunoSelecionado.bairro }} - {{
+        alunoSelecionado.cidade }}, {{ alunoSelecionado.uf }}</span>
+    </div>
+    <div class="field">
+      <label>Alergias: </label>
+      <span *ngIf="alunoSelecionado.alergias && alunoSelecionado.alergias.length > 0; else noAlergias">
+        <span *ngFor="let alergia of alunoSelecionado.alergias">
+          {{ alergia.descricao }}
+        </span>
+      </span>
+      <ng-template #noAlergias>
+        <span> Nenhuma alergia encontrada para este aluno.</span>
+      </ng-template>
+    </div>
+    <div class="field">
+      <label>Documentos do aluno</label>
+      <div class="button-container">
+        <div *ngIf="!alunoSelecionado?.documentos || 
+                 (alunoSelecionado.documentos.certidaoNascimento == null && 
+                  alunoSelecionado.documentos.comprovanteResidencia == null && 
+                  alunoSelecionado.documentos.nis == null && 
+                  alunoSelecionado.documentos.rg == null && 
+                  alunoSelecionado.documentos.cpf == null && 
+                  alunoSelecionado.documentos.declaracaoVacinacao == null && 
+                  alunoSelecionado.documentos.autodeclaracaoRacial == null && 
+                  alunoSelecionado.documentos.laudos.length === 0 && 
+                  alunoSelecionado.documentos.documentosResponsavel.length === 0)">
+          <p>Sem documentos cadastrados</p>
+        </div>
+        <div class="field">
+          <button pButton label="Baixar Certidão de Nascimento" icon="pi pi-download"
+            *ngIf="alunoSelecionado?.documentos?.certidaoNascimento"
+            (click)="downloadDocumento(alunoSelecionado.documentos.certidaoNascimento.caminho)"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.certidaoNascimento">Anexado em: {{
+            alunoSelecionado.documentos.certidaoNascimento.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="field">
+          <button pButton label="Baixar Comprovante de Residência" icon="pi pi-download"
+            *ngIf="alunoSelecionado?.documentos?.comprovanteResidencia"
+            (click)="downloadDocumento(alunoSelecionado.documentos.comprovanteResidencia.caminho)"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.comprovanteResidencia">Anexado em: {{
+            alunoSelecionado.documentos.comprovanteResidencia.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="field">
+          <button pButton label="Baixar NIS" icon="pi pi-download" *ngIf="alunoSelecionado?.documentos?.nis"
+            (click)="downloadDocumento(alunoSelecionado.documentos.nis.caminho)"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.nis">Anexado em: {{
+            alunoSelecionado.documentos.nis.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="field">
+          <button pButton label="Baixar RG" icon="pi pi-download" *ngIf="alunoSelecionado?.documentos?.rg"
+            (click)="downloadDocumento(alunoSelecionado.documentos.rg.caminho)"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.rg">Anexado em: {{
+            alunoSelecionado.documentos.rg.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="field">
+          <button pButton label="Baixar CPF" icon="pi pi-download" *ngIf="alunoSelecionado?.documentos?.cpf"
+            (click)="downloadDocumento(alunoSelecionado.documentos.cpf.caminho)"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.cpf">Anexado em: {{
+            alunoSelecionado.documentos.cpf.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="field">
+          <button pButton label="Baixar Declaração de Vacinação" icon="pi pi-download"
+            *ngIf="alunoSelecionado?.documentos?.declaracaoVacinacao"
+            (click)="downloadDocumento(alunoSelecionado.documentos.declaracaoVacinacao.caminho)"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.declaracaoVacinacao">Anexado em: {{
+            alunoSelecionado.documentos.declaracaoVacinacao.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+        <div class="field">
+          <button pButton label="Baixar Autodeclaração Racial" icon="pi pi-download"
+            *ngIf="alunoSelecionado?.documentos?.autodeclaracaoRacial"
+            (click)="downloadDocumento(alunoSelecionado.documentos.autodeclaracaoRacial.caminho)"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.autodeclaracaoRacial">Anexado em: {{
+            alunoSelecionado.documentos.autodeclaracaoRacial.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="field" *ngIf="alunoSelecionado?.documentos?.laudos?.length > 0">
+      <label>Laudos: </label>
+      <div *ngFor="let laudo of alunoSelecionado.documentos.laudos">
+        <div class="field">
+          <button pButton [label]="'Baixar Laudo - ' + laudo.descricao" icon="pi pi-download"
+            (click)="downloadDocumento(laudo.caminho)" class="laudo-button">
+          </button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.laudos?.length > 0">Anexado em: {{ laudo.createdAt |
+            date: 'dd/MM/yyyy'}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="field" *ngIf="alunoSelecionado?.documentos?.documentosResponsavel?.length > 0">
+      <label>Documentos dos Responsáveis: </label>
+      <div *ngFor="let documento of alunoSelecionado.documentos.documentosResponsavel">
+        <div class="field">
+          <button pButton [label]="'Baixar Documento - ' + documento.descricao" icon="pi pi-download"
+            (click)="downloadDocumento(documento.caminho)" class="laudo-button"></button>
+          <span class="anexo" *ngIf="alunoSelecionado?.documentos?.documentosResponsavel?.length > 0">Anexado em: {{
+            documento.createdAt | date: 'dd/MM/yyyy'}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="button-group">
+    <button pButton type="button" label="Voltar" (click)="displayDetalheDialog = false"
+      class="p-button-secondary"></button>
+  </div>
+</p-dialog>
+
+<!-- DIALOG CADASTRO ALERGIA -->
+<p-dialog header="Cadastro de Alergias do Aluno" [(visible)]="displayAlergiaDialog"
+  [style]="{ width: '70vw', height: '35vh' }" modal="true">
+  <form [formGroup]="alergiaForm" (ngSubmit)="cadastrarAlergias()">
+    <div *ngIf="alunoSelecionado" class="dialog-content">
+      <div class="field">
+        <label class="font-semibold">Nome: </label>
+        <span> {{ alunoSelecionado.nome }}</span>
+      </div>
+      <div class="field">
+        <label class="font-semibold">Nome da Mãe: </label>
+        <span> {{ alunoSelecionado.nomeMae }}</span>
+      </div>
+      <div class="field">
+        <label class="font-semibold">RA: </label>
+        <span> {{ alunoSelecionado.ra }}</span>
+      </div>
+      <div class="field">
+        <label for="alergias" class="font-semibold w-5rem">Alergias:</label>
+        <span>
+          <p-autoComplete formControlName="alergiasSelecionadas" [suggestions]="alergiasFiltradas"
+            (completeMethod)="buscarAlergias($event)" [multiple]="true" field="descricao"
+            placeholder="Pesquisar alergia" />
+        </span>
+      </div>
+      <div class="button-group">
+        <p-button label="Cancelar" (onClick)="displayAlergiaDialog = false" class="p-button-secondary"></p-button>
+        <p-button label="Cadastrar" [loading]="loading" [disabled]="alergiaForm.invalid" type="submit"></p-button>
+      </div>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- DIALOG CADASTRO DOCUMENTO -->
+<p-dialog header="Cadastro de Documentos do Aluno" [(visible)]="displayDocumentoDialog"
+  [style]="{ width: '70vw', height: '40vh' }" modal="true">
+  <form [formGroup]="documentoForm" (ngSubmit)="confirmarCadastro()">
+    <div *ngIf="alunoSelecionado" class="dialog-content">
+      <div class="field">
+        <label class="font-semibold">Nome: </label>
+        <span> {{ alunoSelecionado.nome }}</span>
+      </div>
+      <div class="field">
+        <label class="font-semibold">Nome da Mãe: </label>
+        <span> {{ alunoSelecionado.nomeMae }}</span>
+      </div>
+      <div class="field">
+        <label class="font-semibold">RA: </label>
+        <span> {{ alunoSelecionado.ra }}</span>
+      </div>
+      <div class="flex align-items-center gap-8 mb-3">
+        <label class="font-semibold">Tipo de Documento:* </label>
+        <p-autoComplete formControlName="tipoDocumento" [dropdown]="true" id="tipoDocumento"
+          [suggestions]="tipoDocumentosFiltrados" (completeMethod)="buscarTipoDocumento($event)" optionLabel="descricao"
+          (onSelect)="atualizarExibicaoDescricao()" optionValue="id" aria-placeholder="Pesquisar Tipos de Documentos" />
+      </div>
+      <div class="flex align-items-center gap-7 mb-3" *ngIf="mostrarDescricao">
+        <label for="descricao" class="font-semibold">Descrição:</label>
+        <input formControlName="descricao" id="descricao" pInputText />
+      </div>
+      <div class="flex align-items-center gap-7 mb-3">
+        <label for="doc" class="font-semibold">Upload do Documento:*</label>
+        <input (change)="onDocSelect($event)" type="file" id="doc" class="flex-auto" accept=".pdf" required />
+      </div>
+      <div class="button-group">
+        <p-button label="Cancelar" (onClick)="displayDocumentoDialog = false" class="p-button-secondary"></p-button>
+        <p-button label="Cadastrar" [loading]="loading" [disabled]="documentoForm.invalid" type="submit"></p-button>
+      </div>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- DIALOG CONFIRMAÇÃO-->
+<p-dialog header="Confirmação" [(visible)]="displayConfirmDialog" [style]="{ width: '400px' }" modal="true"
+  closable="false">
+  <p> Você tem certeza de que deseja cadastrar este documento?
+    <b>Se esse documento desse aluno já estiver cadastrado, o documento anterior será perdido. </b>
+    Para verificar os documentos já cadastrados desse aluno, clique no botão "Detalhes" na página anterior.
+  </p>
+  <div class="button-group">
+    <p-button label="Não" icon="pi pi-times" (onClick)="displayConfirmDialog = false"
+      class="p-button-danger"></p-button>
+    <p-button label="Sim" icon="pi pi-check" (onClick)="cadastrarDocumento()" class="p-button-success"></p-button>
+  </div>
+</p-dialog>
+
+<!-- DIALOG DE CADASTRO DO ALUNO -->
+<p-dialog styleClass="p-fluid" [modal]="true" header="Cadastrar Aluno" [(visible)]="cadastroAlunoDialogVisivel"
+  [style]="{ width: '70vw', height: '60vh' }">
+  <form [formGroup]="alunoForm" (ngSubmit)="cadastrarAluno()">
+    <div class="p-fluid p-formgrid grid">
+      <div class="field col-12 md:col-9">
+        <label for="nome" class="font-semibold">Nome*</label>
+        <input formControlName="nome" id="nome" pInputText required />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label for="ra" class="font-semibold">RA*</label>
+        <p-inputMask formControlName="ra" id="ra" mask="999.999.999.999-a" required />
+      </div>
+    </div>
+    <div class="p-grid p-formgrid grid">
+      <div class="field col-12 md:col-4">
+        <label for="dataNascimento" class="font-semibold">Data de Nascimento*</label>
+        <input formControlName="dataNascimento" pInputText id="dataNascimento" type="date" required />
+      </div>
+      <div class="field col-12 md:col-4">
+        <label for="cpf" class="font-semibold">CPF*</label>
+        <p-inputMask formControlName="cpf" mask="999.999.999-99" id="cpf" name="cpf" />
+      </div>
+      <div class="field col-12 md:col-4">
+        <label for="sexo" class="font-semibold">Sexo*</label>
+        <div class="flex flex-wrap gap-3 align-items-center">
+          <p-radioButton formControlName="sexo" name="sexo" value="F" inputId="feminino" />
+          <label for="feminino" class="ml-2">Feminino</label>
+          <p-radioButton formControlName="sexo" name="sexo" value="M" inputId="masculino" />
+          <label for="masculino" class="ml-2">Masculino</label>
+        </div>
+      </div>
+    </div>
+    <div class="p-grid p-formgrid grid">
+      <div class="field col-12 md:col-9">
+        <label for="nomeMae" class="font-semibold">Nome da Mãe*</label>
+        <input formControlName="nomeMae" pInputText id="nomeMae" autocomplete="off" required />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label for="celular" class="font-semibold">Celular*</label>
+        <p-inputMask formControlName="celular" id="celular" type="text" mask="(99)99999-9999" />
+      </div>
+    </div>
+    <div class="p-grid p-formgrid grid">
+      <div class="field col-12 md:col-3">
+        <label for="cep" class="font-semibold">CEP*</label>
+        <p-inputMask formControlName="cep" id="cep" type="text" mask="99999-999" (change)="validarCep()" />
+      </div>
+      <div class="field col-12 md:col-7">
+        <label for="logradouro" class="font-semibold">Logradouro*</label>
+        <input formControlName="logradouro" pInputText id="logradouro" type="text" />
+      </div>
+      <div class="field col-12 md:col-2">
+        <label for="numero" class="font-semibold">Número</label>
+        <input formControlName="numero" pInputText id="numero" type="text" />
+      </div>
+    </div>
+    <div class="p-grid p-formgrid grid">
+      <div class="field col-12 md:col-3">
+        <label for="bairro" class="font-semibold">Bairro*</label>
+        <input formControlName="bairro" pInputText id="bairro" type="text" />
+      </div>
+      <div class="field col-12 md:col-8">
+        <label for="cidade" class="font-semibold">Cidade*</label>
+        <input id="cidade" pInputText formControlName="cidade" type="text" />
+      </div>
+      <div class="field col-12 md:col-1">
+        <label for="uf" class="font-semibold">UF*</label>
+        <input formControlName="uf" pInputText id="uf" type="text" />
+      </div>
+    </div>
+    <div class="p-grid p-formgrid grid">
+      <div class="field col-12 md:col-4">
+        <label class="font-semibold">Raça*</label>
+        <p-dropdown [options]="racas" formControlName="raca" optionLabel="name" placeholder="Selecione uma raça" />
+      </div>
+      <div class="field col-12 md:col-4">
+        <label for="beneficiario" class="font-semibold">É beneficiário do Bolsa Família?*</label>
+        <div class="flex gap-3">
+          <p-radioButton formControlName="beneficiarioBF" name="beneficiarioBF" value="S" inputId="sim" />
+          <label for="sim" class="ml-2">Sim</label>
+          <p-radioButton formControlName="beneficiarioBF" name="beneficiarioBF" value="N" inputId="nao" />
+          <label for="nao" class="ml-2">Não</label>
+        </div>
+      </div>
+      <div class="field col-12 md:col-4">
+        <label for="alergias" class="font-semibold">Alergias</label>
+        <p-autoComplete formControlName="alergiasSelecionadas" [suggestions]="alergiasFiltradas"
+          (completeMethod)="buscarAlergias($event)" [multiple]="true" field="descricao"
+          placeholder="Pesquisar alergia" />
+      </div>
+    </div>
+    <div class="p-grid p-formgrid grid">
+      <div class="field col-12 md:col-4">
+        <label for="certidaoNascimento" class="font-semibold" style="display: block;">Certidão de Nascimento*</label>
+        <input (change)="onCertidaoNascimentoSelect($event)" type="file" id="certidaoNascimento" accept=".pdf" />
+      </div>
+      <div class="field col-12 md:col-4">
+        <label for="comprovanteResidencia" class="font-semibold" style="display: block;">Comprovante de
+          Residência*</label>
+        <input (change)="onComprovanteSelect($event)" type="file" id="comprovanteResidencia" accept=".pdf" />
+      </div>
+    </div>
+    <div class="p-col-12 button-group">
+      <p-button label="Cancelar" (onClick)="cadastroAlunoDialogVisivel = false" class="p-button-secondary"></p-button>
+      <p-button label="Cadastrar" [loading]="loading" [disabled]="alunoForm.invalid" type="submit"></p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- DIALOG DE EDIÇÃO DO ALUNO -->
+<p-dialog styleClass="p-fluid" [modal]="true" header="Editar dados do Aluno" [(visible)]="editarAlunoDialogVisivel"
+  [style]="{ width: '70vw', height: '60vh' }">
+  <div *ngIf="alunoSelecionado" class="dialog-content">
+    <form [formGroup]="editarAlunoForm" (ngSubmit)="editarAluno()">
+      <div class="p-fluid p-formgrid grid">
+        <div class="field col-12 md:col-9">
+          <label for="nome" class="font-semibold">Nome*</label>
+          <input formControlName="nome" id="nome" pInputText required />
+        </div>
+        <div class="field col-12 md:col-3">
+          <label for="ra" class="font-semibold">RA*</label>
+          <input formControlName="ra" id="ra" pInputText />
+        </div>
+      </div>
+      <div class="p-grid p-formgrid grid">
+        <div class="field col-12 md:col-4">
+          <label for="dataNascimento" class="font-semibold">Data de Nascimento*</label>
+          <input formControlName="dataNascimento" pInputText id="dataNascimento" type="date" required />
+        </div>
+        <div class="field col-12 md:col-4">
+          <label for="cpf" class="font-semibold">CPF*</label>
+          <p-inputMask formControlName="cpf" mask="999.999.999-99" id="cpf" name="cpf" />
+        </div>
+        <div class="field col-12 md:col-4">
+          <label for="sexo" class="font-semibold">Sexo*</label>
+          <div class="flex flex-wrap gap-3 align-items-center">
+            <p-radioButton formControlName="sexo" name="sexo" value="F" inputId="feminino" />
+            <label for="feminino" class="ml-2">Feminino</label>
+            <p-radioButton formControlName="sexo" name="sexo" value="M" inputId="masculino" />
+            <label for="masculino" class="ml-2">Masculino</label>
+          </div>
+        </div>
+      </div>
+      <div class="p-grid p-formgrid grid">
+        <div class="field col-12 md:col-9">
+          <label for="nomeMae" class="font-semibold">Nome da Mãe*</label>
+          <input formControlName="nomeMae" pInputText id="nomeMae" autocomplete="off" required />
+        </div>
+        <div class="field col-12 md:col-3">
+          <label for="celular" class="font-semibold">Celular*</label>
+          <p-inputMask formControlName="celular" id="celular" type="text" mask="(99)99999-9999" />
+        </div>
+      </div>
+      <div class="p-grid p-formgrid grid">
+        <div class="field col-12 md:col-3">
+          <label for="cep" class="font-semibold">CEP*</label>
+          <p-inputMask formControlName="cep" id="cep" type="text" mask="99999-999" (change)="validarCep2()" />
+        </div>
+        <div class="field col-12 md:col-7">
+          <label for="logradouro" class="font-semibold">Logradouro*</label>
+          <input formControlName="logradouro" pInputText id="logradouro" type="text" />
+        </div>
+        <div class="field col-12 md:col-2">
+          <label for="numero" class="font-semibold">Número</label>
+          <input formControlName="numero" pInputText id="numero" type="text" />
+        </div>
+      </div>
+      <div class="p-grid p-formgrid grid">
+        <div class="field col-12 md:col-3">
+          <label for="bairro" class="font-semibold">Bairro*</label>
+          <input formControlName="bairro" pInputText id="bairro" type="text" />
+        </div>
+        <div class="field col-12 md:col-8">
+          <label for="cidade" class="font-semibold">Cidade*</label>
+          <input id="cidade" pInputText formControlName="cidade" type="text" />
+        </div>
+        <div class="field col-12 md:col-1">
+          <label for="uf" class="font-semibold">UF*</label>
+          <input formControlName="uf" pInputText id="uf" type="text" />
+        </div>
+      </div>
+      <div class="p-grid p-formgrid grid">
+        <div class="field col-12 md:col-4">
+          <label class="font-semibold">Raça*</label>
+          <p-dropdown [options]="racas" formControlName="raca" optionLabel="name" placeholder="Selecione uma raça" />
+        </div>
+        <div class="field col-12 md:col-4">
+          <label for="beneficiario" class="font-semibold">É beneficiário do Bolsa Família?*</label>
+          <div class="flex gap-3">
+            <p-radioButton formControlName="beneficiarioBF" name="beneficiarioBF" value="S" inputId="sim" />
+            <label for="sim" class="ml-2">Sim</label>
+            <p-radioButton formControlName="beneficiarioBF" name="beneficiarioBF" value="N" inputId="nao" />
+            <label for="nao" class="ml-2">Não</label>
+          </div>
+        </div>
+      </div>
+      <div class="p-col-12 button-group">
+        <p-button label="Cancelar" (onClick)="editarAlunoDialogVisivel = false" class="p-button-secondary"></p-button>
+        <p-button label="Editar" [loading]="loading" [disabled]="editarAlunoForm.invalid" type="submit"></p-button>
+      </div>
+    </form>
+  </div>
+</p-dialog>

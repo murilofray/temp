@@ -1,0 +1,106 @@
+<div class="escolas-container">
+  <div class="titulo-container">
+    <h2 class="titulo-escolas">Escolas</h2>
+    <button
+      pButton
+      label="Inserir"
+      icon="pi pi-plus"
+      class="p-button-sm p-button-sm ml-2"
+      (click)="goInserirEscola()"
+    ></button>
+  </div>
+
+  <p-table [value]="filteredEscolas" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left full-width">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterEscolas($event)"
+            placeholder="Pesquisar por Nome, CNPJ ou INEP"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome">Nome <p-sortIcon [field]="'nome'"></p-sortIcon></th>
+        <th pSortableColumn="cnpj">CNPJ <p-sortIcon [field]="'cnpj'"></p-sortIcon></th>
+        <th pSortableColumn="inep">INEP <p-sortIcon [field]="'inep'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-escola>
+      <tr>
+        <td>{{ escola.nome }}</td>
+        <td>
+          {{ formatarCnpj(escola.cnpj) }}
+        </td>
+        <td>{{ escola.inep }}</td>
+        <td>
+          <div class="flex justify-content-around align-items-center">
+            <button pButton type="button" label="Detalhes" (click)="showDialog(escola)"></button>
+            <button
+              pButton
+              type="button"
+              label="Editar"
+              (click)="goEditarEscola(escola)"
+              class="p-button-warning button-spacing"
+            ></button>
+            <button
+              pButton
+              type="button"
+              label="Deletar"
+              class="p-button-danger button-spacing"
+              (click)="confirmDelete(escola)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog header="Detalhes da Escola" [(visible)]="displayDialog" [style]="{ width: '70vw' }" modal="true">
+  <hr />
+  <div *ngIf="selectedEscola" class="dialog-content">
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Nome: </label>
+      <span>{{ selectedEscola.nome }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">CNPJ: </label>
+      <span>{{ formatarCnpj(selectedEscola.cnpj) }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">INEP: </label>
+      <span>{{ selectedEscola.inep }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Endereço: </label>
+      <span>{{ selectedEscola.endereco }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Email:</label>
+      <span>{{ selectedEscola.email }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold">Telefone(s):</label>
+      <div *ngFor="let telefone of selectedEscola.Telefone">
+        <span>{{ formatarTelefone(telefone.numero) }}</span>
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="button-group">
+    <button pButton type="button" label="Voltar" (click)="displayDialog = false" class="p-button-secondary"></button>
+  </div>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '30vw' }"></p-confirmDialog>
+
+<p-toast position="bottom-right"></p-toast>
+

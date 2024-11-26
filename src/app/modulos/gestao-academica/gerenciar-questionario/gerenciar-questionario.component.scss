@@ -1,0 +1,21 @@
+.titulo-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem; /* Espaçamento opcional abaixo do título e botão */
+}
+
+.titulo-questionarios {
+  margin: 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.note {
+  margin-top: 1rem; /* Espaçamento opcional acima do texto */
+  text-align: center;
+  opacity: 0.7;
+}
+

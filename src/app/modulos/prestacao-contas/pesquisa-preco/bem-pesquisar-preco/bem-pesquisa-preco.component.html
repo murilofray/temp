@@ -1,0 +1,1039 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Pesquisa de Preços</h2>
+  <h5 class="titulo-infos">{{ tituloPesquisa }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <!-- BOTÃO DE CRIAR BEM (ITEM) -->
+        <button *ngIf="!pesquisaCompleta"
+          pButton
+          pRipple
+          label="Adicionar Item"
+          icon="pi pi-plus"
+          class="p-button-success"
+          (click)="newBem()"
+        ></button>
+
+        <!-- BOTÃO DE EDITAR BEM (ITEM) -->
+        <button *ngIf="!pesquisaCompleta"
+          pButton
+          pRipple
+          label="Editar Item"
+          icon="pi pi-pencil"
+          class="p-button-info"
+          (click)="alterBem()"
+          [disabled]="!bemSelecionado"
+        ></button>
+
+        <!-- BOTÃO DE DELETAR BEM (ITEM) -->
+        <button *ngIf="!pesquisaCompleta"
+          pButton
+          pRipple
+          label="Deletar Item"
+          icon="pi pi-trash"
+          class="p-button-danger"
+          (click)="removeBem()"
+          [disabled]="!bemSelecionado"
+        ></button>
+
+        <!-- Botão de Consolidar -->
+        <button
+          *ngIf="permitirConsolidar"
+          pButton
+          pRipple
+          label="Consolidar"
+          icon="pi pi-check"
+          class="p-button-primary"
+          (click)="navigateToConsolidar()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-toolbar>
+  <p-toast></p-toast>
+  <app-pdf-viewer></app-pdf-viewer>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          #dt
+          [value]="listaBens"
+          styleClass="p-datatable-striped"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [paginator]="true"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+          [(selection)]="bemSelecionado"
+          selectionMode="single"
+          (onRowSelect)="onRowSelect($event)"
+          (onRowUnselect)="onRowUnselect($event)"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Descrição</th>
+              <th>Quantidade</th>
+
+              <!-- Cabeçalho do Proponente A -->
+              <th  class="cabecalhoProponentes">
+                Proponente A
+                <hr />
+                <ng-container *ngIf="proponentesTopo(0) as propA">
+                  <!-- Caso não exista um proponenteC -->
+                  <div *ngIf="!propA.existe; else existeProponente">
+                    <button
+                      pButton
+                      pRipple
+                      label="Adicionar"
+                      icon="pi pi-plus"
+                      class="p-button-outlined p-button-rounded p-button-success"
+                      (click)="newProponente(0)"
+                    ></button>
+                  </div>
+
+                  <!-- Caso exista um proponente A -->
+                  <ng-template #existeProponente>
+                    <div class="proponente-info">
+                      <div>{{ propA.nome }}</div>
+                      <div>{{ propA.doc }}</div>
+                    </div>
+                    <hr />
+
+                    <!-- Botões de ação para o proponente A -->
+                    <div class="center-buttons">
+                      <button
+                        pButton
+                        pRipple
+                        icon="pi pi-eye"
+                        class="p-button-outlined p-button-rounded p-button-info mr-2"
+                        (click)="viewProponente(propA.fornecedor)"
+                        pTooltip="Visualizar proponente"
+                        tooltipPosition="top"
+                      ></button>
+                      <button  *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        icon="pi pi-pencil"
+                        class="p-button-outlined p-button-rounded p-button-success mr-2"
+                        (click)="alterProponente(propA.fornecedor)"
+                        pTooltip="Editar Proponente"
+                        tooltipPosition="top"
+                      ></button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        icon="pi pi-trash"
+                        class="p-button-outlined p-button-rounded p-button-danger"
+                        (click)="removeProponente(propA.fornecedor)"
+                        pTooltip="Remover Proponente"
+                        tooltipPosition="top"
+                      ></button>
+                    </div>
+
+                    <hr />
+
+                    <!-- Caso haja um orçamento associado, apresentar os botões de visualizar e remover -->
+                    <div *ngIf="viewBotoesOrcamento('a'); else semOrcamento">
+                      <button
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-info mr-2"
+                        (click)="viewOrcamento('a')"
+                        pTooltip="Visualizar Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-eye"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-danger mr-2"
+                        (click)="removeOrcamento('a')"
+                        pTooltip="Remover Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-trash"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                    </div>
+
+                    <!-- Caso não haja um orçamento, apresentar o botão de adicionar -->
+                    <ng-template #semOrcamento>
+                      <button
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-success mr-2"
+                        (click)="addOrcamento('a')"
+                        pTooltip="Adicionar Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-plus"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                    </ng-template>
+                  </ng-template>
+                </ng-container>
+              </th>
+
+              <!-- Cabeçalho do Proponente B -->
+              <th class="cabecalhoProponentes">
+                Proponente B
+                <hr />
+                <ng-container *ngIf="proponentesTopo(1) as propB">
+                  <!-- Caso não exista um proponenteB -->
+                  <div *ngIf="!propB.existe; else existeProponente">
+                    <button
+                      pButton
+                      pRipple
+                      label="Adicionar"
+                      icon="pi pi-plus"
+                      class="p-button-outlined p-button-rounded p-button-success"
+                      (click)="newProponente(1)"
+                    ></button>
+                  </div>
+
+                  <!-- Caso exista um proponente B -->
+                  <ng-template #existeProponente>
+                    <div class="proponente-info">
+                      <div>{{ propB.nome }}</div>
+                      <div>{{ propB.doc }}</div>
+                    </div>
+                    <hr />
+
+                    <!-- Botões de ação para o proponente B -->
+                    <div class="center-buttons">
+                      <button
+                        pButton
+                        pRipple
+                        icon="pi pi-eye"
+                        class="p-button-outlined p-button-rounded p-button-info mr-2"
+                        (click)="viewProponente(propB.fornecedor)"
+                        pTooltip="Visualizar proponente"
+                        tooltipPosition="top"
+                      ></button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        icon="pi pi-pencil"
+                        class="p-button-outlined p-button-rounded p-button-success mr-2"
+                        (click)="alterProponente(propB.fornecedor)"
+                        pTooltip="Editar Proponente"
+                        tooltipPosition="top"
+                      ></button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        icon="pi pi-trash"
+                        class="p-button-outlined p-button-rounded p-button-danger"
+                        (click)="removeProponente(propB.fornecedor)"
+                        pTooltip="Remover Proponente"
+                        tooltipPosition="top"
+                      ></button>
+                    </div>
+
+                    <hr />
+
+                    <!-- Caso haja um orçamento associado, apresentar os botões de visualizar e remover -->
+                    <div *ngIf="viewBotoesOrcamento('b'); else semOrcamento">
+                      <button
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-info mr-2"
+                        (click)="viewOrcamento('b')"
+                        pTooltip="Visualizar Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-eye"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-danger mr-2"
+                        (click)="removeOrcamento('b')"
+                        pTooltip="Remover Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-trash"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                    </div>
+
+                    <!-- Caso não haja um orçamento, apresentar o botão de adicionar -->
+                    <ng-template #semOrcamento>
+                      <button
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-success mr-2"
+                        (click)="addOrcamento('b')"
+                        pTooltip="Adicionar Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-plus"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                    </ng-template>
+                  </ng-template>
+                </ng-container>
+              </th>
+
+              <!-- Cabeçalho do Proponente C -->
+              <th class="cabecalhoProponentes">
+                Proponente C
+                <hr />
+                <ng-container *ngIf="proponentesTopo(2) as propC">
+                  <!-- Caso não exista um proponenteC -->
+                  <div *ngIf="!propC.existe; else existeProponente">
+                    <button
+                      pButton
+                      pRipple
+                      label="Adicionar"
+                      icon="pi pi-plus"
+                      class="p-button-outlined p-button-rounded p-button-success"
+                      (click)="newProponente(2)"
+                    ></button>
+                  </div>
+
+                  <!-- Caso exista um proponente C -->
+                  <ng-template #existeProponente>
+                    <div class="proponente-info">
+                      <div>{{ propC.nome }}</div>
+                      <div>{{ propC.doc }}</div>
+                    </div>
+                    <hr />
+
+                    <!-- Botões de ação para o proponente C -->
+                    <div class="center-buttons">
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        icon="pi pi-eye"
+                        class="p-button-outlined p-button-rounded p-button-info mr-2"
+                        (click)="viewProponente(propC.fornecedor)"
+                        pTooltip="Visualizar proponente"
+                        tooltipPosition="top"
+                      ></button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        icon="pi pi-pencil"
+                        class="p-button-outlined p-button-rounded p-button-success mr-2"
+                        (click)="alterProponente(propC.fornecedor)"
+                        pTooltip="Editar Proponente"
+                        tooltipPosition="top"
+                      ></button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        icon="pi pi-trash"
+                        class="p-button-outlined p-button-rounded p-button-danger"
+                        (click)="removeProponente(propC.fornecedor)"
+                        pTooltip="Remover Proponente"
+                        tooltipPosition="top"
+                      ></button>
+                    </div>
+
+                    <hr />
+
+                    <!-- Caso haja um orçamento associado, apresentar os botões de visualizar e remover -->
+                    <div *ngIf="viewBotoesOrcamento('c'); else semOrcamento">
+                      <button
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-info mr-2"
+                        (click)="viewOrcamento('c')"
+                        pTooltip="Visualizar Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-eye"></span> <span class="pi pi-file-pdf"></span>
+                      </button>
+                      <button *ngIf="!pesquisaCompleta"
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-danger mr-2"
+                        (click)="removeOrcamento('c')"
+                        pTooltip="Remover Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-trash"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                    </div>
+
+                    <!-- Caso não haja um orçamento, apresentar o botão de adicionar -->
+                    <ng-template #semOrcamento>
+                      <button
+                        pButton
+                        pRipple
+                        class="p-button-outlined p-button-rounded p-button-success mr-2"
+                        (click)="addOrcamento('c')"
+                        pTooltip="Adicionar Orçamento"
+                        tooltipPosition="top"
+                      >
+                        <span class="pi pi-plus"></span>
+                        <span class="pi pi-file-pdf"></span>
+                      </button>
+                    </ng-template>
+                  </ng-template>
+                </ng-container>
+              </th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-bem>
+            <tr [pSelectableRow]="bem">
+              <td style="width: 20%; min-width: 10rem">
+                <span class="p-column-title">Descrição</span>
+                {{ bem.descricao }}
+              </td>
+
+              <td style="width: 5%; min-width: 10rem">
+                <span class="p-column-title">Quantidade</span>
+                {{ bem.quantidade }}
+              </td>
+
+              <!-- Proponente A -->
+              <td style="width: 25%; min-width: 12rem">
+                <span class="p-column-title">Proponente A</span>
+                <div *ngIf="proponentesTopo(0).existe">
+                  <div style="display: flex; align-items: center">
+                    <div>{{ valorProponente(bem, 0).valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</div>
+                    <button
+                      *ngIf="valorProponente(bem, 0).existe"
+                      pButton
+                      pRipple
+                      icon="pi pi-pencil"
+                      class="p-button-text p-button-sm"
+                      (click)="editarValor(bem, 0)"
+                      pTooltip="Editar valor"
+                      tooltipPosition="top"
+                    ></button>
+                    <button
+                      *ngIf="valorProponente(bem, 0).existe"
+                      pButton
+                      pRipple
+                      icon="pi pi-trash"
+                      class="p-button-text p-button-sm p-button-danger"
+                      (click)="removerValor(bem, 0)"
+                      style="margin-left: 0.5rem"
+                      pTooltip="Remover valor"
+                      tooltipPosition="top"
+                    ></button>
+                  </div>
+                  <!-- Deve ser cadastrado o valor do bem orçado -->
+                  <div *ngIf="!valorProponente(bem, 0).existe">
+                    <button
+                      pButton
+                      pRipple
+                      label="Adicionar valor"
+                      icon="pi pi-plus"
+                      class="p-button-outlined p-button-rounded p-button-success"
+                      (click)="novoValor(bem, 0)"
+                    ></button>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Proponente B -->
+              <td style="width: 25%; min-width: 12rem">
+                <span class="p-column-title">Proponente B</span>
+                <div *ngIf="proponentesTopo(1).existe">
+                  <div style="display: flex; align-items: center">
+                    <div>{{ valorProponente(bem, 1).valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</div>
+                    <button
+                      *ngIf="valorProponente(bem, 1).existe"
+                      pButton
+                      pRipple
+                      icon="pi pi-pencil"
+                      class="p-button-text p-button-sm"
+                      (click)="editarValor(bem, 1)"
+                      style="margin-left: 0.5rem"
+                      pTooltip="Editar valor"
+                      tooltipPosition="top"
+                    ></button>
+                    <button
+                      *ngIf="valorProponente(bem, 1).existe"
+                      pButton
+                      pRipple
+                      icon="pi pi-trash"
+                      class="p-button-text p-button-sm p-button-danger"
+                      (click)="removerValor(bem, 1)"
+                      style="margin-left: 0.5rem"
+                      pTooltip="Remover valor"
+                      tooltipPosition="top"
+                    ></button>
+                  </div>
+                  <!-- Deve ser cadastrado o valor do bem orçado -->
+                  <div *ngIf="!valorProponente(bem, 1).existe">
+                    <button
+                      pButton
+                      pRipple
+                      label="Adicionar valor"
+                      icon="pi pi-plus"
+                      class="p-button-outlined p-button-rounded p-button-success"
+                      (click)="novoValor(bem, 1)"
+                    ></button>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Proponente C -->
+              <td style="width: 25%; min-width: 12rem">
+                <span class="p-column-title">Proponente C</span>
+                <div *ngIf="proponentesTopo(2).existe">
+                  <div style="display: flex; align-items: center">
+                    <div>{{ valorProponente(bem, 2).valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</div>
+                    <button
+                      *ngIf="valorProponente(bem, 2).existe"
+                      pButton
+                      pRipple
+                      icon="pi pi-pencil"
+                      class="p-button-text p-button-sm"
+                      (click)="editarValor(bem, 2)"
+                      pTooltip="Editar valor"
+                      tooltipPosition="top"
+                    ></button>
+                    <button
+                      *ngIf="valorProponente(bem, 2).existe"
+                      pButton
+                      pRipple
+                      icon="pi pi-trash"
+                      class="p-button-text p-button-sm p-button-danger"
+                      (click)="removerValor(bem, 2)"
+                      style="margin-left: 0.5rem"
+                      pTooltip="Remover valor"
+                      tooltipPosition="top"
+                    ></button>
+                  </div>
+                  <!-- Deve ser cadastrado o valor do bem orçado -->
+                  <div *ngIf="!valorProponente(bem, 2).existe">
+                    <button
+                      pButton
+                      pRipple
+                      label="Adicionar valor"
+                      icon="pi pi-plus"
+                      class="p-button-outlined p-button-rounded p-button-success"
+                      (click)="novoValor(bem, 2)"
+                    ></button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog para Adicionar um Bem -->
+  <p-dialog
+    [(visible)]="bemDialog"
+    [style]="{ width: '15%' }"
+    header="Item"
+    [modal]="true"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="name">Descrição</label>
+        <input
+          type="text"
+          pInputText
+          id="name"
+          [(ngModel)]="bem.descricao"
+          required
+          autofocus
+          maxlength="60"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && !bem.descricao }"
+        />
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && !bem.descricao">Descrição é necessária.</small>
+      </div>
+
+      <div class="formgrid">
+        <div class="field">
+          <label for="quantiadade">Quantidade</label>
+          <p-inputNumber
+            [min]="0"
+            [showButtons]="true"
+            buttonLayout="horizontal"
+            inputId="horizontal"
+            decrementButtonClass="p-button"
+            incrementButtonClass="p-button"
+            incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus"
+            id="quantidade"
+            [(ngModel)]="bem.quantidade"
+          />
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && !bem.quantidade">Quantidade é necessária.</small>
+        </div>
+        <!-- Validação do Valor -->
+        <div *ngIf="submitted && !bem.quantidade" class="p-invalid">
+          <span>Quantidade é necessária.</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="submitedBem()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Deletar Bem -->
+  <p-dialog
+    [dismissableMask]="true"
+    [(visible)]="deleteBemDialog"
+    header="DELETAR"
+    [modal]="true"
+    [style]="{ width: '450px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="bemSelecionado"
+        >Tem certeza que deseja deletar: <br />
+        <ul>
+          <li>
+            <strong> {{ bemSelecionado.descricao }}</strong>
+          </li>
+          <li><Strong>Quantidade:</Strong> {{ bemSelecionado.quantidade }}</li>
+        </ul>
+      </span>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDelete()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          icon="pi pi-times"
+          class="p-button-info"
+          label="Cancelar"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog para Proponente -->
+  <p-dialog
+    [(visible)]="proponenteDialog"
+    header="Proponente"
+    [modal]="true"
+    [style]="{ width: '75%' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content" class="mb-1">
+      <!-- Primeira linha: CNPJ/CPF e nomes -->
+      <div class="p-formgrig grid">
+        <!-- CNPJ / CPF -->
+        <div class="field col">
+          <label for="cnpjCpfProponente">CNPJ / CPF</label>
+          <input
+            [readonly]="isViewMode"
+            [disabled]="isEditMode"
+            id="cnpjCpfProponente"
+            class="p-inputmask"
+            type="text"
+            pInputText
+            [(ngModel)]="proponenteDOC"
+            (input)="updateMask()"
+            (blur)="verificarFornecedor()"
+            autofocus
+            required
+            maxlength="14"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !proponenteDOC }"
+          />
+        </div>
+
+        <!-- Razão Social -->
+        <div class="field col">
+          <label for="razaoSocialProponente">Razão Social</label>
+          <input
+            id="razaoSocialProponente"
+            type="text"
+            pInputText
+            [(ngModel)]="crudProponente.razaoSocial"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do campo Razão Social -->
+          <div *ngIf="submitted && !crudProponente.razaoSocial" class="p-invalid">
+            <span>Informe uma Razão Social.</span>
+          </div>
+        </div>
+
+        <!-- Nome -->
+        <div class="field col">
+          <label for="nomeFantasiaProponente">Nome Fantasia</label>
+          <input
+            id="nomeFantasiaProponente"
+            type="text"
+            pInputText
+            [(ngModel)]="crudProponente.nomeFantasia"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do campo Nome Fantasia -->
+          <div *ngIf="submitted && !crudProponente.nomeFantasia" class="p-invalid">
+            <span>Informe um Nome Fantasia.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segunda linha: Cidade, Endereço e Responsável -->
+      <div class="p-formgrig grid">
+        <!-- Cidade -->
+        <div class="field col">
+          <label for="cidadeProponente ">Cidade</label>
+          <input
+            id="cidadeProponente"
+            type="text"
+            pInputText
+            [(ngModel)]="crudProponente.cidade"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação da cidade -->
+          <div *ngIf="submitted && !crudProponente.cidade" class="p-invalid">
+            <span>Informe uma cidade.</span>
+          </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="field col">
+          <label for="enderecoProponente">Endereço</label>
+          <input
+            id="enderecoProponente"
+            type="text"
+            placeholder="Lougradouro, 999"
+            pInputText
+            [(ngModel)]="crudProponente.endereco"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do endereço -->
+          <div *ngIf="submitted && !crudProponente.endereco" class="p-invalid">
+            <span>Informe um endereço.</span>
+          </div>
+        </div>
+
+        <!-- Responsável -->
+        <div class="field col">
+          <label for="responsavelProponente">Responsável</label>
+          <input
+            id="responsavelProponente"
+            type="text"
+            pInputText
+            [(ngModel)]="crudProponente.responsavel"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do responsável -->
+          <div *ngIf="submitted && !crudProponente.responsavel" class="p-invalid">
+            <span>Informe um responsável.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terceira linha: Telefone e Email -->
+      <div class="p-formgrig grid">
+        <!-- Telefone -->
+        <div class="field col md:col-4">
+          <label for="telefoneProponente">Telefone</label>
+          <p-inputMask
+            id="telefoneProponente"
+            [(ngModel)]="crudProponente.telefone"
+            mask="(99) 9?9999-9999"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !crudProponente.telefone }"
+          >
+          </p-inputMask>
+          <div *ngIf="submitted && !crudProponente.telefone" class="p-invalid">
+            <span>Informe um telefone válido</span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="field col">
+          <label for="emailProponente">Email</label>
+          <input
+            id="emailProponente"
+            type="email"
+            pInputText
+            [(ngModel)]="crudProponente.email"
+            [readonly]="isViewMode"
+            required
+            maxlength="60"
+            email
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !crudProponente.email }"
+          />
+          <div *ngIf="submitted && !crudProponente.email" class="p-invalid">
+            <span>Informe um email válido</span>
+          </div>
+          <div *ngIf="crudProponente.email && !validateEmail(crudProponente.email)" class="p-invalid">
+            <span>Informe um email válido</span>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="coletarDadosProponentes()"
+        ></button>
+        <button
+          *ngIf="isViewMode"
+          pButton
+          pRipple
+          label="Fechar"
+          icon="pi pi-times"
+          class="p-button-info"
+          (click)="hideDialog()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Remover Proponente -->
+  <p-dialog
+    [(visible)]="deleteProponenteDialog"
+    header="Confirmação"
+    [modal]="true"
+    [style]="{ width: '350px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+  >
+    <ng-template pTemplate="content">
+      <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span
+          >Tem certeza que deseja remover o proponente <b>{{ proponente.razaoSocial }}</b
+          >?</span
+        >
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDeleteProponente()"
+        ></button>
+        <button pButton pRipple icon="pi pi-times" class="p-button-info" label="Não" (click)="hideDialog()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog para adicionar Valor a proposta -->
+  <p-dialog
+    [(visible)]="valorDialog"
+    header="Valor do item"
+    [modal]="true"
+    [style]="{ width: '20%' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content" class="mb-1">
+      <!-- Primeira linha, apenas o valor -->
+      <div lass="p-formgrig grid">
+        <div class="field col">
+          <label for="valorProposta">Valor</label>
+          <p-inputNumber
+            [min]="0"
+            id="valorProposta"
+            [(ngModel)]="valorProposto"
+            mode="currency"
+            currency="BRL"
+            locale="pt-BR"
+          >
+          </p-inputNumber>
+          <!-- Validação do Valor -->
+          <div *ngIf="submitted && !valorProposto" class="ng-invalid ng-dirty">
+            <span>Valor é necessário.</span>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="adicionarValor()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Remover Valor de Proponente -->
+  <p-dialog
+    [(visible)]="deleteValorDialog"
+    header="Confirmação"
+    [modal]="true"
+    [style]="{ width: '350px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+  >
+    <ng-template pTemplate="content">
+      <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span>Tem certeza que deseja remover este valor?</span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDeleteValor()"
+        ></button>
+        <button pButton pRipple icon="pi pi-times" class="p-button-info" label="Não" (click)="hideDialog()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    header="Adicionar Orçamento"
+    [(visible)]="dialogOrcamento"
+    [modal]="true"
+    [style]="{ width: '750px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content" class="mb-1">
+      <!-- Campo de arquivo -->
+      <label for="upload">Arquivo</label>
+      <p-fileUpload
+        name="file"
+        id="upload"
+        (onSelect)="onFileSelected($event)"
+        chooseLabel="Escolher"
+        uploadLabel="Enviar"
+        cancelLabel="Cancelar"
+        [auto]="true"
+        accept="application/pdf"
+        required
+      >
+      </p-fileUpload>
+      <!-- Validação do campo de upload -->
+      <div *ngIf="submitted && !uploadedFile.documentoScanId" class="p-invalid">
+        <span>Anexe um arquivo.</span>
+      </div>
+    </ng-template>
+
+    <!-- Botões de Ação -->
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          *ngIf="isViewMode"
+          pButton
+          pRipple
+          label="Fechar"
+          icon="pi pi-times"
+          class="p-button-info"
+          (click)="hideDialog()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="submitOrcamento()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+  <p-confirmDialog></p-confirmDialog>
+</div>

@@ -1,0 +1,28 @@
+.button-group {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.titulo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.laudo-button {
+  margin-bottom: 10px;
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap; /* Permite que os botões se movam para a linha seguinte se não houver espaço suficiente */
+  gap: 10px; /* Espaço entre os botões */
+}
+
+.anexo{
+  margin-left: 8px;
+}

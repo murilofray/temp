@@ -1,0 +1,135 @@
+<div class="questionarios-container">
+  <div class="titulo-container">
+    <h2 class="titulo-questionarios">Questionários</h2>
+    <div>
+      <button
+        pButton
+        label="Novo questionário"
+        icon="pi pi-plus"
+        class="p-button-sm p-button-sm ml-2"
+        (click)="goInserirQuestionario()"
+      ></button>
+    </div>
+  </div>
+
+  <p-table [value]="filteredQuestionarios" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left full-width">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterQuestionarios($event)"
+            placeholder="Pesquisar por descrição, data de criação ou nome do servidor"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="descricao">Descrição <p-sortIcon [field]="'descricao'"></p-sortIcon></th>
+        <th pSortableColumn="dataCriacao">Data de criação <p-sortIcon [field]="'dataCriacao'"></p-sortIcon></th>
+        <th pSortableColumn="servidor">Servidor <p-sortIcon [field]="'servidor'"></p-sortIcon></th>
+        <th pSortableColumn="nPerguntas">N° perguntas <p-sortIcon [field]="'nPerguntas'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-questionario>
+      <tr>
+        <td>{{ questionario.descricao }}</td>
+        <td>{{ formatarData(questionario.dataCriacao) }}</td>
+        <td>{{ questionario.Servidor.nome }}</td>
+        <td>{{ questionario.Pergunta.length }}</td>
+        <td>
+          <div class="flex justify-content-around align-items-center">
+            <button pButton type="button" label="Detalhes" (click)="showDialog(questionario)"></button>
+            <button
+              pButton
+              type="button"
+              class="p-button-warning button-spacing"
+              [disabled]="questionario.Pergunta[0].Resposta.length != 0"
+              title="Não é possível editar questionários com respostas"
+              (click)="goEditarQuestionario(questionario)"
+            >
+              {{ questionario.Pergunta[0].Resposta.length == 0 ? 'Editar' : 'Respondido' }}
+            </button>
+            <button
+              pButton
+              type="button"
+              class="p-button-danger button-spacing"
+              [disabled]="questionario.Pergunta[0].Resposta.length != 0"
+              title="Não é possível editar questionários com respostas"
+              (click)="confirmDelete(questionario)"
+            >
+              {{ questionario.Pergunta[0].Resposta.length == 0 ? 'Deletar' : 'Respondido' }}
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <p class="note">Questionários respondido não podem ser editados ou deletados!</p>
+</div>
+
+<p-dialog header="Detalhes do questionário" [(visible)]="displayDialog" [style]="{ width: '70vw' }" modal="true">
+  <hr />
+  <div *ngIf="selectedQuestionario" class="dialog-content">
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Descrição: </label>
+      <span>{{ selectedQuestionario.descricao }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Data de criação: </label>
+      <span>{{ formatarData(selectedQuestionario.dataCriacao) }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Servidor: </label>
+      <span>{{ selectedQuestionario.Servidor.nome }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Número de perguntas: </label>
+      <span>{{ selectedQuestionario.Pergunta.length }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Número de respostas: </label>
+      <span>{{ selectedQuestionario.Pergunta[0].Resposta.length }} {{ ' ' }}</span>
+      <a *ngIf="selectedQuestionario.Pergunta[0].Resposta.length != 0" class="p-button-text">(Abrir respostas)</a>
+    </div>
+    <hr />
+    <div class="field" *ngIf="selectedQuestionario.Pergunta?.length">
+      <label style="font-weight: bold; padding-right: 4px"
+        >Questões ({{ selectedQuestionario.Pergunta.length }}):
+      </label>
+      <div *ngFor="let pergunta of selectedQuestionario.Pergunta; let i = index">
+        <div>
+          <span>#{{ i + 1 }}: {{ pergunta.descricao }}</span>
+        </div>
+        <div>
+          <span>(Resposta: {{ formatarTipoQuestao(pergunta.tipo) }})</span>
+        </div>
+        <div *ngFor="let opcao of pergunta.Opcao">
+          <span>- {{ opcao.descricao }}</span>
+        </div>
+        <br />
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="button-group flex justify-content-between">
+    <button pButton type="button" label="Voltar" (click)="displayDialog = false" class="p-button-secondary"></button>
+    <button
+      pButton
+      type="button"
+      label="Copiar (Duplicar)"
+      class="p-button-primary"
+      (click)="goClonarQuestionario(selectedQuestionario)"
+    ></button>
+  </div>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '30vw' }"></p-confirmDialog>
+
+<p-toast position="bottom-right"></p-toast>
+

@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "Angular.ng-template",
+    "prisma.prisma",
+    "rangav.vscode-thunder-client",
+    "EditorConfig.EditorConfig",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint"
+  ]
+}

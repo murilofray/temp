@@ -1,0 +1,182 @@
+<p-toast></p-toast>
+
+<div class="servidor-container">
+  <h2>Cadastro de Servidor</h2>
+
+  <form (ngSubmit)="onSubmit()" #cadastrarServidorForm="ngForm">
+    <div align="center">
+      <h4>Informações Obrigatórias</h4>
+    </div>
+
+    <div class="three-fields-row">
+      <div class="form-group">
+        <label for="nome">Nome *</label>
+        <input type="text" [(ngModel)]="newServidor.nome" pInputText id="nome" name="nome" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="text" [(ngModel)]="newServidor.email" pInputText id="email" name="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="rg">RG *</label>
+        <input pInputText [(ngModel)]="newServidor.rg" id="rg" name="rg" required 
+       pattern="^\d{1,11}$" maxlength="11" (keypress)="allowOnlyNumbers($event)" />
+      </div>
+
+      
+    </div>
+
+    <div class="three-fields-row">
+      
+      <div class="form-group">
+        <label for="nivel">Nível de Acesso *</label>
+        <p-multiSelect
+          id="nivel"
+          [options]="niveisAcesso"
+          [(ngModel)]="niveisSelecionados"
+          optionLabel="descricao"
+          placeholder="Selecionar Níveis de Acesso"
+          (onChange)="onNiveisChange()"
+          name="niveisAcesso"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="cpf">CPF *</label>
+        <p-inputMask [(ngModel)]="newServidor.cpf" mask="999.999.999-99" id="cpf" name="cpf" required />
+      </div>
+
+      <div class="form-group">
+        <label for="dataContratacao">Data de Contratação *</label>
+        <p-calendar
+          [(ngModel)]="newServidor.dataContratacao"
+          id="dataContratacao"
+          name="dataContratacao"
+          dateFormat="dd/mm/yy"
+          [maxDate]="today"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="three-fields-row"></div>
+
+    <div class="three-fields-row">
+      <div class="form-group">
+        <label for="senha">Senha *</label>
+        <p-password id="senha" [(ngModel)]="newServidor.senha" name="senha" />
+      </div>
+
+      <div class="form-group">
+        <label for="senha">Confirmar Senha *</label>
+        <p-password id="senha" [(ngModel)]="confirmarSenha" name="senha" />
+      </div>
+
+      <!-- <div class="form-group">
+        <label for="escolaId">Escola ID *</label>
+        <p-inputNumber [(ngModel)]="newServidor.escolaId" id="escolaId" name="escolaId" required />
+      </div> -->
+
+      <div class="form-group">
+        <label for="escolaId">Escolha uma Escola *</label>
+        <p-dropdown
+          id="escolaId"
+          [options]="escolas"
+          [(ngModel)]="newServidor.escolaId"
+          optionLabel="nome" 
+          optionValue="id" 
+          placeholder="Selecionar Escola"
+          name="escolaId"
+          required
+        ></p-dropdown>
+      </div>
+
+    </div>
+
+    <div align="center">
+      <br />
+      <h4>Informações Opcionais</h4>
+    </div>
+
+    <div class="two-fields-row">
+      <div class="form-group">
+        <label for="categoria">Categoria</label>
+        <input type="text" [(ngModel)]="newServidor.categoria" pInputText id="categoria" name="categoria" required />
+      </div>
+
+      <div class="form-group">
+        <label for="grau">Grau</label>
+        <input type="text" [(ngModel)]="newServidor.grau" pInputText id="grau" name="grau" required />
+      </div>
+    </div>
+
+    <div class="two-fields-row">
+      <div class="form-group">
+        <label for="pontuacaoAnual">Pontuação Anual</label>
+        <p-inputNumber [(ngModel)]="newServidor.pontuacaoAnual" id="pontuacaoAnual" name="pontuacaoAnual" required />
+      </div>
+
+      <div class="form-group">
+        <label for="pontuacaoAssiduidade">Pontuação Assiduidade</label>
+        <p-inputNumber
+          [(ngModel)]="newServidor.pontuacaoAssiduidade"
+          id="pontuacaoAssiduidade"
+          name="pontuacaoAssiduidade"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="two-fields-row">
+      <!-- <div class="form-group">
+        <label for="dataUltimaAssiduidade">Data de Última Progressão por Assiduidade</label>
+        <p-calendar
+          [(ngModel)]="newServidor.dataUltimaAssiduidade"
+          id="dataUltimaAssiduidade"
+          name="dataUltimaAssiduidade"
+          dateFormat="dd/mm/yy"
+          [maxDate]="today"
+          required
+        />
+      </div> -->
+
+      <div class="form-group">
+        <label for="anoDaUltimaProgressaoPorAssiduidade">Ano da Última Progressão por Assiduidade</label>
+        <input pInputText [(ngModel)]="newServidor.anoDaUltimaProgressaoPorAssiduidade" id="anoDaUltimaProgressaoPorAssiduidade" name="anoDaUltimaProgressaoPorAssiduidade"
+       pattern="^\d{1,11}$" maxlength="4" (keypress)="allowOnlyNumbers($event)" />
+      </div>
+
+      <!-- <div class="form-group">
+        <label for="dataUltimoTitulo">Data de Última Progressão por Títulos</label>
+        <p-calendar
+          [(ngModel)]="newServidor.dataUltimoTitulo"
+          id="dataUltimoTitulo"
+          name="dataUltimoTitulo"
+          dateFormat="dd/mm/yy"
+          [maxDate]="today"
+          required
+        />
+      </div> -->
+
+      <div class="form-group">
+        <label for="anoDaUltimaProgressaoPorTitulo">Ano da Última Progressão por Título</label>
+        <input pInputText [(ngModel)]="newServidor.anoDaUltimaProgressaoPorTitulo" id="anoDaUltimaProgressaoPorTitulo" name="anoDaUltimaProgressaoPorTitulo"
+       pattern="^\d{1,11}$" maxlength="4" (keypress)="allowOnlyNumbers($event)" />
+      </div>
+
+      <div class="form-group">
+        <label for="anoDoUltimoQuinquenio">Ano do Último Quinquênio</label>
+        <input pInputText [(ngModel)]="newServidor.anoDoUltimoQuinquenio" id="anoDoUltimoQuinquenio" name="anoDoUltimoQuinquenio"
+       pattern="^\d{1,11}$" maxlength="4" (keypress)="allowOnlyNumbers($event)" />
+      </div>
+
+    </div>
+
+    <div class="button-container">
+      <button type="submit" [disabled]="isInvalid()" pButton label="Cadastrar" class="p-button-primary"></button>
+      <button pButton label="Voltar" class="p-button-danger" (click)="navigateToListaServidores()"></button>
+    </div>
+  </form>
+</div>

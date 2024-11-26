@@ -1,0 +1,240 @@
+/* Estilo geral da Sidebar */
+:host ::ng-deep .p-sidebar {
+  background-color: #ffffff !important; /* Cor de fundo branca */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important; /* Sombra para dar destaque */
+  border-right: 1px solid #e0e0e0 !important; /* Borda sutil à direita */
+}
+
+/* Título do Menu */
+.menu-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin: 20px 10px;
+}
+
+/* Texto "Cadastro" */
+.cadastro-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  margin: 10px 10px;
+}
+
+/* Estilo dos botões */
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px;
+}
+
+:host ::ng-deep .menu-buttons .p-button {
+  width: 100% !important;
+  justify-content: flex-start; /* Alinha o texto à esquerda */
+  padding: 10px 15px;
+  background-color: #007bff !important; /* Cor de fundo azul */
+  border: none; /* Remove a borda */
+  border-radius: 5px; /* Arredondamento */
+  color: white !important;
+  font-weight: bold;
+  transition: background-color 0.3s ease; /* Efeito de transição ao passar o mouse */
+}
+
+:host ::ng-deep .menu-buttons .p-button:hover {
+  background-color: #0056b3 !important; /* Cor de fundo ao passar o mouse */
+}
+
+:host ::ng-deep .menu-buttons .p-button:focus {
+  box-shadow: 0 0 0 2px #0056b3 !important; /* Destaque ao focar */
+}
+
+/* Ícone de fechamento da Sidebar */
+:host ::ng-deep .p-sidebar-close {
+  font-size: 1.5rem;
+  color: #555 !important; /* Cor do ícone de fechamento */
+  transition: color 0.3s ease;
+}
+
+:host ::ng-deep .p-sidebar-close:hover {
+  color: #007bff !important; /* Cor do ícone de fechamento ao passar o mouse */
+}
+
+/* Estilo geral do container da Home */
+.home-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Estilo para cada card de PDDE */
+.pdde-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo do conteúdo de cada card */
+.pdde-card-content {
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo da imagem do logo */
+.pdde-logo {
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
+  border-radius: 8px;
+}
+
+/* Estilo das informações do PDDE */
+.pdde-info {
+  text-align: left;
+}
+
+.pdde-info h3 {
+  margin: 0 0 5px;
+}
+
+.pdde-financial-info {
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+}
+
+/* Estilização dos botões dentro de cada card */
+.pdde-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.p-button {
+  padding: 10px 20px !important;
+}
+
+/* Garantir que o botão para abrir a Sidebar fique visível */
+button.p-button.p-button-text {
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  z-index: 1000 !important; /* Maior prioridade para o z-index */
+}
+
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #333;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.modal-actions .btn-save {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal-actions .btn-save:hover {
+  background-color: #218838;
+}
+
+.modal-actions .btn-cancel {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal-actions .btn-cancel:hover {
+  background-color: #dc3545;
+}
+
+/* Estilização para o <select> */
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  appearance: none; /* Remove o estilo padrão do navegador */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none; /* Remove o contorno ao focar */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+/* Estilo ao focar no <select> */
+select:focus {
+  border-color: #66afe9;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
+}
+
+/* Ajuste do placeholder para o primeiro <option> */
+select option:first-child {
+  color: #999;
+}
+

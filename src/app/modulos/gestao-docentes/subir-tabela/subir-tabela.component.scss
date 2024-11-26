@@ -1,0 +1,14 @@
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+
+  h2 {
+    margin-bottom: 20px;
+  }
+
+  input[type='file'] {
+    margin-bottom: 10px;
+  }
+}

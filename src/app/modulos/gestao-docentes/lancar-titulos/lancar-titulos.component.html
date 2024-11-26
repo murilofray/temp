@@ -1,0 +1,239 @@
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Lançar Títulos</h2>
+
+  <!-- Botão para abrir o modal de cadastro -->
+  <div class="flex">
+    <button
+      pButton
+      type="button"
+      label="Lançar Título"
+      (click)="openModal()"
+      class="p-button-success ml-auto"
+    ></button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        (input)="filterTitulosByNome($event)"
+        placeholder="Pesquisar por Nome"
+        class="p-inputtext p-component p-element"
+      />
+    </span>
+
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input
+        pInputText
+        type="text"
+        (input)="filterTitulosByInstituicao($event)"
+        placeholder="Pesquisar por Instituição"
+        class="p-inputtext p-component p-element"
+      />
+    </span>
+
+    <select (change)="filterTitulosByTipo($event)" class="tipo-select">
+      <option value="">Todos os Tipos</option>
+      <option
+        *ngFor="let categoria of categoriasCertificado"
+        [value]="categoria.id"
+      >
+        {{ categoria.nome }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Modal para Lançar Novo Título -->
+  <p-dialog
+    header="Lançar Novo Título"
+    [(visible)]="isModalOpen"
+    [style]="{ width: '60vw' }"
+    modal="true"
+  >
+    <form [formGroup]="tituloForm" (ngSubmit)="createTitulo()">
+      <div class="field">
+        <label for="servidorId">Servidor:</label>
+        <p>{{ servidorNome }}</p>
+        <input
+          type="hidden"
+          formControlName="servidorId"
+          [value]="servidorId"
+        />
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="documento">Documento:</label>
+          <input type="file" (change)="onFileSelected($event)" />
+        </div>
+
+        <div class="field">
+          <label for="nome">Nome:</label>
+          <input
+            type="text"
+            pInputText
+            formControlName="nome"
+            placeholder="Digite o nome"
+          />
+          <div
+            *ngIf="
+              tituloForm.get('nome')?.invalid && tituloForm.get('nome')?.touched
+            "
+            class="error-message"
+          >
+            Nome é obrigatório.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="instituicao">Instituição:</label>
+          <input
+            type="text"
+            pInputText
+            formControlName="instituicao"
+            placeholder="Digite a instituição"
+          />
+          <div
+            *ngIf="
+              tituloForm.get('instituicao')?.invalid &&
+              tituloForm.get('instituicao')?.touched
+            "
+            class="error-message"
+          >
+            Instituição é obrigatória.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="tipoId">Categoria:</label>
+          <p-dropdown
+            formControlName="tipoId"
+            [options]="categoriasCertificado"
+            optionLabel="nome"
+            optionValue="id"
+            placeholder="Selecione a Categoria"
+          ></p-dropdown>
+          <div
+            *ngIf="
+              tituloForm.get('tipoId')?.invalid &&
+              tituloForm.get('tipoId')?.touched
+            "
+            class="error-message"
+          >
+            Categoria é obrigatória.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cargaHoraria">Carga Horária:</label>
+          <input
+            type="number"
+            pInputText
+            formControlName="cargaHoraria"
+            placeholder="Digite a carga horária"
+          />
+          <div
+            *ngIf="
+              tituloForm.get('cargaHoraria')?.invalid &&
+              tituloForm.get('cargaHoraria')?.touched
+            "
+            class="error-message"
+          >
+            Carga Horária é obrigatória e deve ser maior que 0.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="dataConclusao">Data de Conclusão:</label>
+          <input type="date" formControlName="dataConclusao" pInputText />
+          <div
+            *ngIf="
+              tituloForm.get('dataConclusao')?.invalid &&
+              tituloForm.get('dataConclusao')?.touched
+            "
+            class="error-message"
+          >
+            Data de Conclusão é obrigatória.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="validade">Validade:</label>
+          <input type="date" formControlName="validade" pInputText />
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button
+          type="button"
+          (click)="closeModal()"
+          pButton
+          label="Cancelar"
+          class="p-button-secondary"
+        ></button>
+        <button
+          type="submit"
+          pButton
+          label="Salvar"
+          [disabled]="tituloForm.invalid"
+          class="p-button-success"
+        ></button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- Tabela para exibir os Títulos -->
+  <p-table
+    [value]="filteredTitulos"
+    [paginator]="true"
+    [rows]="10"
+    [sortMode]="'multiple'"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome">
+          Nome
+          <p-sortIcon field="nome"></p-sortIcon>
+        </th>
+        <th pSortableColumn="instituicao">
+          Instituição
+          <p-sortIcon field="instituicao"></p-sortIcon>
+        </th>
+        <th pSortableColumn="tipoId">
+          Categoria
+          <p-sortIcon field="tipoId"></p-sortIcon>
+        </th>
+        <th pSortableColumn="cargaHoraria">
+          Carga Horária
+          <p-sortIcon field="cargaHoraria"></p-sortIcon>
+        </th>
+        <th pSortableColumn="pontos">
+          Pontos
+          <p-sortIcon field="pontos"></p-sortIcon>
+        </th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-titulo>
+      <tr>
+        <td>{{ titulo.nome }}</td>
+        <td>{{ titulo.instituicao }}</td>
+        <td>{{ getCategoriaNome(titulo.tipoId) }}</td>
+        <td>{{ titulo.cargaHoraria }}</td>
+        <td>{{ titulo.pontos }}</td>
+        <td>
+          <button
+            pButton
+            type="button"
+            (click)="verDocumento(titulo.documentoScanId)"
+            label="Ver Documento"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

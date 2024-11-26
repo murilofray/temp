@@ -1,0 +1,182 @@
+<p-toast></p-toast>
+<div class="perfil-container">
+    <!-- <p-card> -->
+        
+    <div align="center"><h2>Informações do Servidor</h2></div>
+    <!-- <div class="informations-container">
+      <p>
+        <strong>Nome:</strong> {{ servidor.nome }}<br />
+        <strong>RG:</strong> {{ servidor.rg }}<br />
+        <strong>CPF:</strong> {{ formatarCPF(servidor.cpf) }}<br />
+        <strong>Categoria:</strong> {{ servidor.categoria }}<br />
+        <strong>Grau:</strong> {{ servidor.grau }}<br />
+        <strong>Data de Contratação:</strong> {{ servidor.dataContratacao | date:'dd/MM/yyyy' }}<br />
+        <strong>Email:</strong> {{ servidor.email }}
+      </p>
+    </div> -->
+    <div class="two-fields-row">
+        <div class="form-group">
+            <label for="nome">Nome:</label>
+            <input type="text" [(ngModel)]="servidor.nome" pInputText id="nome" name="nome" readonly />
+        </div>
+
+        <div class="form-group">
+            <label for="rg">RG:</label>
+            <input type="text" [(ngModel)]="servidor.rg" pInputText id="rg" name="rg" readonly />
+        </div>
+    </div>
+
+    <div class="two-fields-row">
+        <div class="form-group">
+            <label for="cpf">CPF:</label>
+            <input type="text" [value]="formatarCPF(servidor.cpf)" pInputText id="cpf" name="cpf" readonly />
+        </div>
+
+        <div class="form-group">
+            <label for="categoria">Categoria:</label>
+            <input type="text" [(ngModel)]="servidor.categoria" pInputText id="categoria" name="categoria" readonly />
+        </div>
+    </div>
+
+    <div class="two-fields-row">
+        <div class="form-group">
+            <label for="grau">Grau:</label>
+            <input type="text" [(ngModel)]="servidor.grau" pInputText id="grau" name="grau" readonly />
+        </div>
+
+        <div class="form-group">
+            <label for="dataContratacao">Data de Contratação:</label>
+            <input type="text" [value]="servidor.dataContratacao | date:'dd/MM/yyyy'" pInputText id="dataContratacao" name="dataContratacao" readonly />
+        </div>
+    </div>
+
+    <div class="two-fields-row">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="text" [(ngModel)]="servidor.email" pInputText id="email" name="email" readonly />
+        </div>
+
+    </div>
+
+    <div class="reset-password-button" align="center">
+        <button pButton type="button" label="Redefinir Senha" icon="pi pi-refresh" (click)="mostrarDialogoRedefinirSenha()"></button>
+    </div>
+
+
+    <div class="escola-container" *ngIf="escola?.id !== null">
+        <div align="center"><h3>Informações da Escola</h3></div>
+        <!-- <div class="informations-container">
+        <p>
+            <strong>Nome:</strong> {{ escola.nome }}<br />
+            <strong>CNPJ:</strong> {{ formatarCNPJ(escola.cnpj) }}<br />
+            <strong>INEP:</strong> {{ escola.inep }}<br />
+            <strong>Ato de Criação:</strong> {{ escola.atoCriacao }}<br />
+            <strong>Endereço:</strong> {{ escola.endereco }}<br />
+            <strong>Email:</strong> {{ escola.email }}
+        </p>
+        </div> -->
+
+        <div class="two-fields-row">
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" [(ngModel)]="escola.nome" pInputText id="nome" name="nome" readonly />
+            </div>
+    
+            <div class="form-group">
+                <label for="cnpj">CNPJ:</label>
+                <input type="text" [value]="formatarCNPJ(escola.cnpj)" pInputText id="cnpj" name="cnpj" readonly />
+            </div>
+        </div>
+    
+        <div class="two-fields-row">
+            <div class="form-group">
+                <label for="inep">INEP:</label>
+                <input type="text" [(ngModel)]="escola.inep" pInputText id="inep" name="inep" readonly />
+            </div>
+    
+            <div class="form-group">
+                <label for="atoCriacao">Ato de Criação:</label>
+                <input type="text" [(ngModel)]="escola.atoCriacao" pInputText id="atoCriacao" name="atoCriacao" readonly />
+            </div>
+        </div>
+    
+        <div class="two-fields-row">
+            <div class="form-group">
+                <label for="endereco">Endereço:</label>
+                <input type="text" [(ngModel)]="escola.endereco" pInputText id="endereco" name="endereco" readonly />
+            </div>
+    
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" [value]="escola.email" pInputText id="email" name="email" readonly />
+            </div>
+        </div>
+
+
+    </div>
+    
+    <div class="pontuacao-container" *ngIf="servidor.pontuacaoAnual !== 0 || servidor.pontuacaoAssiduidade !== 0">
+      <div align="center"><h3>Pontuações</h3></div>
+      
+      <p-table [value]="[{ chave: 'Pontuação Anual', valor: servidor.pontuacaoAnual }, { chave: 'Pontuação Assiduidade', valor: servidor.pontuacaoAssiduidade }]">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Tipo</th>
+            <th>Valor</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-pontuacao>
+          <tr>
+            <td>{{ pontuacao.chave }}</td>
+            <td>{{ pontuacao.valor }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+    <div class="datas-container" *ngIf="servidor.anoDaUltimaProgressaoPorAssiduidade !== null || servidor.anoDaUltimaProgressaoPorTitulo !== null || servidor.anoDoUltimoQuinquenio !== null">
+      <div align="center"><h3>Datas Recentes</h3></div>
+      <!-- <div class="informations-container">
+        <p>
+            <strong>Última Progressão por Assiduidade:</strong> {{ servidor.dataUltimaAssiduidade | date:'dd/MM/yyyy' }}<br />
+            <strong>Última Progressão por Título:</strong> {{ servidor.dataUltimoTitulo | date:'dd/MM/yyyy' }}
+        </p>
+        </div> -->
+
+        <div class="two-fields-row">
+            <div class="form-group">
+                <label for="endereco">Ano da Última Progressão por Assiduidade:</label>
+                <input type="text" [value]="servidor.anoDaUltimaProgressaoPorAssiduidade " pInputText id="endereco" name="endereco" readonly />
+            </div>
+    
+            <div class="form-group">
+                <label for="email">Ano da Última Progressão por Título:</label>
+                <input type="text" [value]="servidor.anoDaUltimaProgressaoPorTitulo" pInputText id="email" name="email" readonly />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Ano do Último Quinquênio:</label>
+                <input type="text" [value]="servidor.anoDoUltimoQuinquenio" pInputText id="email" name="email" readonly />
+            </div>
+        </div>
+    </div>
+    <!-- </p-card> -->
+
+     <!-- Modal de Redefinir Senha -->
+     <p-dialog header="Redefinir Senha" [(visible)]="dialogoRedefinirSenhaVisivel" [modal]="true" [style]="{'height': '40%', 'max-width': '90vw'}">
+        <div class="form-field">
+            <label for="senhaAtual">Senha Atual: </label>
+            <p-password id="senhaAtual" [(ngModel)]="senhaAtual"/>
+        </div>
+        <div class="form-field">
+            <label for="novaSenha">Nova Senha: </label>
+            <p-password id="novaSenha" [(ngModel)]="novaSenha"/>
+        </div>
+        <div class="form-field">
+            <label for="confirmarNovaSenha">Confirmar Nova Senha: </label>
+            <p-password id="confirmarNovaSenha" [(ngModel)]="confirmarNovaSenha"/>
+        </div>
+        
+            <button pButton type="button" label="Redefinir" icon="pi pi-check" (click)="redefinirSenha()"></button>
+    </p-dialog>
+
+  </div>

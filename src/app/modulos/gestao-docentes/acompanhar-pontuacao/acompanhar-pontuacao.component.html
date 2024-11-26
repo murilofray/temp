@@ -1,0 +1,45 @@
+<div class="pontuacao-container">
+  <h2 class="titulo-pagina">Minha Pontuação para Progressão</h2>
+
+  <!-- Tabela de Assiduidade -->
+  <div class="tabela-container">
+    <p-table [value]="assiduidadeData" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Assiduidade</th>
+          <th>Pontos</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-assiduidade>
+        <tr>
+          <td>{{ assiduidade.ano }}</td>
+          <td>{{ assiduidade.pontos }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <p class="tabela-footer">Faltam 0 ano(s) e 0 ponto(s) para próxima progressão</p>
+    <button pButton type="button" label="Minhas Ocorrências" icon="pi pi-eye" class="botao-ocorrencias"></button>
+  </div>
+
+  <!-- Tabela de Títulos -->
+  <div class="tabela-container">
+    <p-table [value]="titulosData" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Títulos</th>
+          <th>Pontos</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-titulo>
+        <tr>
+          <td>{{ titulo.nome }}</td>
+          <td>{{ titulo.pontos }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <p class="tabela-footer">
+      Faltam {{ anosRestantes }} ano(s) e {{ pontosRestantesTitulos }} ponto(s) para próxima progressão
+    </p>
+    <button pButton type="button" label="Meus Títulos" icon="pi pi-eye" class="botao-titulos"></button>
+  </div>
+</div>

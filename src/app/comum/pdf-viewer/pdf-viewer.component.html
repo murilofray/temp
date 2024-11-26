@@ -1,0 +1,10 @@
+<div *ngIf="displayDialog" class="pdf-dialog-overlay" (click)="closeDialog()">
+    <div class="pdf-dialog-content" (click)="$event.stopPropagation()">
+      <iframe
+        *ngIf="pdfUrl"
+        [src]="sanitizer.bypassSecurityTrustResourceUrl(pdfUrl)"
+        width="100%"
+        height="100%"
+      ></iframe>
+    </div>
+  </div>

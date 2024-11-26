@@ -1,0 +1,120 @@
+<p-toast></p-toast>
+<div class="configuracoes-container">
+    <h2 class="titulo-configuracoes">Configurações do Sistema</h2>
+
+    <!-- Exibição da configuração -->
+    <div *ngIf="configuracoes.length > 0; else criarConfig">
+        <p><strong>Ano Letivo:</strong> <i> {{ configuracoes[0]?.anoLetivo }} </i></p>
+        <p><strong>Início do ano letivo:</strong> <i> {{ configuracoes[0]?.anoLetivo }} </i></p>
+        <p><strong>Fim do ano letivo:</strong> <i> {{ configuracoes[0]?.anoLetivo }} </i></p>
+        <p><strong>Tempo Mínimo de Assiduidade:</strong> <i> {{ configuracoes[0]?.tempoMinimoAssiduidade }} anos </i> </p>
+        <p><strong>Tempo Mínimo de Título:</strong> <i> {{ configuracoes[0]?.tempoMinimoTitulo }} anos </i> </p>
+        
+        <!-- Botão de edição -->
+        <button pButton type="button" label="Editar" class="p-button-warning"
+            (click)="mostrarDialogEditar(configuracoes[0])"></button>
+    </div>
+
+    <!-- Caso não haja configuração, mostrar o botão de criação -->
+    <ng-template #criarConfig>
+        <p>Nenhuma configuração encontrada.</p>
+        <button pButton type="button" label="Criar" class="p-button-success" (click)="mostrarDialogCriar()"></button>
+    </ng-template>
+</div>
+
+<!-- Dialog de edição -->
+<p-dialog header="Editar Configuração" [(visible)]="displayDialogEditar" [style]="{ width: '50vw' }" modal="true">
+    <div *ngIf="selectedConfiguracao" class="dialog-content">
+        <div class="p-fluid">
+            <div class="field">
+                <label for="anoLetivo">Ano Letivo:</label>
+                <p-calendar [(ngModel)]="selectedYear" [yearNavigator]="true" [view]="'year'" [showIcon]="true"
+                    [showButtonBar]="true" [monthNavigator]="false" [dateFormat]="'yy'" class="custom-calendar">
+                </p-calendar>
+            </div>
+
+            <div class="field">
+                <label for="tempoMinimoAssiduidade">Tempo Mínimo de Assiduidade:</label>
+                <input [(ngModel)]="selectedConfiguracao.tempoMinimoAssiduidade" id="tempoMinimoAssiduidade"
+                    type="number" pInputText />
+            </div>
+
+            <div class="field">
+                <label for="tempoMinimoTitulo">Tempo Mínimo de Título:</label>
+                <input [(ngModel)]="selectedConfiguracao.tempoMinimoTitulo" id="tempoMinimoTitulo" type="number"
+                    pInputText />
+            </div>
+
+            <div class="field">
+                <label for="cursoHorasMinimas">Cursos:</label>
+                <div class="p-grid p-align-center">
+                    <div class="p-col-6">
+                        <p-inputNumber [(ngModel)]="selectedConfiguracao.cursoHorasMinimas" inputId="minmax"
+                        mode="decimal" [min]="0" [max]="100" placeholder="Horas Mínimas" />
+                    </div>
+                    <div class="p-col-6">
+                        <p-inputNumber [(ngModel)]="selectedConfiguracao.cursoValidade" inputId="minmax"
+                        mode="decimal" [min]="0" [max]="100" placeholder="Validade (anos)" />
+                    </div>
+                    <div class="p-col-6">
+                        <p-inputNumber [(ngModel)]="selectedConfiguracao.CursoHorasMaxAno" inputId="minmax"
+                        mode="decimal" [min]="0" [max]="100" placeholder="Máximo Horas no Ano" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button pButton label="Salvar" (click)="salvarConfiguracao()" class="p-button-success"></button>
+                <button pButton label="Cancelar" (click)="displayDialogEditar = false"
+                    class="p-button-secondary"></button>
+            </div>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Dialog de criação -->
+<p-dialog header="Criar Configuração" [(visible)]="displayDialogCriar" [style]="{ width: '50vw' }" modal="true">
+    <div class="dialog-content">
+        <div class="p-fluid">
+            <div class="field">
+                <label for="anoLetivo">Ano Letivo*:</label>
+                <p-calendar [(ngModel)]="selectedYear" [yearNavigator]="true" [view]="'year'" [showIcon]="true"
+                    [showButtonBar]="true" [monthNavigator]="false" [dateFormat]="'yy'" class="custom-calendar">
+                </p-calendar>
+            </div>
+            <div class="field">
+                <label for="tempoMinimoAssiduidade">Tempo Mínimo de Assiduidade (anos)*:</label>
+                <p-inputNumber [(ngModel)]="newConfiguracao.tempoMinimoAssiduidade" inputId="minmax" mode="decimal" [min]="0" [max]="100" />
+            </div>
+
+            <div class="field">
+                <label for="tempoMinimoTitulo">Tempo Mínimo de Título (anos)*:</label>
+                <p-inputNumber [(ngModel)]="newConfiguracao.tempoMinimoTitulo" inputId="minmax" mode="decimal" [min]="0" [max]="100" />
+            </div>
+
+            <div class="field">
+                <label for="cursoHorasMinimas">Cursos*:</label>
+                <div class="p-grid p-align-center">
+                    <div class="p-col-6">
+                        <p-inputNumber [(ngModel)]="newConfiguracao.cursoHorasMinimas" inputId="minmax"
+                        mode="decimal" [min]="0" [max]="100000" placeholder="Horas Mínimas" />
+                    </div>
+                    <div class="p-col-6">
+                        <p-inputNumber [(ngModel)]="newConfiguracao.cursoValidade" inputId="minmax"
+                        mode="decimal" [min]="0" [max]="100" placeholder="Validade (anos)" />
+                    </div>
+                    <div class="p-col-6">
+                        <p-inputNumber [(ngModel)]="newConfiguracao.CursoHorasMaxAno" inputId="minmax"
+                        mode="decimal" [min]="0" [max]="100000" placeholder="Máximo Horas no Ano" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button pButton label="Criar" (click)="criarConfiguracao()" class="p-button-success"></button>
+                <button pButton label="Cancelar" (click)="displayDialogCriar = false"
+                    class="p-button-secondary"></button>
+            </div>
+        </div>
+    </div>
+</p-dialog>

@@ -1,0 +1,125 @@
+<div class="questionarios-container">
+  <div class="titulo-container">
+    <div>
+      <h2 class="titulo-questionarios">Alunos</h2>
+      <span>Turma: {{ alunos[0]?.Turma.ano }} {{ alunos[0]?.Turma.letra }} ({{ alunos[0]?.Turma.anoLetivo }})</span>
+    </div>
+  </div>
+
+  <p-table [value]="filteredAlunos" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left full-width">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterAlunos($event)"
+            placeholder="Pesquisar por nome ou nome da mãe"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome">Nome <p-sortIcon [field]="'nome'"></p-sortIcon></th>
+        <th pSortableColumn="nomeMae">Nome da mãe<p-sortIcon [field]="'nomeMae'"></p-sortIcon></th>
+        <!-- <th pSortableColumn="ra">RA <p-sortIcon [field]="'ra'"></p-sortIcon></th> -->
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-aluno>
+      <tr>
+        <td>{{ aluno.nome }}</td>
+        <td>{{ aluno.nomeMae }}</td>
+        <!-- <td>{{ aluno.ra }}</td> -->
+        <td>
+          <div class="flex justify-content-around align-items-center">
+            <button pButton type="button" label="Visualizar" (click)="showDialog(aluno)"></button>
+            <button pButton type="button" label="Questionários" (click)="goToQuestionarioAluno(aluno)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <br />
+  <div class="flex justify-content-center align-items-center">
+    <button pButton type="button" label="Voltar" class="p-button-secondary" (click)="goBack()"></button>
+  </div>
+</div>
+
+<p-dialog header="Dados do aluno" [(visible)]="displayDialog" [style]="{ width: '50vw' }" modal="true">
+  <hr />
+  <div *ngIf="selectedAluno" class="dialog-content">
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Nome: </label>
+      <span>{{ selectedAluno.nome }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Turma: </label>
+      <span>{{ selectedAluno.Turma.ano }} - {{ selectedAluno.Turma.letra }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Nome da mãe: </label>
+      <span>{{ selectedAluno.nomeMae }}</span>
+    </div>
+    <!-- <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">RA: </label>
+      <span>{{ selectedAluno.ra }}</span>
+    </div> -->
+    <!-- <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">CPF: </label>
+      <span>{{ selectedAluno.cpf }}</span>
+    </div> -->
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Idade: </label>
+      <span>{{ calcularIdade(selectedAluno.dataNascimento) }} ({{ formatarData(selectedAluno.dataNascimento) }})</span>
+    </div>
+    <!-- <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Beneficiário do bolsa família: </label>
+      <span>{{ selectedAluno.ra ? 'Sim' : 'Não' }}</span>
+    </div> -->
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Celular: </label>
+      <span>{{ selectedAluno.celular }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Raça: </label>
+      <span>{{ selectedAluno.raca }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Sexo: </label>
+      <span>{{ selectedAluno.sexo == 'M' ? 'Masculino' : 'Feminino' }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Endereço: </label>
+      <span
+        >{{ selectedAluno.logradouro }}, {{ selectedAluno.numero }}, {{ selectedAluno.bairro }},
+        {{ selectedAluno.cidade }}, {{ selectedAluno.uf }}, CEP: {{ selectedAluno.cep }}</span
+      >
+    </div>
+    <hr />
+    <div class="field" *ngIf="selectedAluno.AlunoAlergia?.length">
+      <label style="font-weight: bold; padding-right: 4px">Alergias ({{ selectedAluno.AlunoAlergia?.length }}): </label>
+      <div *ngFor="let alergia of selectedAluno.AlunoAlergia; let i = index">
+        <span
+          >- {{ alergia.Alergia.descricao }} <strong>({{ alergia.Alergia.tipoAlergia.descricao }})</strong></span
+        >
+        <br />
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="button-group flex justify-content-between">
+    <button pButton type="button" label="Voltar" (click)="displayDialog = false" class="p-button-secondary"></button>
+    <button
+      pButton
+      type="button"
+      label="Questionários respondidos"
+      (click)="goToQuestionarioAluno(selectedAluno)"
+      class="p-button-primary"
+    ></button>
+  </div>
+</p-dialog>
+

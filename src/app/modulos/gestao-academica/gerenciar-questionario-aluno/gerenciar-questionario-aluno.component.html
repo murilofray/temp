@@ -1,0 +1,185 @@
+<div class="questionarios-container">
+  <div class="titulo-container">
+    <div>
+      <h2 class="titulo-questionarios">Questionários respondidos</h2>
+      <span class="titulo-questionarios"
+        >Aluno: {{ aluno?.nome }} - Turma: {{ aluno?.Turma.ano }} {{ aluno?.Turma.letra }} ({{
+          aluno?.Turma.anoLetivo
+        }})</span
+      >
+    </div>
+    <div>
+      <button
+        pButton
+        label="Nova resposta (questionário)"
+        icon="pi pi-plus"
+        class="p-button-sm p-button-sm ml-2"
+        (click)="showDialogNovoQuestionario()"
+      ></button>
+    </div>
+  </div>
+
+  <p-table [value]="filteredQuestionariosAluno" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left full-width">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterQuestionariosAluno($event)"
+            placeholder="Pesquisar por descrição, data ou nome do professor"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="descricao">Descrição <p-sortIcon [field]="'descricao'"></p-sortIcon></th>
+        <th pSortableColumn="dataCriacao">Data<p-sortIcon [field]="'dataCriacao'"></p-sortIcon></th>
+        <th pSortableColumn="servidor">Servidor <p-sortIcon [field]="'servidor'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-questionario>
+      <tr>
+        <td>{{ questionario.Resposta[0].Pergunta.Questionario.descricao }}</td>
+        <td>{{ formatarData(questionario.createdAt) }}</td>
+        <td>{{ questionario.Servidor.nome }}</td>
+        <td>
+          <div class="flex justify-content-around align-items-center">
+            <button pButton type="button" label="Visualizar" (click)="showDialog(questionario)"></button>
+            <!-- <button
+              pButton
+              type="button"
+              class="p-button-warning button-spacing"
+              (click)="goEditarQuestionario(questionario)"
+            >
+              Editar
+            </button> -->
+            <button
+              pButton
+              type="button"
+              class="p-button-danger button-spacing"
+              [disabled]="questionario.Servidor.id != servidorId"
+              (click)="confirmDelete(questionario)"
+            >
+              Deletar
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <br />
+  <div class="flex justify-content-center align-items-center">
+    <button pButton type="button" label="Voltar" class="p-button-secondary" (click)="goBack()"></button>
+  </div>
+</div>
+
+<p-dialog header="Detalhes do questionário" [(visible)]="displayDialog" [style]="{ width: '70vw' }" modal="true">
+  <hr />
+  <div *ngIf="selectedQuestionarioAluno" class="dialog-content">
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Descrição: </label>
+      <span>{{ selectedQuestionarioAluno.Resposta[0].Pergunta.Questionario.descricao }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Data de criação: </label>
+      <span>{{ formatarData(selectedQuestionarioAluno.createdAt) }}</span>
+    </div>
+    <div class="field">
+      <label style="font-weight: bold; padding-right: 4px">Servidor: </label>
+      <span>{{ selectedQuestionarioAluno.Servidor.nome }}</span>
+    </div>
+    <hr />
+    <div class="field" *ngIf="selectedQuestionarioAluno.Resposta?.length">
+      <label style="font-weight: bold; padding-right: 4px"
+        >Questões ({{ selectedQuestionarioAluno.Resposta.length }}):
+      </label>
+      <div *ngFor="let resposta of selectedQuestionarioAluno.Resposta.reverse(); let i = index">
+        <div>
+          <span>#{{ i + 1 }}: {{ resposta.Pergunta.descricao }}</span>
+        </div>
+        <div *ngIf="resposta.resposta != null">
+          <span>{{ resposta.resposta }}</span>
+        </div>
+        <div *ngIf="resposta.resposta == null">
+          <div *ngFor="let opcao of resposta.OpcaoResposta">
+            <span>- {{ opcao.respostaDescricao }}</span>
+          </div>
+        </div>
+
+        <br />
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="button-group flex justify-content-between">
+    <button pButton type="button" label="Voltar" (click)="displayDialog = false" class="p-button-secondary"></button>
+    <button pButton type="button" label="Baixar (PDF)" class="p-button-primary"></button>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Escolha do questionário"
+  [(visible)]="displayDialogNovoQuestionario"
+  [style]="{ width: '70vw' }"
+  modal="true"
+>
+  <hr />
+  <p-table [value]="filteredQuestionarios" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <span class="p-input-icon-left full-width">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterQuestionarios($event)"
+            placeholder="Pesquisar por descrição, data de criação ou nome do servidor"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="descricao">Descrição <p-sortIcon [field]="'descricao'"></p-sortIcon></th>
+        <th pSortableColumn="dataCriacao">Data de criação <p-sortIcon [field]="'dataCriacao'"></p-sortIcon></th>
+        <th pSortableColumn="servidor">Servidor <p-sortIcon [field]="'servidor'"></p-sortIcon></th>
+        <th pSortableColumn="nPerguntas">N° perguntas <p-sortIcon [field]="'nPerguntas'"></p-sortIcon></th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-questionario>
+      <tr>
+        <td>{{ questionario.descricao }}</td>
+        <td>{{ formatarData(questionario.dataCriacao) }}</td>
+        <td>{{ questionario.Servidor.nome }}</td>
+        <td>{{ questionario.Pergunta.length }}</td>
+        <td>
+          <div class="flex justify-content-around align-items-center">
+            <button pButton type="button" label="Responder" (click)="goInserirQuestionarioAluno(questionario)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <hr />
+  <div class="button-group flex justify-content-between">
+    <button
+      pButton
+      type="button"
+      label="Voltar"
+      (click)="displayDialogNovoQuestionario = false"
+      class="p-button-secondary"
+    ></button>
+  </div>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '30vw' }"></p-confirmDialog>
+
+<p-toast position="bottom-right"></p-toast>
+

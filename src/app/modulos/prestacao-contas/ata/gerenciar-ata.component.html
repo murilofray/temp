@@ -1,0 +1,217 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Últimas atas</h2>
+  <h5 class="titulo-infos">{{ infoEscola }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+        *ngIf="nivelAcessoId === NivelAcessoEnum.DIRETOR.id || nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id || nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id || nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id"
+          pButton
+          pRipple
+          label="Cadastrar Ata"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          (click)="openAtaModal()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            pInputText
+            placeholder="Pesquisar por título"
+            (input)="filterAtas($event)"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <!-- Modal para cadastro de Ata -->
+  <p-dialog
+    header="Cadastrar Nova Ata"
+    [(visible)]="isAtaModalOpen"
+    modal="true"
+    [style]="{ width: '500px', minHeight: '600px' }"
+  >
+    <ng-template pTemplate="content">
+      <div class="modal-content">
+        <!-- Mensagem de erro -->
+        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+        <!-- Formulário -->
+        <form [formGroup]="ataForm" (ngSubmit)="createAta()" class="form-container">
+          <div class="form-row">
+            <div class="form-group col-md-8">
+              <label for="titulo">Título</label>
+              <input type="text" pInputText formControlName="titulo" />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="data">Data</label>
+              <p-calendar
+                formControlName="data"
+                dateFormat="dd/mm/yy"
+                [maxDate]="maxDate"
+                [appendTo]="'body'"
+              ></p-calendar>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="documento">Documento</label>
+            <input type="file" (change)="onFileSelected($event)" />
+          </div>
+
+          <div class="form-group">
+            <label for="ata">Ata</label>
+            <textarea pInputTextarea formControlName="ata"></textarea>
+          </div>
+
+          <!-- Botões -->
+          <div class="modal-actions">
+            <button
+              pButton
+              pRipple
+              class="p-button-success"
+              label="Salvar"
+              icon="pi pi-check"
+              type="submit"
+              [disabled]="ataForm.invalid"
+            ></button>
+            <button
+              pButton
+              pRipple
+              class="p-button-warning"
+              label="Cancelar"
+              icon="pi pi-times"
+              type="button"
+              (click)="closeAtaModal()"
+            ></button>
+          </div>
+        </form>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Modal Editar Ata -->
+  <p-dialog
+    header="Editar Ata"
+    [(visible)]="isEditModalOpen"
+    modal="true"
+    [style]="{ width: '500px', minHeight: '600px' }"
+  >
+    <ng-template pTemplate="content">
+      <div class="modal-content">
+        <form [formGroup]="editAtaForm" (ngSubmit)="updateAta()" class="form-container">
+          <div class="form-row">
+            <div class="form-group col-md-8">
+              <label for="titulo">Título</label>
+              <input type="text" pInputText formControlName="titulo" />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="data">Data</label>
+              <p-calendar
+                formControlName="data"
+                dateFormat="dd/mm/yy"
+                [maxDate]="maxDate"
+                [appendTo]="'body'"
+              ></p-calendar>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="documento">Documento</label>
+            <input type="file" (change)="onFileSelected($event)" />
+            <!-- Exibe o nome do arquivo existente -->
+            <p *ngIf="existingFileName" class="file-name">
+              Arquivo atual: {{ existingFileName }}
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="ata">Ata</label>
+            <textarea pInputTextarea formControlName="ata"></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button pButton pRipple class="p-button-success" label="Salvar" icon="pi pi-check" type="submit"></button>
+            <button
+              pButton
+              pRipple
+              class="p-button-warning"
+              label="Cancelar"
+              icon="pi pi-times"
+              type="button"
+              (click)="closeEditModal()"
+            ></button>
+          </div>
+        </form>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Tabela e paginação para Atas -->
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          styleClass="p-datatable-striped"
+          [value]="filteredAtas"
+          [paginator]="true"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} atas"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="data">Data<p-sortIcon [field]="'data'"></p-sortIcon></th>
+              <th pSortableColumn="titulo">Título <p-sortIcon [field]="'titulo'"></p-sortIcon></th>
+              <th>Ações</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-ata>
+            <tr>
+              <td class="p-wrap-text" style="width: 20%; min-width: 10rem">{{ ata.data | date: 'dd/MM/yyyy' }}</td>
+              <td class="p-wrap-text" style="width: 50%; min-width: 10rem">{{ ata.titulo }}</td>
+              <td class="p-wrap-text" style="width: 30%; min-width: 10rem">
+                <div class="button-group">
+                  <button
+                    pButton
+                    pRipple
+                    class="p-button-outlined p-button-rounded p-button-info mr-2"
+                    label="Visualizar"
+                    icon="pi pi-eye"
+                    pTooltip="Visualizar o Documento"
+                    tooltipPosition="top"
+                    (click)="verDocumento(ata)"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    class="p-button-outlined p-button-rounded p-button-success mr-2"
+                    *ngIf="nivelAcessoId === NivelAcessoEnum.DIRETOR.id || nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id || nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id || nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id"
+                  label="Editar"
+                    icon="pi pi-pencil"
+                    pTooltip="Editar a ata"
+                    tooltipPosition="top"
+                    (click)="openEditModal(ata)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,378 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Fornecedores</h2>
+  <h5 class="titulo-infos">{{ infoPesquisas }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Novo Fornecedor"
+          icon="pi pi-plus"
+          class="p-button-success"
+          (click)="newFornecedor()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterFornecedores($event)"
+            placeholder="Pesquisar"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+  </p-toolbar>
+  <p-toast></p-toast>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          #dt
+          styleClass="p-datatable-striped"
+          [value]="fornecedoresFiltrados"
+          [columns]="cols"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [paginator]="true"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} fornecedores"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pColumn="razaoSocial">Razão Social</th>
+              <th pColumn="doc">CNPJ / CPF</th>
+              <th pColumn="fantasia">Nome Fantasia</th>
+              <th pColumn="endereco">Endereço</th>
+              <th pColumn="telefone">Telefone</th>
+              <th pColumn="email">E-mail</th>
+              <th pColumn="acoes">Ações</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-fornecedor>
+            <tr [pSelectableRow]="fornecedor">
+              <td class="p-wrap-text" style="width: 20%; min-width: 10rem">
+                <span class="p-column-title">Razão Social</span>
+                {{ fornecedor.razaoSocial }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 15%; min-width: 10rem">
+                <span class="p-column-title">CNPJ / CPF</span>
+                {{ apresentarDOC(fornecedor) }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 10%; min-width: 10rem">
+                <span class="p-column-title">Nome Fantasia</span>
+                {{ fornecedor.nomeFantasia }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 15%; min-width: 10rem">
+                <span class="p-column-title">Endereço</span>
+                {{ apresentarEndereco(fornecedor) }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 15%; min-width: 10rem">
+                <span class="p-column-title">Telefone</span>
+                {{ formatarTelefone(fornecedor.telefone) }}
+              </td>
+
+              <td class="p-wrap-text" style="width: 10%; min-width: 10rem">
+                <span class="p-column-title">Email</span>
+                {{ fornecedor.email }}
+              </td>
+
+              <!-- Ações -->
+              <td class="p-wrap-text" style="width: 15%; min-width: 12rem">
+                <span class="p-column-title">Ações</span>
+
+                <div>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-eye"
+                    class="p-button-outlined p-button-rounded p-button-help mr-2"
+                    (click)="viewFornecedor(fornecedor)"
+                    pTooltip="Visualizar fornecedor"
+                    tooltipPosition="top"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-pencil"
+                    class="p-button-outlined p-button-rounded p-button-success mr-2"
+                    (click)="alterFornecedor(fornecedor)"
+                    pTooltip="Editar Fornecedor"
+                    tooltipPosition="top"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-trash"
+                    class="p-button-outlined p-button-rounded p-button-danger"
+                    (click)="removeFornecedor(fornecedor)"
+                    pTooltip="Remover Fornecedor"
+                    tooltipPosition="top"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog para Fornecedor -->
+  <p-dialog
+    [(visible)]="fornecedorDialog"
+    header="Fornecedor"
+    [modal]="true"
+    [style]="{ width: '75%' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content" class="mb-1">
+      <!-- Primeira linha: CNPJ/CPF e nomes -->
+      <div class="p-formgrig grid">
+        <!-- CNPJ / CPF -->
+        <div class="field col">
+          <label for="cnpjCpfFornecedor">CNPJ / CPF</label>
+          <input
+            [readonly]="isViewMode"
+            [disabled]="isEditMode"
+            id="cnpjCpfFornecedor"
+            class="p-inputmask"
+            type="text"
+            pInputText
+            [(ngModel)]="fornecedorDOC"
+            (input)="updateMask()"
+            (blur)="verificarFornecedor()"
+            autofocus
+            required
+            maxlength="14"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !fornecedorDOC }"
+          />
+        </div>
+
+        <!-- Razão Social -->
+        <div class="field col">
+          <label for="razaoSocialFornecedor">Razão Social</label>
+          <input
+            id="razaoSocialFornecedor"
+            type="text"
+            pInputText
+            [(ngModel)]="crudFornecedor.razaoSocial"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do campo Razão Social -->
+          <div *ngIf="submitted && !crudFornecedor.razaoSocial" class="p-invalid">
+            <span>Informe uma Razão Social.</span>
+          </div>
+        </div>
+
+        <!-- Nome -->
+        <div class="field col">
+          <label for="nomeFantasiaFornecedor">Nome Fantasia</label>
+          <input
+            id="nomeFantasiaFornecedor"
+            type="text"
+            pInputText
+            [(ngModel)]="crudFornecedor.nomeFantasia"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do campo Nome Fantasia -->
+          <div *ngIf="submitted && !crudFornecedor.nomeFantasia" class="p-invalid">
+            <span>Informe um Nome Fantasia.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segunda linha: Cidade, Endereço e Responsável -->
+      <div class="p-formgrig grid">
+        <!-- Cidade -->
+        <div class="field col">
+          <label for="cidadeFornecedor ">Cidade</label>
+          <input
+            id="cidadeFornecedor"
+            type="text"
+            pInputText
+            [(ngModel)]="crudFornecedor.cidade"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação da cidade -->
+          <div *ngIf="submitted && !crudFornecedor.cidade" class="p-invalid">
+            <span>Informe uma cidade.</span>
+          </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="field col">
+          <label for="enderecoFornecedor">Endereço</label>
+          <input
+            id="enderecoFornecedor"
+            type="text"
+            placeholder="Lougradouro, 999"
+            pInputText
+            [(ngModel)]="crudFornecedor.endereco"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do endereço -->
+          <div *ngIf="submitted && !crudFornecedor.endereco" class="p-invalid">
+            <span>Informe um endereço.</span>
+          </div>
+        </div>
+
+        <!-- Responsável -->
+        <div class="field col">
+          <label for="responsavelFornecedor">Responsável</label>
+          <input
+            id="responsavelFornecedor"
+            type="text"
+            pInputText
+            [(ngModel)]="crudFornecedor.responsavel"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+          />
+          <!-- Validação do responsável -->
+          <div *ngIf="submitted && !crudFornecedor.responsavel" class="p-invalid">
+            <span>Informe um responsável.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terceira linha: Telefone e Email -->
+      <div class="p-formgrig grid">
+        <!-- Telefone -->
+        <div class="field col md:col-4">
+          <label for="telefoneFornecedor">Telefone</label>
+          <p-inputMask
+            id="telefoneFornecedor"
+            [(ngModel)]="crudFornecedor.telefone"
+            mask="(99) 9?9999-9999"
+            required
+            maxlength="60"
+            [readonly]="isViewMode"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !fornececrudFornecedordor.telefone }"
+          >
+          </p-inputMask>
+          <div *ngIf="submitted && !crudFornecedor.telefone" class="p-invalid">
+            <span>Informe um telefone válido</span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="field col">
+          <label for="emailFornecedor">Email</label>
+          <input
+            id="emailFornecedor"
+            type="email"
+            pInputText
+            [(ngModel)]="crudFornecedor.email"
+            [readonly]="isViewMode"
+            required
+            maxlength="60"
+            email
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !crudFornecedor.email }"
+          />
+          <div *ngIf="submitted && !fornecedor.email" class="p-invalid">
+            <span>Informe um email válido</span>
+          </div>
+          <div *ngIf="crudFornecedor.email && !validateEmail(crudFornecedor.email)" class="p-invalid">
+            <span>Informe um email válido</span>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="coletarDadosFornecedors()"
+        ></button>
+        <button
+          *ngIf="isViewMode"
+          pButton
+          pRipple
+          label="Fechar"
+          icon="pi pi-times"
+          class="p-button-info"
+          (click)="hideDialog()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Remover Fornecedor -->
+  <p-dialog
+    [(visible)]="deleteFornecedorDialog"
+    header="Confirmação"
+    [modal]="true"
+    [style]="{ width: '350px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+  >
+    <ng-template pTemplate="content">
+      <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span
+          >Tem certeza que deseja remover o Fornecedor <b>{{ fornecedor.razaoSocial }}</b
+          >? <br />
+          <br />
+          Esta operação afetará todas as unidades escolares.
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDeleteFornecedor()"
+        ></button>
+        <button pButton pRipple icon="pi pi-times" class="p-button-info" label="Não" (click)="hideDialog()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

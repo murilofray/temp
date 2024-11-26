@@ -1,0 +1,13 @@
+<p-toast></p-toast>
+
+<div>
+  <h2><strong>Quinquênio</strong></h2>
+
+  <div *ngIf="!erro">
+    <h2 *ngIf="!buscarInformacao()"> Faltam {{ anos }} anos para seu próximo quinquênio! </h2>
+    <h2 *ngIf="buscarInformacao()"> Esse ano seu quinquênio está disponível! </h2>  
+  </div>
+  <div *ngIf="erro">
+    <h2> Erro ao carregar informações. </h2>
+  </div>
+</div>

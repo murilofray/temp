@@ -1,0 +1,175 @@
+<p-toast></p-toast>
+<div class="tabela-container">
+    <h2 class="titulo-tabela">Gerenciamento de Turmas</h2>
+    <h5 class="titulo-infos"></h5>
+
+
+    <p-toolbar *ngIf="!isLoading">
+        <ng-template pTemplate="left">
+            <div class="my-2 toolbar-flex-spacing">
+                <button pButton pRipple label="Cadastrar" icon="pi pi-plus" class="p-button"
+                    (click)="isCadastrarTurmaOpen = true"></button>
+
+                <button *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ADMINISTRADOR])" pButton (click)="deletarTurmaDialog()" [disabled]="turmaSelecionada == null" type="button"
+                    label="Deletar" class="p-button-danger button-spacing mr-2"></button>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <div class="my-2 toolbar-flex-spacing">
+                <p-button [routerLink]="['/academico/realizar-matricula']" label="Realizar Matricula"></p-button>
+            </div>
+        </ng-template>
+
+        <!-- <ng-template pTemplate="right">
+            <div class="my-2 toolbar-flex-spacing">
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              pinputtext=""
+              type="text"
+              (input)="filterPesquisas($event)"
+              placeholder="Pesquisar"
+              class="p-inputtext p-component p-element w-full"
+            />
+          </span>
+        </div>
+        </ng-template> -->
+    </p-toolbar>
+
+    <p-dialog header="Cadastrar Turma" [(visible)]="isCadastrarTurmaOpen" modal="true" [style]="{ width: '400px' }">
+        <ng-template pTemplate="content">
+            <form [formGroup]="turmaForm" class="gap" (ngSubmit)="criarTurma()">
+                <div class="p-grid p-fluid p-formgrid grid">
+                    <div *ngIf="!isUserAdmin" class="field col-12 md:col-4 label">
+                        <label for="escola">Escola </label>
+                        <input id="escola" type="text" [disabled]="true" [value]="escola.nome" pInputText />
+                    </div>
+                    <div *ngIf="isUserAdmin" class="field col-12 md:col-4 label">
+                        <label for="escola">Escola </label>
+                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="escola"
+                            [options]="escolas" optionLabel="nome" optionValue="id"
+                            formControlName="escola" (onChange)="onDocenteChange($event)"></p-dropdown>
+                    </div>
+                    <div *ngIf="!isUserAdmin" class="field col-12 md:col-8 label">
+                        <label for="docente">Docente </label>
+                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="docente"
+                            [options]="docentesEscola" optionLabel="nome" optionValue="id"
+                            formControlName="docente"></p-dropdown>
+                    </div>
+                    <div *ngIf="isUserAdmin" class="field col-12 md:col-8 label">
+                        <label for="docente">Docente</label>
+                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="docente"
+                            [options]="docentesEscolaAdmin" optionLabel="nome" optionValue="id"
+                            formControlName="docente"></p-dropdown>
+                    </div>
+                </div>
+
+                <div class="p-grid p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-4 label">
+                        <label for="letra">Letra </label>
+                        <input id="letra" type="text" maxlength="1" pInputText formControlName="letra" />
+                    </div>
+                    <div class="field col-12 md:col-4 label">
+                        <label for="ano">Ano</label>
+                        <input id="ano" type="text" maxlength="5" pInputText formControlName="ano" />
+                    </div>
+                    <div class="field col-12 md:col-4 label">
+                        <label for="ano-letivo">Ano Letivo</label>
+                        <input id="ano-letivo" type="number" pInputText formControlName="anoLetivo" />
+                    </div>
+                </div>
+            </form>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <div class="dialog-footer-button">
+                <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-success" type="submit"
+                    [disabled]="turmaForm.invalid" (click)="criarTurma()"></button>
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-warning"
+                    (click)="isCadastrarTurmaOpen = false"></button>
+            </div>
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog header="Turma" [(visible)]="detalheTurmaVisivel" [style]="{ 'min-width': '40%' }" modal="true">
+        <div class="p-grid p-fluid p-formgrid grid" *ngIf="turmaDetalhes">
+            <div class="field col-12 md:col-4 label">
+                <label style="font-weight: bold;">Letra</label>
+                <p>{{turmaDetalhes.letra}}</p>
+            </div>
+            <div class="field col-12 md:col-4 label">
+                <label style="font-weight: bold;">Ano</label>
+                <p>{{turmaDetalhes.ano}}</p>
+            </div>
+            <div class="field col-12 md:col-4 label">
+                <label style="font-weight: bold;">Ano Letivo </label>
+                <p>{{turmaDetalhes.anoLetivo}}</p>
+            </div>
+            <div class="field col-12 md:col-10 label">
+                <label style="font-weight: bold;">Escola</label>
+                <p>{{turmaDetalhes.Escola.nome}}</p>
+            </div>
+        </div>
+        <div *ngIf="turmaDetalhesAlunos.length > 0">
+            <p-button [routerLink]="['/academico/gerenciar-alunos']" [style]="{ 'margin-bottom': '10px' }"
+                label="Gerenciar Alunos"></p-button>
+            <p-table [value]="turmaDetalhesAlunos" [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>RA</th>
+                        <th>Aluno</th>
+                        <th>Mãe</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-aluno>
+                    <tr>
+                        <td>{{ aluno.ra }}</td>
+                        <td>{{ aluno.nome }}</td>
+                        <td>{{ aluno.nomeMae }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </p-dialog>
+
+    <div class="grid">
+        <div class="col-12">
+            <div class="card">
+                <p-table #dt1 [value]="turmas" responsiveLayout="scroll" [paginator]="true" [rows]="10"
+                    [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+                    [rowHover]="true" dataKey="id" [(selection)]="turmaSelecionada" selectionMode="single">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Turma Id</th>
+                            <th>Escola</th>
+                            <th>Docente</th>
+                            <th>Letra</th>
+                            <th>Ano</th>
+                            <th>Ano Letivo</th>
+                            <th>Visualizar</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-turma>
+                        <tr [pSelectableRow]="turma">
+                            <td>{{ turma.id }}</td>
+                            <td>{{ turma.Escola.nome }}</td>
+                            <td>{{ turma.Servidor.nome }}</td>
+                            <td>{{ turma.letra }}</td>
+                            <td>{{ turma.ano }}</td>
+                            <td>{{ turma.anoLetivo }}</td>
+                            <td>
+                                <p-button label="Ver" (click)="detalhesTurma(turma)" icon="pi pi-eye"
+                                    class="p-button-text"></p-button>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </div>
+
+    <p-confirmDialog [style]="{ width: '450px' }" />
+</div>

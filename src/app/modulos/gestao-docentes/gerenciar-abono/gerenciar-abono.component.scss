@@ -1,0 +1,30 @@
+.margin-top {
+    margin-top: 15px;
+  }
+  
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+  
+      label {
+        font-weight: bold;
+      }
+  
+      .flex {
+        align-items: center;
+        gap: 10px;
+      }
+    }
+  }
+
+  :host ::ng-deep .p-toast {
+    z-index: 10000;
+  }
+  
+  

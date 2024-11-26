@@ -1,0 +1,118 @@
+<div class="escolas-container">
+  <h2 class="titulo-escolas">{{ escola.id != null ? 'Alterar escola' : 'Inserir escola' }}</h2>
+
+  <div class="form-container">
+    <!-- Nome -->
+    <div class="field">
+      <label for="nome">Nome*:</label>
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="escola.nome"
+        placeholder="Nome da Escola"
+        class="p-inputtext p-component p-element full-width"
+      />
+    </div>
+
+    <!-- CNPJ -->
+    <div class="field">
+      <label for="cnpj">CNPJ*:</label>
+      <p-inputMask
+        [(ngModel)]="escola.cnpj"
+        mask="99.999.999/9999-99"
+        placeholder="CNPJ"
+        class="full-width"
+        styleClass="w-full"
+      ></p-inputMask>
+    </div>
+
+    <!-- INEP -->
+    <div class="field">
+      <label for="inep">INEP*:</label>
+      <p-inputMask
+        [(ngModel)]="escola.inep"
+        mask="99999999"
+        placeholder="INEP"
+        class="full-width"
+        styleClass="w-full"
+      ></p-inputMask>
+    </div>
+
+    <!-- Endereço -->
+    <div class="field">
+      <label for="endereco">Endereço*:</label>
+      <textarea
+        rows="5"
+        cols="30"
+        pInputTextarea
+        [(ngModel)]="escola.endereco"
+        placeholder="Endereço da Escola"
+        class="p-inputtextarea p-inputtext p-component p-element full-width"
+      ></textarea>
+    </div>
+
+    <!-- Ato criação -->
+    <div class="field">
+      <label for="endereco">Ato criação*:</label>
+      <textarea
+        rows="5"
+        cols="30"
+        pInputTextarea
+        [(ngModel)]="escola.atoCriacao"
+        placeholder="Ato criação da Escola"
+        class="p-inputtextarea p-inputtext p-component p-element full-width"
+      ></textarea>
+    </div>
+
+    <!-- E-mail -->
+    <div class="field">
+      <label for="email">Email*:</label>
+      <input
+        type="email"
+        pInputText
+        [(ngModel)]="escola.email"
+        placeholder="Email da Escola"
+        class="p-inputtext p-component p-element full-width"
+      />
+    </div>
+
+    <!-- Telefones -->
+    <div class="field">
+      <label for="telefone">Telefones*:</label>
+      <div *ngFor="let telefone of telefones; let i = index; trackBy: trackByIndex" class="telefone-field">
+        <p-inputMask
+          [(ngModel)]="telefones[i]"
+          mask="(99) 99999-9999"
+          placeholder="Telefone"
+          class="telefone-input full-width"
+          styleClass="w-full"
+        ></p-inputMask>
+        <button pButton icon="pi pi-trash" class="p-button-text p-button-sm" (click)="removerTelefone(i)"></button>
+      </div>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-plus"
+        label="Adicionar Telefone"
+        class="p-button-sm p-button-outlined"
+        (click)="adicionarTelefone()"
+      ></button>
+    </div>
+
+    <!-- Botão de Enviar -->
+    <div class="button-group flex justify-between">
+      <button pButton type="button" label="Cancelar" class="p-button-outlined" (click)="cancelar()"></button>
+
+      <button
+        pButton
+        type="button"
+        label="{{ escola.id != null ? 'Alterar' : 'Inserir' }}"
+        class="p-button-primary"
+        (click)="enviarEscola()"
+      ></button>
+    </div>
+  </div>
+</div>
+
+<p-toast position="bottom-right"></p-toast>
+

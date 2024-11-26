@@ -1,0 +1,98 @@
+<p-toast></p-toast>
+<div class="tabela-container">
+    <h2 class="titulo-tabela">Transferência</h2>
+    <h5 class="titulo-infos"></h5>
+
+    <p-toolbar *ngIf="!isLoading">
+        <ng-template pTemplate="left">
+            <div class="my-2 toolbar-flex-spacing">
+                <button [disabled]="alunoSelecionado == null" pButton pRipple label="Realizar Transferência"
+                    icon="pi pi-plus" class="p-button" (click)="isRealizarTransferenciaDialogOpen = true"></button>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <div class="my-2 toolbar-flex-spacing">
+
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pinputtext="" type="text" (input)="dt1.filterGlobal($event.target.value, 'contains')"
+                        placeholder="Pesquisar por RA ou Nome" class="p-inputtext p-component p-element w-full" />
+                </span>
+            </div>
+        </ng-template>
+    </p-toolbar>
+
+    <div class="grid">
+        <div class="col-12">
+            <div class="card">
+                <p-table #dt1 [globalFilterFields]="['ra', 'nome']" [value]="alunosEscola" responsiveLayout="scroll"
+                    [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+                    [rowHover]="true" dataKey="id" [(selection)]="alunoSelecionado" selectionMode="single">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>RA</th>
+                            <th>Turma</th>
+                            <th>Nome</th>
+                            <th>Mãe</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-aluno>
+                        <tr [pSelectableRow]="aluno">
+                            <td>{{ aluno.ra }}</td>
+                            <td>{{ aluno.turmaDescricao }}</td>
+                            <td>{{ aluno.nome }}</td>
+                            <td>{{ aluno.nomeMae }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </div>
+
+    <p-confirmDialog #cd>
+        <ng-template let-confirmation pTemplate="footer">
+            <button type="button" pButton label="Transferir" class="p-button-danger p-button-text"
+                (click)="cd.accept()">
+            </button>
+            <button type="button" pButton label="Cancelar" class="p-button-text" (click)="cd.reject()">
+            </button>
+        </ng-template>
+    </p-confirmDialog>
+
+    <p-dialog header="Realizar Transferência" [(visible)]="isRealizarTransferenciaDialogOpen" modal="true"
+        [style]="{ width: '400px', height: '300px' }">
+        <ng-template pTemplate="content">
+            <div class="flex flex-column align-items-center justify-content-center h-full" style="height: 100%;">
+                <p class="mb-3 text-center">Você deseja realizar uma transferência externa (Fora do sistema municipal)?
+                </p>
+
+                <div class="flex flex-wrap gap-3 align-items-center">
+                    <div class="flex align-items-center">
+                        <p-radioButton name="pizza" value="externo" [(ngModel)]="transferenciaExterna" inputId="sim" />
+                        <label for="sim" class="ml-2">
+                            Sim
+                        </label>
+                    </div>
+
+                    <div class="flex align-items-center">
+                        <p-radioButton name="pizza" value="interno" [(ngModel)]="transferenciaExterna" inputId="nao" />
+                        <label for="nao" class="ml-2">
+                            Não
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <div class="dialog-footer-button">
+                <button pButton pRipple label="Transferir" icon="pi pi-check" class="p-button-success" type="submit"
+                    [disabled]="!alunoSelecionado || transferenciaExterna == null"
+                    (click)="realizarTransferenciaDialog()"></button>
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-warning"
+                    (click)="isRealizarTransferenciaDialogOpen = false; transferenciaExterna = null"></button>
+            </div>
+        </ng-template>
+    </p-dialog>
+</div>

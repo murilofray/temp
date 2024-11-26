@@ -1,0 +1,15 @@
+.label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.gap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.full {
+    height: 100%;
+}

@@ -1,0 +1,97 @@
+.perfil-container {
+    max-width: 80%;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  p-card {
+    padding: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    margin-top: 2rem;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    line-height: 1.5;
+    font-size: 1rem;
+  }
+  
+  p-table {
+    margin-top: 1rem;
+  }
+
+  .informations-container {
+    margin-left: 2rem;
+  }
+
+  p-dialog .ui-dialog-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .form-field {
+    width: 100%; 
+    max-width: 300px; 
+    margin-bottom: 1rem;
+  
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      text-align: left; 
+    }
+  
+    p-password {
+      width: 100%;
+    }
+  }
+  
+  p-footer {
+    display: flex;
+    justify-content: center; 
+    gap: 1rem; 
+  }
+
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #000000;
+  }
+
+
+.two-fields-row .form-group {
+  flex: 1;
+}
+
+input{
+  width: 100%;
+}
+
+.two-fields-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+.reset-password-button{
+    width: 100%;
+    box-sizing: border-box;
+}
+  

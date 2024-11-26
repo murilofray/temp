@@ -1,0 +1,43 @@
+<p-toast></p-toast>
+
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Relatório de Ocorrências dos Docentes</h2>
+
+  <div class="field">
+    <label for="professor">Selecione o Docente: </label>
+    
+    <p-dropdown [options]="professores" [(ngModel)]="selectedProfessor"
+    optionLabel="nome" placeholder="Selecione um docente" [filter]="true"
+    [filterBy]="'nome'" (onChange)="filtrarOcorrenciasPorProfessor()"></p-dropdown>
+    
+    <button pButton type="button" label="Baixar Relatório de Ocorrências Do Docente"
+    class="button-spacing"
+    (click)="gerarRelatorio()"
+    ></button>
+  </div>
+
+  <p-table *ngIf="selectedProfessor" [value]="ocorrencias" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption"> </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="data">Data da Ocorrência<p-sortIcon [field]="'data'"></p-sortIcon></th>
+        <th pSortableColumn="lancadoPor">Registrado Por<p-sortIcon [field]="'lancadopor'"></p-sortIcon></th>
+        <th pSortableColumn="status">Estado <p-sortIcon [field]="'status'"></p-sortIcon></th>
+        <th pSortableColumn="abonada">É Abonada? <p-sortIcon [field]="'abonada'"></p-sortIcon></th>
+        <th pSortableColumn="tipoAbono">Tipo de Abono <p-sortIcon [field]="'tipoabonada'"></p-sortIcon></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-ocorrencia>
+      <tr>
+        <td>{{ formatData(ocorrencia.dataOcorrencia) }}</td>
+        <td>{{ buscarDocente(ocorrencia.lancadoPor) }}</td>
+        <td>{{ ocorrencia.status }}</td>
+        <td *ngIf="ocorrencia.status.toLowerCase()==='aceita'">{{ buscarAbono(ocorrencia.abonoId) }}</td>
+        <td *ngIf="ocorrencia.status.toLowerCase()==='recusada'"> Não </td>
+        <td *ngIf="ocorrencia.status.toLowerCase()!=='aceita'&&ocorrencia.status.toLowerCase()!=='recusada'"> - </td>
+        <td *ngIf="ocorrencia.status.toLowerCase()=='aceita'||ocorrencia.status.toLowerCase()=='recusada'">{{ buscarNomeAbono(ocorrencia.abonoId) }}</td>
+        <td *ngIf="ocorrencia.status.toLowerCase()!=='aceita'&&ocorrencia.status.toLowerCase()!=='recusada'"> - </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

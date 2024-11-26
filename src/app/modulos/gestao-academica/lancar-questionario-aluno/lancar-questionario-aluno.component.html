@@ -1,0 +1,27 @@
+<div class="questionarios-container">
+  <h2 class="titulo-questionarios">Questionário: {{ questionarioDescricao }}</h2>
+  <h5 class="titulo-questionarios">
+    Aluno: {{ aluno?.nome }} - Turma: {{ aluno?.Turma.ano }} {{ aluno?.Turma.letra }} ({{ aluno?.Turma.anoLetivo }})
+  </h5>
+
+  <hr />
+
+  <div class="form-container" id="form-container"></div>
+
+  <hr />
+
+  <div class="button-group flex justify-between">
+    <button pButton type="button" label="Cancelar" class="p-button-outlined" (click)="cancelar()"></button>
+
+    <button
+      pButton
+      type="button"
+      label="Salvar resposta"
+      class="p-button-primary"
+      (click)="inserirQuestionario()"
+    ></button>
+  </div>
+</div>
+
+<p-toast position="bottom-right"></p-toast>
+

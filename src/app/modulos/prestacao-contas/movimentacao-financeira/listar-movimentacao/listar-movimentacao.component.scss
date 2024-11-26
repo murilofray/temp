@@ -1,0 +1,23 @@
+
+
+/* Estilo para saída em vermelho */
+.valor-saida {
+  color: var(--danger-color); /* Mantém o tom de erro do tema PrimeNG */
+}
+
+/* Estilo para entrada em azul */
+.valor-entrada {
+  color: var(--primary-color); /* Mantém o tom primário do tema PrimeNG */
+}
+
+label {
+    display: block; /* Garante que o label fique em linha separada */
+    padding: 10px 0px;
+    margin-top: 10px; /* Adiciona espaçamento entre o label e o campo */
+    font-weight: bold; /* Torna o texto do label em negrito */
+  }
+
+  .p-form input,
+  .p-form .p-calendar {
+    margin-bottom: 16px; /* Adiciona espaçamento entre os campos */
+  }

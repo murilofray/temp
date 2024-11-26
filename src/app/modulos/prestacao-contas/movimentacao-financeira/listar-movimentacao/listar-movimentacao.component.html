@@ -1,0 +1,361 @@
+<div class="tabela-container">
+  <h2 class="titulo-tabela">Movimentações Financeiras</h2>
+  <h5 class="titulo-infos">{{ infoContaBancaria }}</h5>
+
+  <p-toolbar>
+    <ng-template pTemplate="left">
+      <div class="my-2 toolbar-flex-spacing">
+        <button
+          pButton
+          pRipple
+          label="Nova movimentação"
+          icon="pi pi-plus"
+          class="p-button-success mr-2"
+          (click)="createMovimentacao()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          label="Remover movimentação"
+          icon="pi pi-trash"
+          class="p-button-danger"
+          (click)="deleteSelectedMovimentacao()"
+          [disabled]="!movimentacaoSelecionada"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <div class="my-2 toolbar-flex-spacing">
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pinputtext=""
+            type="text"
+            (input)="filterMovimentacoes($event)"
+            placeholder="Pesquisar"
+            class="p-inputtext p-component p-element w-full"
+          />
+        </span>
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <p-toast></p-toast>
+  <app-pdf-viewer></app-pdf-viewer>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card">
+        <p-table
+          styleClass="p-datatable-striped"
+          [value]="MovimentacoesFiltradas"
+          [paginator]="true"
+          responsiveLayout="scroll"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 20, 30]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} movimentações"
+          [(selection)]="movimentacaoSelecionada"
+          selectionMode="single"
+          (onRowSelect)="onRowSelect($event)"
+          (onRowUnselect)="onRowUnselect($event)"
+          [rowHover]="true"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="data">Data <p-sortIcon [field]="'data'"></p-sortIcon></th>
+              <th pSortableColumn="descricao">Descrição <p-sortIcon [field]="'descricao'"></p-sortIcon></th>
+              <th pSortableColumn="categoria">Categoria<p-sortIcon [field]="'categoria'"></p-sortIcon></th>
+              <th pSortableColumn="saida">Saída <p-sortIcon [field]="'saida'"></p-sortIcon></th>
+              <th pSortableColumn="entrada">Entrada <p-sortIcon [field]="'entrada'"></p-sortIcon></th>
+              <th>Ações</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-movFinanceira>
+            <tr [pSelectableRow]="movFinanceira">
+              <td>{{ movFinanceira.data | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ movFinanceira.descricao }}</td>
+              <td>{{ movFinanceira.capitalCusteio }}</td>
+              <!-- Valor de Saída em Vermelho -->
+              <td class="p-error">
+                {{ apresentarValor(movFinanceira).saida | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+              </td>
+
+              <!-- Valor de Entrada em Azul -->
+              <td class="p-primary">
+                {{ apresentarValor(movFinanceira).entrada | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+              </td>
+              <td>
+                <div class="button-group">
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-file-pdf"
+                    class="p-button-outlined p-button-rounded p-button-info mr-2"
+                    label="Visualizar"
+                    pTooltip="Visualizar o documento"
+                    tooltipPosition="top"
+                    (click)="visualizarMovimentacao(movFinanceira)"
+                  ></button>
+                  <button
+                    pButton
+                    pRipple
+                    icon="pi pi-pencil"
+                    class="p-button-outlined p-button-rounded p-button-success mr-2"
+                    label="Editar"
+                    pTooltip="Realizar edição"
+                    tooltipPosition="top"
+                    (click)="editarMovimentacao(movFinanceira)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog para adicionar uma MOVIMENTAÇÃO FINANCEIRA -->
+  <p-dialog
+    header="Movimentacao Financeira"
+    [(visible)]="dialogMovFinanceira"
+    [modal]="true"
+    [style]="{ width: '750px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <ng-template pTemplate="content" class="mb-1">
+      <!-- Descrição e Data -->
+      <div class="p-formgrig grid">
+        <!-- Campo de Descrição -->
+        <div class="fiel col">
+          <label for="descricao">Descrição</label>
+          <input
+            type="text"
+            id="descricao"
+            pInputText
+            required
+            autofocus
+            [(ngModel)]="movimentacaoFinanceira.descricao"
+            class="p-inputtext p-component p-element"
+            [readonly]="isViewMode"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !movimentacaoFinanceira.descricao }"
+          />
+          <!-- Validação do campo descrição -->
+          <div *ngIf="submitted && !movimentacaoFinanceira.descricao" class="p-invalid">
+            <span>Informe uma descrição.</span>
+          </div>
+        </div>
+
+        <!-- Campo da data -->
+        <div class="fiel col">
+          <label for="data">Data</label>
+          <p-calendar
+            id="data"
+            [(ngModel)]="movimentacaoFinanceira.data"
+            dateFormat="dd/mm/yy"
+            [showIcon]="false"
+            class="full-width"
+            (onShow)="onCalendarShow()"
+            [readonly]="isViewMode"
+            required
+            [appendTo]="'body'"
+          ></p-calendar>
+          <!-- Validação do campo data -->
+          <div *ngIf="submitted && !movimentacaoFinanceira.data" class="p-invalid">
+            <span>Informe uma data.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Natureza da Movimentação, Categoria da Movimentação na mesma linha -->
+      <div class="p-formgrig grid">
+        <!-- Campo de Natureza da Movimentação com RadioButton -->
+        <div class="fiel col md:col-6">
+          <label>Natureza da Movimentação</label>
+          <p-dropdown
+            [appendTo]="'body'"
+            [showClear]="true"
+            [options]="naturezasDropdown"
+            [(ngModel)]="naturezaSelecionada"
+            optionLabel="natureza"
+            optionValue="value"
+            placeholder="Selecione um Natureza"
+          >
+            <!-- Validação do campo Natureza da Movimentação -->
+            <div *ngIf="submitted && !naturezaSelecionada" class="p-invalid">
+              <span>Selecione uma Natureza para a Movimentação.</span>
+            </div>
+          </p-dropdown>
+        </div>
+
+        <!-- Campo de Categoria da Movimentação com Dropdown -->
+        <div class="fiel col md:col-6">
+          <label>Categoria da Movimentação</label>
+          <p-dropdown
+            [appendTo]="'body'"
+            [showClear]="true"
+            [options]="categoriasDropdown"
+            [(ngModel)]="categoriaSelecionada"
+            optionLabel="categoria"
+            optionValue="value"
+            placeholder="Selecione um Categoria"
+          >
+            <!-- Validação do campo Categoria da Movimentação -->
+            <div *ngIf="submitted && !programaSelecionado" class="p-invalid">
+              <span>Selecione uma Categoria para a Movimentação.</span>
+            </div>
+          </p-dropdown>
+        </div>
+      </div>
+
+      <!-- Valor e Arquivo na mesma linha -->
+      <div class="p-formgrig grid">
+        <!-- Campo de valor -->
+        <div class="fiel col md:col-3">
+          <label for="valorProposta">Valor</label>
+          <p-inputNumber
+            id="valorProposta"
+            [(ngModel)]="movimentacaoFinanceira.valor"
+            mode="currency"
+            currency="BRL"
+            locale="pt-BR"
+            [readonly]="isViewMode"
+            required
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && !movimentacaoFinanceira.valor }"
+          ></p-inputNumber>
+          <!-- Validação do campo valor -->
+          <div
+            *ngIf="submitted && (!movimentacaoFinanceira.valor || movimentacaoFinanceira.valor <= 0)"
+            class="p-invalid"
+          >
+            <span>Informe um valor maior que zero.</span>
+          </div>
+        </div>
+
+        <!-- Campo de arquivo -->
+        <div class="fiel col md:col-9">
+          <div *ngIf="isUploadedFileObject; else uploadFile" class="file-preview">
+            <label for="upload">Arquivo</label>
+            <h6>
+              Arquivo carregado:
+              <a [href]="uploadedFile.caminho" target="_blank">{{ getFileName(uploadedFile.caminho) }} </a>
+            </h6>
+
+            <button
+              pButton
+              label="Remover arquivo"
+              icon="pi pi-times"
+              class="p-button-warning"
+              (click)="confirmarRemocao()"
+            ></button>
+          </div>
+
+          <ng-template #uploadFile>
+            <label for="upload">Arquivo</label>
+            <p-fileUpload
+              *ngIf="!uploadedFile || uploadedFile; instanceof: File"
+              name="file"
+              id="upload"
+              (onSelect)="onFileSelected($event)"
+              chooseLabel="Escolher"
+              uploadLabel="Enviar"
+              cancelLabel="Cancelar"
+              [auto]="true"
+              accept="application/pdf"
+              required
+            >
+            </p-fileUpload>
+            <!-- Validação do campo de upload -->
+            <div *ngIf="submitted && !movimentacaoFinanceira.documentoScanId" class="p-invalid">
+              <span>Anexe um arquivo.</span>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Botões de Ação -->
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          *ngIf="isViewMode"
+          pButton
+          pRipple
+          label="Fechar"
+          icon="pi pi-times"
+          class="p-button-info"
+          (click)="hideDialog()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Salvar"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="submitMovFinanceira()"
+        ></button>
+        <button
+          *ngIf="!isViewMode"
+          pButton
+          pRipple
+          label="Cancelar"
+          icon="pi pi-times"
+          class="p-button-warning"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog de Deletar a uma MOVIMENTAÇÃO FINANCEIRA -->
+  <p-dialog
+    header="DELETAR"
+    [dismissableMask]="true"
+    [(visible)]="dialogDeletarMovFinanceira"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    [closable]="false"
+    [dismissableMask]="false"
+    class="p-fluid centralizar-header"
+  >
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="movimentacaoSelecionada"
+        >Tem certeza que deseja remover a seguinte movimentação financeira: <br /><br />
+        Data: <b>{{ movimentacaoSelecionada.data | date: 'dd/MM/yyyy' }}</b> <br />
+        Descrição: <b>{{ movimentacaoSelecionada.descricao }}</b> <br />
+        No Valor de <b>{{ movimentacaoSelecionada.valor | currency: 'BRL' }}</b>
+      </span>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-button">
+        <button
+          pButton
+          pRipple
+          icon="pi pi-check"
+          class="p-button-danger p-button-outlined"
+          label="Sim"
+          (click)="confirmDelete()"
+        ></button>
+        <button
+          pButton
+          pRipple
+          icon="pi pi-times"
+          class="p-button-info"
+          label="Cancelar"
+          (click)="hideDialog()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
+</div>

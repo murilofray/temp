@@ -1,0 +1,28 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.full-width {
+  width: 100% !important;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between; /* Espaça os botões nas extremidades */
+  margin-top: 20px; /* Adiciona espaço acima dos botões */
+}
+
+.button-group button {
+  flex: 1; /* Faz com que ambos os botões ocupem espaço igual */
+}
+
+.button-group button:first-child {
+  margin-right: 10%; /* Empurra o botão de Cancelar para a esquerda */
+}
+
+.button-group button:last-child {
+  margin-left: 10%; /* Empurra o botão de Enviar para a direita */
+}
+

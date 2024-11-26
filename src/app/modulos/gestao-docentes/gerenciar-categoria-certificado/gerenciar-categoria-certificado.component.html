@@ -1,0 +1,131 @@
+<p-toast></p-toast>
+<div class="categorias-container">
+  <h2 class="titulo-categorias">Gerenciar Categorias de Certificado</h2>
+
+  <!-- Tabela -->
+  <p-table [value]="categoriasFiltradas" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="caption">
+      <div class="flex caption-container">
+        <!-- Botão de Nova Categoria alinhado à esquerda -->
+        <button
+          pButton
+          type="button"
+          label="Nova Categoria"
+          class="p-button-success"
+          (click)="abrirDialog()"
+        ></button>
+
+        <!-- Campo de pesquisa alinhado à direita -->
+        <span class="p-input-icon-left search-container">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="filtrarCategorias($event)"
+            placeholder="Pesquisar por Nome"
+            class="p-inputtext p-component p-element"
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nome</th>
+        <th>Pontos por Hora</th>
+        <th>Horas Mínimas</th>
+        <th>Horas Máximas</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-categoria>
+      <tr>
+        <td>{{ categoria.nome }}</td>
+        <td>{{ categoria.pontosPorHora }}</td>
+        <td>{{ categoria.horasMinimas }}</td>
+        <td>{{ categoria.horasMaximas }}</td>
+        <td>
+          <button
+            pButton
+            label="Alterar"
+            class="p-button-primary"
+            style="margin-right: 8px;"
+            (click)="abrirDialog(categoria)"
+          ></button>
+          <button
+            pButton
+            label="Excluir"
+            class="p-button-danger"
+            (click)="deletarCategoria(categoria.id)"
+          ></button>
+        </td>
+        
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+
+<!-- Modal -->
+<p-dialog
+  header="{{ novoRegistro ? 'Nova Categoria' : 'Editar Categoria' }}"
+  [(visible)]="exibirDialog"
+  [style]="{ width: '50vw' }"
+  modal="true"
+  (onHide)="fecharDialog()"
+>
+  <div class="dialog-content">
+    <p class="alert-message" style="font-weight: bold;">
+      Caso não haja valores para horas mínimas ou máximas, deixe os campos em branco. Eles serão considerados como "Sem Limite".
+    </p>
+    <div class="field">
+      <label>Nome*:</label>
+      <input
+        pInputText
+        [(ngModel)]="categoriaSelecionada.nome"
+        placeholder="Digite o nome da categoria"
+      />
+    </div>
+    <div class="field">
+      <label>Pontos por Hora*:</label>
+      <input
+        type="number"
+        pInputText
+        [(ngModel)]="categoriaSelecionada.pontosPorHora"
+        placeholder="Digite os pontos por hora"
+      />
+    </div>
+    <div class="field">
+      <label>Horas Mínimas:</label>
+      <input
+        type="number"
+        pInputText
+        [(ngModel)]="categoriaSelecionada.horasMinimas"
+        placeholder="Opcional"
+      />
+    </div>
+    <div class="field">
+      <label>Horas Máximas:</label>
+      <input
+        type="number"
+        pInputText
+        [(ngModel)]="categoriaSelecionada.horasMaximas"
+        placeholder="Opcional"
+      />
+    </div>
+    <div class="button-group spaced-buttons">
+      <button
+        pButton
+        label="Salvar"
+        class="p-button-success"
+        (click)="salvarCategoria()"
+      ></button>
+      <button
+        pButton
+        label="Cancelar"
+        class="p-button-secondary"
+        (click)="fecharDialog()"
+      ></button>
+    </div>
+    
+  </div>
+</p-dialog>

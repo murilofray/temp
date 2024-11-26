@@ -1,0 +1,235 @@
+<div class="ocorrencias-container">
+  <h2 class="titulo-ocorrencias">Ocorrências</h2>
+
+  <!-- Filtros -->
+  <div class="filtro-container">
+    <div class="flex">
+      <!-- Filtro por Nome -->
+      <span class="p-input-icon-left ml-auto">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          (input)="filterOcorrencias($event)"
+          placeholder="Nome"
+          class="p-inputtext p-component p-element"
+        />
+      </span>
+
+      <!-- Filtro por Status -->
+      <p-dropdown
+        [options]="[
+          { label: 'Todos', value: null },
+          { label: 'Não Avaliada', value: 'Não Avaliada' },
+          { label: 'Aceita', value: 'Aceita' },
+          { label: 'Não Aceita', value: 'Não Aceita' },
+          { label: 'Excluida', value: 'Excluida' }
+        ]"
+        [(ngModel)]="statusSelecionado"
+        placeholder="Filtrar por Status"
+        (onChange)="carregarOcorrenciasPorStatus(statusSelecionado)"
+        class="ml-2"
+      ></p-dropdown>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <p-table [value]="filteredOcorrencias" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Professor</th>
+        <th>Status</th>
+        <th>Data Ocorrência</th>
+        <th>Ultima Alteração por</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-ocorrencia>
+      <tr>
+        <td>{{ ocorrencia.servidorNome }}</td>
+        <td>{{ ocorrencia.status }}</td>
+        <td>{{ ocorrencia.dataOcorrencia | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ ocorrencia.aprovadoPorNome || '' }}</td>
+        <td>
+          <div class="button-group">
+            <button
+              *ngIf="ocorrencia.status?.trim().toLowerCase() === 'não avaliada'"
+              pButton
+              type="button"
+              label="Aceitar"
+              class="p-button-success button-spacing"
+              (click)="abonarOcorrencia(ocorrencia)"
+            ></button>
+            <button
+            *ngIf="ocorrencia.status?.trim().toLowerCase() === 'não avaliada'"
+            pButton
+            type="button"
+            label="Recusar"
+            class="p-button-warning button-spacing"
+            (click)="abrirDialogoRecusa(ocorrencia)"
+          ></button>
+            <button
+            *ngIf="ocorrencia.status?.trim().toLowerCase() !== 'excluida'"
+            pButton
+            type="button"
+            label="Excluir"
+            class="p-button-danger button-spacing"
+            (click)="abrirDialogoExclusao(ocorrencia)"
+          ></button>
+            <button
+              *ngIf="ocorrencia.status?.trim().toLowerCase() === 'excluida'"
+              pButton
+              type="button"
+              label="Restaurar"
+              class="p-button-secondary button-spacing"
+              (click)="restaurarOcorrencia(ocorrencia)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              label="Detalhes"
+              class="p-button-info"
+              (click)="showDialog(ocorrencia)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Detalhes da Ocorrência -->
+<p-dialog
+  header="Detalhe da Ocorrência"
+  [(visible)]="displayDialog"
+  [style]="{ width: '50vw' }"
+  modal="true"
+>
+  <div *ngIf="selectedOcorrencia" class="dialog-content">
+    <div class="field">
+      <label>Professor:</label>
+      <span>{{ selectedOcorrencia.servidorNome }}</span>
+    </div>
+    <div class="field">
+      <label>Descrição:</label>
+      <span>{{ selectedOcorrencia.descricao }}</span>
+    </div>
+    <div class="field">
+      <label>Status:</label>
+      <span>{{ selectedOcorrencia.status }}</span>
+    </div>
+    <div class="field">
+      <label>Última Alteração por:</label>
+      <span>{{ selectedOcorrencia.aprovadoPorNome || '' }}</span>
+    </div>
+    <div class="field">
+      <label>Data Ocorrência:</label>
+      <span>{{ selectedOcorrencia.dataOcorrencia | date: 'dd/MM/yyyy' }}</span>
+    </div>
+    <div class="field">
+      <label>Motivo Recusa/Exclusão:</label>
+      <span>{{ selectedOcorrencia.motivo || ''  }}</span>
+    </div>
+    <div class="button-group">
+      <button
+        pButton
+        type="button"
+        label="Fechar"
+        class="p-button-secondary"
+        (click)="displayDialog = false"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Justificar Recusa"
+  [(visible)]="displayJustificarRecusaDialog"
+  [style]="{ width: '40vw' }"
+  modal="true"
+  [closable]="false"
+  [draggable]="false"
+>
+  <div class="p-fluid">
+    <div class="field">
+      <label for="motivo" class="dialog-label">Motivo da Recusa</label>
+      <textarea
+        pInputTextarea
+        id="motivo"
+        [(ngModel)]="motivoRecusa"
+        rows="5"
+        cols="40"
+        placeholder="Informe o motivo da recusa"
+        class="p-inputtextarea p-component p-element"
+      ></textarea>
+      <small *ngIf="!motivoRecusa" class="p-error">O motivo é obrigatório.</small>
+    </div>
+
+    <!-- Botões lado a lado -->
+    <div class="dialog-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-secondary"
+        (click)="displayJustificarRecusaDialog = false"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Confirmar"
+        icon="pi pi-check"
+        class="p-button-danger"
+        [disabled]="!motivoRecusa"
+        (click)="confirmarRecusa()"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Justificar Exclusão"
+  [(visible)]="displayJustificarExclusaoDialog"
+  [style]="{ width: '40vw' }"
+  modal="true"
+  [closable]="false"
+  [draggable]="false"
+>
+  <div class="p-fluid">
+    <div class="field">
+      <label for="motivoExclusao" class="dialog-label">Motivo da Exclusão</label>
+      <textarea
+        pInputTextarea
+        id="motivoExclusao"
+        [(ngModel)]="motivoExclusao"
+        rows="5"
+        cols="40"
+        placeholder="Informe o motivo da exclusão"
+        class="p-inputtextarea p-component p-element"
+      ></textarea>
+      <small *ngIf="!motivoExclusao" class="p-error">O motivo é obrigatório.</small>
+    </div>
+
+    <!-- Botões lado a lado -->
+    <div class="dialog-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-secondary"
+        (click)="displayJustificarExclusaoDialog = false"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Confirmar"
+        icon="pi pi-check"
+        class="p-button-danger"
+        [disabled]="!motivoExclusao"
+        (click)="confirmarExclusao()"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
