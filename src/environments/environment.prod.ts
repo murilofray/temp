@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: '',
-  docsApiURL: '',
+  apiUrl: 'https://seceduepitacio.azurewebsites.net/api',
+  docsApiURL: 'https://seceduepitacio.azurewebsites.net/docs/',
 };
