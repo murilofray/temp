@@ -33,4 +33,13 @@ export class DocumentoService {
       throw error;
     }
   }
+
+  async update(documentoId: number, documentoData: FormData) {
+    try {
+      const resposta = await apiClient.put(`/doc/ata/${documentoId}`, documentoData);
+      return resposta.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

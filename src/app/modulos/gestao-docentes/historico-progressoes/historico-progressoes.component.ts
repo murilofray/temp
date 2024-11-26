@@ -15,18 +15,16 @@ import { ProgressaoService } from '../services/progressao.service';
 import { ConfirmationService } from 'primeng/api';
 
 export interface JwtPayload {
-  servidor: {
-    id: number;
-    escolaId: number;
-    nome: string;
-    NivelAcessoServidor: any[];
-  };
+  id: number;
+  escolaId: number;
+  nome: string;
+  nivelAcesso: string[];
   iat: number;
   exp: number;
 }
 
 @Component({
-  selector: 'app-gerenciar-progressoes-diretor',
+  selector: 'app-historico-progressoes',
   standalone: true,
   imports: [
     TableModule,
@@ -38,11 +36,11 @@ export interface JwtPayload {
     FileUploadModule,
     ToastModule,
   ],
-  templateUrl: './gerenciar-progressoes-diretor.component.html',
-  styleUrl: './gerenciar-progressoes-diretor.component.scss',
+  templateUrl: './historico-progressoes.component.html',
+  styleUrl: './historico-progressoes.component.scss',
   providers: [MessageService, ConfirmationService],
 })
-export class GerenciarProgressoesDiretorComponent {
+export class HistoricoProgressoesComponent {
   displayDialogDetalhes: boolean = false;
   diretorLogado: any;
   professores: any;
@@ -60,18 +58,8 @@ export class GerenciarProgressoesDiretorComponent {
     const tokenJWT = localStorage.getItem('jwt');
     const decodedToken: JwtPayload = jwtDecode(tokenJWT);
 
-    this.servidorService.buscarServidoresPorEscola(decodedToken.servidor.escolaId).then((data) => {
+    this.servidorService.buscarServidoresPorEscola(decodedToken.escolaId).then((data) => {
       this.professores = data;
-
-      this.professores.forEach((prof) => {
-        this.progressaoService.buscarProgressoesDoServidor(prof.id).then((data) => {
-          if (data.data) {
-            data.data.forEach((prog) => {
-              this.progressoes.push(prog);
-            });
-          }
-        });
-      });
     });
   }
   atualizarProgressao(progressao: any, aprovado: boolean) {

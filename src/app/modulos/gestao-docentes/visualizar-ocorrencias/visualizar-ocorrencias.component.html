@@ -2,7 +2,7 @@
 <div class="ocorrencias-container">
   <h2 class="titulo-ocorrencias">Minhas Ocorrências</h2>
 
-  <p-table [value]="filteredOcorrencias" [paginator]="true" [rows]="5">
+  <p-table [value]="ocorrencias" [paginator]="true" [rows]="5">
     <ng-template pTemplate="caption"> </ng-template>
     <ng-template pTemplate="header">
       <tr>
@@ -20,11 +20,11 @@
         <td *ngIf="ocorrencia.status.toLowerCase()==='aceita'">{{ buscarAbono(ocorrencia.abonoId) }}</td>
         <td *ngIf="ocorrencia.status.toLowerCase()==='recusada'"> Não </td>
         <td *ngIf="ocorrencia.status.toLowerCase()!=='aceita'&&ocorrencia.status.toLowerCase()!=='recusada'">
-          Indeterminado </td>
+          - </td>
         <td *ngIf="ocorrencia.status.toLowerCase()=='aceita'||ocorrencia.status.toLowerCase()=='recusada'">{{
           buscarNomeAbono(ocorrencia.abonoId) }}</td>
         <td *ngIf="ocorrencia.status.toLowerCase()!=='aceita'&&ocorrencia.status.toLowerCase()!=='recusada'">
-          Indeterminado </td>
+          - </td>
         <td>
           <button *ngIf="ocorrencia.status.toLowerCase() === 'não justificada'" pButton type="button" label="Justificar"
             class="p-button-success button-spacing" (click)="mostrarDialogJustificar(ocorrencia)"></button>

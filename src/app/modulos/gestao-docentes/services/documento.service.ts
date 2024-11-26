@@ -32,7 +32,7 @@ export class DocumentoService {
   async downloadPDF(caminho: string) {
     // URL do endpoint para download
 
-    const url = `http://localhost:3333/api/doc/download?docPath=${caminho}`;
+    const url = `${environment.apiUrl}/doc/download?docPath=${caminho}`;
 
     // Faz a requisição para o backend usando axios.get
     axios
@@ -53,7 +53,10 @@ export class DocumentoService {
       });
   }
 
-
+  getUltimoDocumentoTipo20(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/ultimo-tipo-20`);
+  }
+  
 
   
 }

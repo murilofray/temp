@@ -13,6 +13,8 @@ import { ToastModule } from 'primeng/toast';
 import { jwtDecode } from 'jwt-decode';
 import { TableModule } from 'primeng/table';
 import { CategoriaCertificadoService } from '../services/categoria-certificado.service';
+import { environment } from 'src/environments/environment';
+
 export interface JwtPayload {
   servidor: {
     id: number;
@@ -151,7 +153,8 @@ export class LancarTitulosComponent implements OnInit {
   createTitulo(): void {
     if (this.tituloForm.valid && this.selectedFile) {
       const formData = new FormData();
-      formData.append('tipoDocumentoId', '1');
+      formData.append('caminho', 'certificados/');   
+      formData.append('tipoDocumentoId', '9');
       formData.append('pdf', this.selectedFile);
 
       this.documentoService.createDocumentoScan(formData).subscribe(
@@ -210,5 +213,19 @@ export class LancarTitulosComponent implements OnInit {
   getCategoriaNome(tipoId: number): string | undefined {
     const categoria = this.categoriasCertificado.find(cat => cat.id === tipoId);
     return categoria?.nome;
+  }
+
+  verDocumento(documentoScanId: number): void {
+    this.documentoService.getDocumentoCaminho(documentoScanId).subscribe(
+      (response) => {
+        if (response.caminho) {
+          const pdfUrl = `${environment.docsApiURL}${response.caminho}`;
+          window.open(pdfUrl, '_blank');
+        } else {
+          console.error('Caminho do documento não encontrado.');
+        }
+      },
+      (error) => console.error('Erro ao carregar o documento:', error),
+    );
   }
 }

@@ -8,19 +8,19 @@ import { CommonModule } from '@angular/common';
 import { CalendarModule } from 'primeng/calendar';
 import { ListboxModule } from 'primeng/listbox';
 import { MessageService } from 'primeng/api';
-import { DocenteService } from '../services/docente.service';
 import { ToastModule } from 'primeng/toast';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { jwtDecode } from 'jwt-decode';
 import { ProgressaoService } from '../services/progressao.service';
-import { DocumentoService } from '../services/documento.service';
 import { ServidorService } from '../services/servidor.service';
 
 export interface JwtPayload {
-  id: number;
-  escolaId: number;
-  nome: string;
-  nivelAcesso: string[];
+  servidor: {
+    id: number;
+    escolaId: number;
+    nome: string;
+    NivelAcessoServidor: any[];
+  };
   iat: number;
   exp: number;
 }
@@ -47,6 +47,10 @@ export interface JwtPayload {
 export class HomeSecretariaComponent implements OnInit {
   servidoresAptos: any[] = [];
   progressoesEmAndamento: any[] = [];
+  servidorLogadoId: number | null = null;
+
+  exibirDialogConfirmacao: boolean = false; // Controle da visibilidade do diálogo
+  servidorSelecionado: any = null; // Armazena o servidor selecionado para progressão
 
   constructor(
     private servidorService: ServidorService,
@@ -55,6 +59,11 @@ export class HomeSecretariaComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    const tokenJWT = localStorage.getItem('jwt');
+    if (tokenJWT) {
+      const decodedToken: JwtPayload = jwtDecode(tokenJWT);
+      this.servidorLogadoId = decodedToken.servidor.id;
+    }
     await this.carregarServidoresAptos();
     await this.carregarProgressoesEmAndamento();
   }
@@ -62,13 +71,11 @@ export class HomeSecretariaComponent implements OnInit {
   async carregarServidoresAptos() {
     try {
       const response = await this.servidorService.getAll();
-      console.log(response)
       if (!response.error) {
         this.servidoresAptos = response.data.filter(
           (servidor: any) =>
-            servidor.aptoParaProgressaoPorAssiduidade == true || servidor.aptoParaProgressaoPorTitulo
+            servidor.aptoParaProgressaoPorAssiduidade || servidor.aptoParaProgressaoPorTitulo
         );
-        console.log(this.servidoresAptos)
       } else {
         this.showError('Erro ao carregar servidores aptos à progressão.');
       }
@@ -80,61 +87,48 @@ export class HomeSecretariaComponent implements OnInit {
   async carregarProgressoesEmAndamento() {
     try {
       const response = await this.progressaoService.index();
-      console.log(response) 
-      if (!response.error) {
-        this.progressoesEmAndamento = response.data.filter(
-          (progressao: any) => progressao.aprovado === null
-        );
-      } else {
-        this.showError('Erro ao carregar progresso em andamento.');
-      }
+      this.progressoesEmAndamento = response.filter(
+        (progressao: any) => progressao.aprovado === null
+      );
     } catch (error) {
       this.showError('Erro ao carregar progresso em andamento.');
     }
   }
 
-  async iniciarProgressao(servidor: any) {
-    try {
-      const progressaoData = {
-        servidorId: servidor.id,
-        data: new Date(),
-        tipo: servidor.aptoParaProgressaoPorAssiduidade ? 'ASSIDUIDADE' : 'TITULO',
-        aprovado: null,
-        detalhes: `Progressão por ${servidor.aptoParaProgressaoPorAssiduidade ? 'assiduidade' : 'título'}`,
-        aprovadoPor: null,
-      };
-      const response = await this.progressaoService.createProgressao(progressaoData);
-      if (!response.error) {
-        this.showSuccess('Progressão iniciada com sucesso.');
-        await this.carregarServidoresAptos();
-        await this.carregarProgressoesEmAndamento();
-      } else {
-        this.showError('Erro ao iniciar progressão.');
-      }
-    } catch (error) {
-      this.showError('Erro ao iniciar progressão.');
-    }
+  confirmarIniciarProgressao(servidor: any) {
+    this.servidorSelecionado = servidor;
+    this.exibirDialogConfirmacao = true;
   }
 
-  async aprovarProgressao(progressao: any) {
+  async iniciarProgressaoConfirmada() {
+    if (!this.servidorSelecionado) return;
+
     try {
-      const response = await this.progressaoService.editarProgressao(
-        progressao.id,
-        progressao.servidorId,
-        progressao.data,
-        progressao.tipo,
-        true,
-        progressao.detalhes,
-        1 // ID do usuário aprovador (substituir conforme necessário)
-      );
+      const progressaoData = {
+        servidorId: this.servidorSelecionado.id,
+        data: new Date(),
+        tipo: this.servidorSelecionado.aptoParaProgressaoPorAssiduidade ? 'ASSIDUIDADE' : 'TITULO',
+        aprovado: null,
+        detalhes: 'Progressão em andamento.',
+        aprovadoPor: null,
+        createdAt: new Date(),
+        updatedAt: null,
+        deletedAt: null,
+      };
+
+      const response = await this.progressaoService.createProgressao(progressaoData);
+      await this.carregarServidoresAptos();
+
       if (!response.error) {
-        this.showSuccess('Progressão aprovada com sucesso.');
-        await this.carregarProgressoesEmAndamento();
+        this.showSuccess('Progressão iniciada com sucesso!');
       } else {
-        this.showError('Erro ao aprovar progressão.');
+        this.showError('Erro ao iniciar a progressão.');
       }
     } catch (error) {
-      this.showError('Erro ao aprovar progressão.');
+      this.showError('Erro ao iniciar a progressão.');
+    } finally {
+      this.exibirDialogConfirmacao = false;
+      this.servidorSelecionado = null;
     }
   }
 

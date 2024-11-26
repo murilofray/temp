@@ -3,6 +3,11 @@ import { jwtDecode } from 'jwt-decode';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ServidorService } from 'src/app/comum/services/servidor.service';
+import { OcorrenciaService } from '../services/ocorrencia.service';
+import { AbonoService } from '../services/abono.service';
+import { TableModule } from 'primeng/table';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 
 
@@ -21,7 +26,12 @@ export interface JwtPayload {
 @Component({
   selector: 'app-visualizar-pontuacao-para-atribuicao',
   standalone: true,
-  imports: [ToastModule],
+  imports: [
+    ToastModule,
+    TableModule,
+    FormsModule,
+    CommonModule,
+  ],
   templateUrl: './visualizar-pontuacao-para-atribuicao.component.html',
   styleUrl: './visualizar-pontuacao-para-atribuicao.component.scss',
   providers: [MessageService],
@@ -30,13 +40,25 @@ export class VisualizarPontuacaoParaAtribuicaoComponent {
   pontuacaoTotal = 0;
   hoje = new Date();
 
+  filteredOcorrencias: any[] = [];
+  ocorrencias: any;
+  abonos: any;
+
   constructor(
     private messageService: MessageService,
     private servidorService: ServidorService,
+    private ocorrenciaService: OcorrenciaService,
+    private abonoService: AbonoService,
   ) {}
 
   async ngOnInit() {
+    
+    this.abonoService.index().then((data) => {
+      this.abonos = data;
+    });
+
     this.buscarPontuacao();
+
   }
 
   buscarPontuacao() {
@@ -44,21 +66,40 @@ export class VisualizarPontuacaoParaAtribuicaoComponent {
     const decodedToken: JwtPayload = jwtDecode(tokenJWT);
 
     this.servidorService.buscarServidorPorId(decodedToken.servidor.id).then((data) => {
-      this.pontuacaoTotal = this.buscarDiasDoAno() - data.pontuacaoAnual;
+      this.pontuacaoTotal = data.pontuacaoAnual;
       return data.pontuacaoAnual;
     });
-  }
-  1;
-  buscarDiasDoAno(): number {
-    const ano = this.hoje.getFullYear();
 
-    if ((ano % 4 === 0 && ano % 100 !== 0) || ano % 400 === 0) {
-      return 366; // Ano bissexto
-    }
-    return 365;
+    this.ocorrenciaService.buscarOcorrenciasDoServidor(decodedToken.servidor.id).then((data) => {
+      this.ocorrencias = data;
+      this.filterOcorrencias();
+    });
   }
 
-  formatarData(data: Date) {
+  filterOcorrencias() {
+    this.filteredOcorrencias = this.ocorrencias.filter((ocorrencia) => {
+
+      if (ocorrencia.status === 'Aceita' && this.buscarAbono(ocorrencia.abonoId)){
+        return false;
+      }
+  
+      return true;
+    });
+
+  }
+  
+  
+  buscarAbono(id: any): boolean {
+    let abona = false;
+    this.abonos.forEach((abono) => {
+      if (abono.id == id) {
+        abona = abono.abona;
+      }
+    });
+    return abona ? true : false;
+  }
+
+  formatData(data: Date) {
     data = new Date(data);
 
     // Formata para "dd/MM/aaaa"

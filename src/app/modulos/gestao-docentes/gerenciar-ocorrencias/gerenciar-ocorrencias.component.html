@@ -40,7 +40,8 @@
         <th>Professor</th>
         <th>Status</th>
         <th>Data Ocorrência</th>
-        <th>Ultima Alteração por</th>
+        <th>Última Alteração por</th>
+        <th>Documento</th> <!-- Nova coluna -->
         <th>Ações</th>
       </tr>
     </ng-template>
@@ -50,6 +51,18 @@
         <td>{{ ocorrencia.status }}</td>
         <td>{{ ocorrencia.dataOcorrencia | date: 'dd/MM/yyyy' }}</td>
         <td>{{ ocorrencia.aprovadoPorNome || '' }}</td>
+        <td>
+          <button
+            *ngIf="ocorrencia.documentoScanId"
+            pButton
+            type="button"
+            label="Ver Documento"
+            icon="pi pi-eye"
+            class="p-button-info"
+            (click)="verDocumento(ocorrencia.documentoScanId)"
+          ></button>
+          <span *ngIf="!ocorrencia.documentoScanId">Não Disponível</span>
+        </td>
         <td>
           <div class="button-group">
             <button
@@ -61,21 +74,21 @@
               (click)="abonarOcorrencia(ocorrencia)"
             ></button>
             <button
-            *ngIf="ocorrencia.status?.trim().toLowerCase() === 'não avaliada'"
-            pButton
-            type="button"
-            label="Recusar"
-            class="p-button-warning button-spacing"
-            (click)="abrirDialogoRecusa(ocorrencia)"
-          ></button>
+              *ngIf="ocorrencia.status?.trim().toLowerCase() === 'não avaliada'"
+              pButton
+              type="button"
+              label="Recusar"
+              class="p-button-warning button-spacing"
+              (click)="abrirDialogoRecusa(ocorrencia)"
+            ></button>
             <button
-            *ngIf="ocorrencia.status?.trim().toLowerCase() !== 'excluida'"
-            pButton
-            type="button"
-            label="Excluir"
-            class="p-button-danger button-spacing"
-            (click)="abrirDialogoExclusao(ocorrencia)"
-          ></button>
+              *ngIf="ocorrencia.status?.trim().toLowerCase() !== 'excluida'"
+              pButton
+              type="button"
+              label="Excluir"
+              class="p-button-danger button-spacing"
+              (click)="abrirDialogoExclusao(ocorrencia)"
+            ></button>
             <button
               *ngIf="ocorrencia.status?.trim().toLowerCase() === 'excluida'"
               pButton
@@ -96,6 +109,7 @@
       </tr>
     </ng-template>
   </p-table>
+  
 </div>
 
 <!-- Detalhes da Ocorrência -->

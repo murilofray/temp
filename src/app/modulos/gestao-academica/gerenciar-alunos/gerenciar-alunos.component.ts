@@ -559,7 +559,7 @@ export class GerenciarAlunosComponent {
       if (this.documentoForm.valid) {
         const tipoDocumento = this.documentoForm.get('tipoDocumento')?.value;
         const docFile = this.documentoForm.get('documento')?.value;
-        const caminhoPasta = this.alunoSelecionado.ra;
+        const caminhoPasta = this.alunoSelecionado.ra + "/";
         const descricao = this.documentoForm.get('descricao')?.value;
         const resposta = await this.alunoService.adicionarDocumento(
           this.alunoSelecionado.id,   // alunoId
@@ -698,13 +698,13 @@ export class GerenciarAlunosComponent {
       const documentos = [
         {
           tipoDocumentoId: certidaoNascimentoId, // ID para "CERTIDAO_NASCIMENTO"
-          caminho: ra,
+          caminho: ra + "/",
           pdf: this.certidaoNascimentoFile,
           descricao: ''
         },
         {
           tipoDocumentoId: comprovanteResidenciaId, // ID para "COMPROVANTE_RESIDENCIA"
-          caminho: ra,
+          caminho: ra + "/",
           pdf: this.comprovanteFile,
           descricao: ''
         }

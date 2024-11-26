@@ -122,23 +122,61 @@ export class GerenciarAtaComponent implements OnInit {
   async updateAta() {
     if (this.editAtaForm.valid) {
       const updatedAta = this.editAtaForm.value;
-      console.log('Atualizando ata:', updatedAta);
-
-      // Chamada para o serviço de atualização
+  
       try {
-        const resposta = await this.ataService.update(updatedAta);
+        // Atualizar o documento (se necessário)
+        if (this.selectedFile) {
+          const documentoFormData = new FormData();
+          documentoFormData.append('tipoDocumentoId', tde.ATA_ASSINADA.id.toString()); // Tipo do documento
+          documentoFormData.append('descricao', updatedAta.titulo); // Pode usar o título como descrição
+          documentoFormData.append('caminho', tde.ATA_ASSINADA.caminho); // Caminho relativo
+          documentoFormData.append('pdf', this.selectedFile); // Arquivo selecionado
+  
+          // Atualize o documento associado à ata
+          const documentoId = this.selectedAta.documentosScanId; // ID do documento relacionado
+          await this.documentoService.update(documentoId, documentoFormData);
+  
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Arquivo atualizado',
+            detail: 'O arquivo foi atualizado com sucesso.',
+            life: 1500,
+          });
+        }
+  
+        // Atualizar os dados da ata
+        const ataFormData = {
+          id: updatedAta.id,
+          titulo: updatedAta.titulo,
+          data: updatedAta.data.toISOString(), // Converte a data para string ISO
+          ata: updatedAta.ata,
+        };
+  
+        await this.ataService.updateAta(updatedAta.id, ataFormData);
+  
         this.messageService.add({
           severity: 'success',
-          summary: 'Atualizado',
+          summary: 'Ata atualizada',
+          detail: 'Os dados da ata foram atualizados com sucesso.',
           life: 1500,
         });
+  
+        // Fechar o modal e recarregar as atas
         this.closeEditModal();
-        this.fetchAtas(); // Atualiza a lista de atas
+        this.fetchAtas();
       } catch (error) {
-        console.error('Erro ao atualizar ata:', error);
+        console.error('Erro ao atualizar ata ou documento:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Não foi possível atualizar a ata ou o arquivo.',
+          life: 5000,
+        });
       }
     }
   }
+  
+  
 
   futureDateValidator(control: any): { [key: string]: boolean } | null {
     const selectedDate = new Date(control.value);

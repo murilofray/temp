@@ -16,7 +16,7 @@
         <td>{{ buscarNomeServidor(progressao.servidorId) }}</td>
         <td>
           <span *ngIf="progressao.aprovado === null">Pendente</span>
-          <span *ngIf="progressao.aprovado === true">Aprovado</span>
+          <span *ngIf="progressao.aprovado === true">Concluído</span>
           <span *ngIf="progressao.aprovado === false">Recusado</span>
         </td>
         <td>{{ progressao.tipo }}</td>
@@ -33,25 +33,25 @@
 <p-dialog header="Detalhe da Progressão" [(visible)]="displayDialogDetalhes" [style]="{ width: '50vw' }" modal="true">
   <div *ngIf="selectedProgressao" class="dialog-content">
     <div class="field">
-      <label><strong> Docente: </strong></label>
+      <label> Docente: </label>
       <span> {{ buscarNomeServidor(selectedProgressao.servidorId) }}</span>
     </div>
     <div class="field">
-      <label><strong> Status: </strong></label>
+      <label>Status: </label>
       <span *ngIf="selectedProgressao.aprovado === null"> Pendente </span>
       <span *ngIf="selectedProgressao.aprovado === true"> Aprovado </span>
       <span *ngIf="selectedProgressao.aprovado === false"> Recusado </span>
     </div>
     <div class="field">
-      <label><strong> Tipo: </strong></label>
+      <label> Tipo: </label>
       <span> {{ selectedProgressao.tipo }}</span>
     </div>
     <div class="field">
-      <label><strong> Data: </strong></label>
+      <label> Data: </label>
       <span> {{ formatarData(selectedProgressao.data) }}</span>
     </div>
-    <div class="field" *ngIf="selectedProgressao.detalhes">
-      <label><strong> Descrição: </strong></label>
+    <div class="field">
+      <label> Descrição: </label>
       <span> {{ selectedProgressao.detalhes }}</span>
     </div>
   </div>

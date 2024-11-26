@@ -112,7 +112,7 @@ export class DocumentoAlunoService {
   async downloadPDF(caminho: string) {
     // URL do endpoint para download
 
-    const url = `http://localhost:3333/api/doc/download?docPath=${caminho}`;
+    const url = `${environment.apiUrl}/doc/download?docPath=${caminho}`;
 
     // Faz a requisição para o backend usando axios.get
     axios

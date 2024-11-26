@@ -29,7 +29,8 @@ import { AcompanharPontuacaoComponent } from './modulos/gestao-docentes/acompanh
 import { HomeComponent2 } from './modulos/gestao-docentes/home/home.component';
 import { HomeSecretariaComponent } from './modulos/gestao-docentes/home-secretaria/home-secretaria.component';
 import { SubirTabelaComponent } from './modulos/gestao-docentes/subir-tabela/subir-tabela.component';
-
+import { AcompanharProgressoesComponent } from './modulos/gestao-docentes/acompanhar-progressoes/acompanhar-progressoes.component';
+import { HistoricoProgressoesComponent } from './modulos/gestao-docentes/historico-progressoes/historico-progressoes.component';
 import { VisualizarPontuacaoParaAtribuicaoComponent } from './modulos/gestao-docentes/visualizar-pontuacao-para-atribuicao/visualizar-pontuacao-para-atribuicao.component';
 import { RelatorioOcorrenciasParaProgressaoDiretorComponent } from './modulos/gestao-docentes/relatorio-ocorrencias-para-progressao-diretor/relatorio-ocorrencias-para-progressao-diretor.component';
 import { GerenciarProgressoesDiretorComponent } from './modulos/gestao-docentes/gerenciar-progressoes-diretor/gerenciar-progressoes-diretor.component';
@@ -42,13 +43,13 @@ import { GerenciarCategoriaCertificadoComponent } from './modulos/gestao-docente
 // Módulo Prestação de Conta
 import { HomeComponent } from './modulos/prestacao-contas/home/home.component';
 import { CadastrarServidorComponent } from './comum/cadastrar-servidor/cadastrar-servidor.component';
-import { BemConsolidarProponenteComponent } from './modulos/prestacao-contas/consolidar-proponente/bem-consolidar-proponente/bem-consolidar-proponente.component';
+import { BemConsolidarProponenteComponent } from './modulos/prestacao-contas/pesquisa-preco/bem-consolidar-proponente/bem-consolidar-proponente.component';
 import { ContaBancariaComponent } from './modulos/prestacao-contas/conta-bancaria-cadastro/conta-bancaria.component';
 import { PddeCadastroComponent } from './modulos/prestacao-contas/pdde-cadastro/pdde-cadastro.component';
 import { ProgramaCadastroComponent } from './modulos/prestacao-contas/programa/programa-cadastro.component';
 import { BemPesquisaPrecoComponent } from './modulos/prestacao-contas/pesquisa-preco/bem-pesquisar-preco/bem-pesquisa-preco.component';
 import { ServicoPesquisaPrecoComponent } from './modulos/prestacao-contas/pesquisa-preco/servico-pesquisa-preco/servico-pesquisa-preco.component';
-import { ServicoConsolidarProponenteComponent } from './modulos/prestacao-contas/consolidar-proponente/servico-consolidar-proponente/servico-consolidar-proponente.component';
+import { ServicoConsolidarProponenteComponent } from './modulos/prestacao-contas/pesquisa-preco/servico-consolidar-proponente/servico-consolidar-proponente.component';
 import { GerarTermoDeDoacaoComponent } from './modulos/prestacao-contas/gerar-termo-de-doacao/gerar-termo-de-doacao.component';
 import { GerarDemonstrativoExecucaoComponent } from './modulos/prestacao-contas/gerar-demonstrativo-execucao/gerar-demonstrativo-execucao.component';
 import { ListaApmsComponent } from './modulos/prestacao-contas/lista-apms/lista-apms.component';
@@ -66,6 +67,7 @@ import { ListaFornecedorComponent } from './modulos/prestacao-contas/fornecedor/
 import { ListaOfiMemComponent } from './modulos/prestacao-contas/oficio-memorando/lista-ofimem/lista-ofimem.component';
 import { VisualizarQuinquenioComponent } from './modulos/gestao-docentes/visualizar-quinquenio/visualizar-quinquenio.component';
 import { RealizarTransferenciaComponent } from './modulos/gestao-academica/realizar-transferencia/realizar-transferencia.component';
+import { GerenciarConfiguracoesSistemaComponent } from './modulos/gestao-docentes/gerenciar-configuracoes-sistema/gerenciar-configuracoes-sistema.component';
 
 //
 // Cada grupo coloca a mão apenas onde é devido, evitando maiores conflitos nas linhas abaixo.
@@ -96,6 +98,8 @@ const routesDocentes: any = {
     { path: 'visualizar-ocorrencias', component: VisualizarOcorrenciasComponent },
     { path: 'lancar-ocorrencia', component: LancarOcorrenciasComponent },
     { path: 'acompanhar-pontuacao', component: AcompanharPontuacaoComponent },
+    { path: 'acompanhar-progressoes', component: AcompanharProgressoesComponent },
+    { path: 'historico-progressoes', component: HistoricoProgressoesComponent },
     { path: 'home', component: HomeComponent2 },
     { path: 'home-secretaria', component: HomeSecretariaComponent },
     { path: 'subir-tabela', component: SubirTabelaComponent },
@@ -103,13 +107,14 @@ const routesDocentes: any = {
     { path: 'gerenciar-progressoes-diretor', component: GerenciarProgressoesDiretorComponent },
     { path: 'gerenciar-titulos', component: GerenciarTitulosComponent },
     { path: 'lancar-titulos', component: LancarTitulosComponent },
-    { 
+    {
       path: 'relatorio-ocorrencias-para-progressao-diretor',
       component: RelatorioOcorrenciasParaProgressaoDiretorComponent,
     },
     {  path: 'gerenciar-abono', component: GerenciarAbonoComponent },
     { path: 'gerenciar-categoria-certificado', component: GerenciarCategoriaCertificadoComponent},
     { path: 'visualizar-quinquenio', component: VisualizarQuinquenioComponent },
+    { path: 'gerenciar-configuracoes-sistema', component: GerenciarConfiguracoesSistemaComponent},
   ],
 };
 

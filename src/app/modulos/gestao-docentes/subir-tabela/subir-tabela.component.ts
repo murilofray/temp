@@ -3,6 +3,7 @@ import { DocumentoService } from '../services/documento.service'; // Serviço pa
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-subir-tabela',
@@ -26,8 +27,9 @@ export class SubirTabelaComponent {
   uploadFile(): void {
     if (this.selectedFile) {
       const formData = new FormData();
+      formData.append('caminho', 'tabela_vencimento/');   
+      formData.append('tipoDocumentoId', '20');
       formData.append('pdf', this.selectedFile);
-      formData.append('tipoDocumentoId', '1');
 
       // Upload do documento
       this.documentoService.createDocumentoScan(formData).subscribe(
@@ -44,10 +46,10 @@ export class SubirTabelaComponent {
   }
 
   verDocumento(): void {
-    this.documentoService.getDocumentoCaminho(5).subscribe(
+    this.documentoService.getUltimoDocumentoTipo20().subscribe(
       (response) => {
         if (response.caminho) {
-          const pdfUrl = `http://localhost:3333/docs/${response.caminho}`;
+          const pdfUrl = `${environment.docsApiURL}${response.caminho}`;
           window.open(pdfUrl, '_blank');
         } else {
           console.error('Caminho do documento não encontrado.');

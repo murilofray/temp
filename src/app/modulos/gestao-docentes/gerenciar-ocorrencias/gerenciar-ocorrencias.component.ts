@@ -10,6 +10,8 @@ import { ServidorService } from '../services/servidor.service';
 import {jwtDecode} from 'jwt-decode';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextareaModule } from 'primeng/inputtextarea';
+import { DocumentoService } from '../services/documento.service';
+import { environment } from 'src/environments/environment';
 
 export interface Ocorrencia {
   id: number;
@@ -78,7 +80,8 @@ export class GerenciarOcorrenciasComponent implements OnInit {
   constructor(
     private ocorrenciaService: OcorrenciaService,
     private docenteService: DocenteService,
-    private servidorService: ServidorService
+    private servidorService: ServidorService,
+    private documentoService: DocumentoService
   ) {}
 
   async ngOnInit() {
@@ -281,6 +284,24 @@ export class GerenciarOcorrenciasComponent implements OnInit {
       await this.carregarOcorrenciasPorStatus(this.statusSelecionado);
     } else {
       await this.carregarOcorrencias();
+    }
+  }
+
+  verDocumento(documentoScanId: number): void {
+    if (documentoScanId) {
+      this.documentoService.getDocumentoCaminho(documentoScanId).subscribe(
+        (response) => {
+          if (response.caminho) {
+            const pdfUrl = `${environment.docsApiURL}${response.caminho}`;
+            window.open(pdfUrl, '_blank');
+          } else {
+            console.error('Caminho do documento não encontrado.');
+          }
+        },
+        (error) => console.error('Erro ao carregar o documento:', error),
+      );
+    } else {
+      console.error('ID do documento escaneado não fornecido.');
     }
   }
 }

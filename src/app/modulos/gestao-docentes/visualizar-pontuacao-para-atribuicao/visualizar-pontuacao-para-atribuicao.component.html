@@ -4,5 +4,27 @@
   <h2 class="titulo-ocorrencias">Pontuação para Atribuição de Aulas</h2>
 
   <h2>Total: {{ pontuacaoTotal }}</h2>
-  <div>Pontuação calculada até o dia atual: {{ formatarData(hoje) }}</div>
+  <div>Pontuação calculada até o dia atual: {{ formatData(hoje) }}</div>
+
+  
+  <h3> Lista de ocorrências não abonadas: </h3>
+  <div>
+    Cada ocorrência abaixo é equivalente a um ponto perdido na pontuação para atribuição de aulas.
+    Caso a ocorrência seja aceita e o tipo de abono atribuído seja válido, o ponto será restaurado.
+  </div>
+  <p-table [value]="filteredOcorrencias" [paginator]="true" [rows]="5">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="data">Data da Ocorrência<p-sortIcon [field]="'data'"></p-sortIcon></th>
+        <th pSortableColumn="status">Estado <p-sortIcon [field]="'status'"></p-sortIcon></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-ocorrencia>
+      <tr>
+        <td>{{ formatData(ocorrencia.dataOcorrencia) }}</td>
+        <td>{{ ocorrencia.status }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
 </div>

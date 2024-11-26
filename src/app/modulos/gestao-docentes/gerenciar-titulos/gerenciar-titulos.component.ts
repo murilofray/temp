@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-gerenciar-titulos',
@@ -105,7 +106,7 @@ export class GerenciarTitulosComponent implements OnInit {
     this.documentoService.getDocumentoCaminho(documentoScanId).subscribe(
       (response) => {
         if (response.caminho) {
-          const pdfUrl = `http://localhost:3333/docs/${response.caminho}`;
+          const pdfUrl = `${environment.docsApiURL}${response.caminho}`;
           window.open(pdfUrl, '_blank');
         } else {
           console.error('Caminho do documento não encontrado.');

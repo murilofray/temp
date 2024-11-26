@@ -113,6 +113,7 @@ export class HomeComponent implements OnInit {
       try {
         const decodedToken = JSON.parse(atob(tokenJWT.split('.')[1])); // Decodifica o token
         console.log('Decoded JWT:', decodedToken); // Para depuração
+        this.nivelAcessoId = this.nivelAcesso.extrairNivelAcessoId(tokenJWT)
         const escolaId = decodedToken.servidor?.escolaId; // Extração do escolaId
         if (escolaId) {
           this.escolaId = escolaId;

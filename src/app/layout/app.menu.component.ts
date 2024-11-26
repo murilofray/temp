@@ -71,22 +71,32 @@ export class AppMenuComponent implements OnInit {
     const gestaoDocentes: any = {
       label: 'Gestão de Docentes',
       items: [
-        { label: 'Tela Inicial', icon: 'pi pi-fw pi-home', routerLink: ['/docente/home'] },
-        { label: 'Tela Inicial - Secretaria', icon: 'pi pi-fw pi-home', routerLink: ['/docente/home-secretaria'] },
+        { label: 'Tela Inicial', icon: 'pi pi-fw pi-home', routerLink: ['/docente/home'], requiredAccess: [nae.DOCENTE.descricao], },
+        { label: 'Tela Inicial - Secretaria', icon: 'pi pi-fw pi-home', routerLink: ['/docente/home-secretaria'],  requiredAccess: [nae.ADMINISTRADOR.descricao],  },
+        
         {
           label: 'Ocorrências',
           icon: 'pi pi-fw pi-exclamation-circle',
           items: [
-            { label: 'Lançar Ocorrências', icon: 'pi pi-fw pi-pencil', routerLink: ['/docente/lancar-ocorrencia'] },
+            { label: 'Lançar Ocorrências', icon: 'pi pi-fw pi-pencil', routerLink: ['/docente/lancar-ocorrencia'],
+              requiredAccess: [nae.DIRETOR.descricao, nae.VICE_DIRETOR.descricao, nae.ESCRITUARIO.descricao],
+             },
             {
               label: 'Visualizar Ocorrências',
               icon: 'pi pi-fw pi-eye',
               routerLink: ['/docente/visualizar-ocorrencias'],
+              requiredAccess: [
+                nae.DIRETOR.descricao,
+                nae.VICE_DIRETOR.descricao,
+                nae.DOCENTE.descricao,
+                nae.ESCRITUARIO.descricao,
+              ],
             },
             {
               label: 'Relatório de Ocorrências',
               icon: 'pi pi-fw pi-chart-bar',
               routerLink: ['/docente/relatorio-ocorrencias-para-progressao-diretor'],
+              requiredAccess: [nae.DIRETOR.descricao, nae.VICE_DIRETOR.descricao],
             },
             { label: 'Gerenciar Ocorrências', icon: 'pi pi-fw pi-cog', routerLink: ['/docente/gerenciar-ocorrencia'] },
           ],
@@ -95,8 +105,21 @@ export class AppMenuComponent implements OnInit {
           label: 'Títulos',
           icon: 'pi pi-fw pi-bookmark',
           items: [
-            { label: 'Lançar Títulos', icon: 'pi pi-fw pi-pencil', routerLink: ['/docente/lancar-titulos'] },
-            { label: 'Gerenciar Títulos', icon: 'pi pi-fw pi-cog', routerLink: ['/docente/gerenciar-titulos'] },
+            { label: 'Lançar Títulos', icon: 'pi pi-fw pi-pencil', routerLink: ['/docente/lancar-titulos'],
+              requiredAccess: [
+                nae.DIRETOR.descricao,
+                nae.VICE_DIRETOR.descricao,
+                nae.DOCENTE.descricao,
+                nae.ESCRITUARIO.descricao,
+              ],
+             },
+            { label: 'Gerenciar Títulos', icon: 'pi pi-fw pi-cog', routerLink: ['/docente/gerenciar-titulos'],
+              requiredAccess: [
+                nae.DIRETOR.descricao,
+                nae.VICE_DIRETOR.descricao,
+                nae.ADMINISTRADOR.descricao,
+              ],
+             },
           ],
         },
         {
@@ -107,16 +130,41 @@ export class AppMenuComponent implements OnInit {
               label: 'Pontuação para Atribuição de Aulas',
               icon: 'pi pi-fw pi-eye',
               routerLink: ['/docente/visualizar-pontuacao-para-atribuicao'],
+              requiredAccess: [
+                nae.DIRETOR.descricao,
+                nae.VICE_DIRETOR.descricao,
+                nae.DOCENTE.descricao,
+                nae.ESCRITUARIO.descricao,
+              ],
+            },
+            {
+              label: 'Progressões em Andamento',
+              icon: 'pi pi-fw pi-eye',
+              routerLink: ['/docente/acompanhar-progressoes'],
+              requiredAccess: [nae.ADMINISTRADOR.descricao],
             },
             {
               label: 'Gerenciar Progressões',
               icon: 'pi pi-fw pi-file',
               routerLink: ['/docente/gerenciar-progressoes-diretor'],
+              requiredAccess: [nae.DIRETOR.descricao, nae.VICE_DIRETOR.descricao],
+            },
+            {
+              label: 'Histórico de Progressões',
+              icon: 'pi pi-fw pi-chart-bar',
+              routerLink: ['/docente/historico-progressoes'],
+              requiredAccess: [nae.ADMINISTRADOR.descricao],
             },
             {
               label: 'Acompanhar Minha Pontuação',
               icon: 'pi pi-fw pi-chart-line',
               routerLink: ['/docente/acompanhar-pontuacao'],
+              requiredAccess: [
+                nae.DIRETOR.descricao,
+                nae.VICE_DIRETOR.descricao,
+                nae.DOCENTE.descricao,
+                nae.ESCRITUARIO.descricao,
+              ],
             },
           ],
         },
@@ -125,8 +173,16 @@ export class AppMenuComponent implements OnInit {
           label: 'Configurações do Sistema',
           icon: 'pi pi-sliders-h',
           routerLink: ['/docente/gerenciar-configuracoes-sistema'],
+          requiredAccess: [nae.ADMINISTRADOR.descricao],
         },
-        { label: 'Visualizar Quinquênio', icon: 'pi pi-calculator', routerLink: ['/docente/visualizar-quinquenio'] },
+        { label: 'Visualizar Quinquênio', icon: 'pi pi-calculator', routerLink: ['/docente/visualizar-quinquenio'],
+          requiredAccess: [
+            nae.DIRETOR.descricao,
+            nae.VICE_DIRETOR.descricao,
+            nae.DOCENTE.descricao,
+            nae.ESCRITUARIO.descricao,
+          ],
+         },
       ],
     };
 
@@ -137,7 +193,7 @@ export class AppMenuComponent implements OnInit {
         {
           label: 'Turma',
           icon: 'pi pi-fw pi-id-card',
-          routerLink: ['/academico/turma'],
+          routerLink: ['/academico/questionarios/turma'],
           requiredAccess: [nae.DOCENTE.descricao],
         },
         {
@@ -147,13 +203,13 @@ export class AppMenuComponent implements OnInit {
           requiredAccess: [nae.COORDENADOR.descricao],
         },
         {
-         
+
           label: 'Gerenciar Alergias',
-         
+
           icon: 'pi pi-fw pi-book',
-         
+
           routerLink: ['/academico/gerenciar-alergias'],
-        
+
           requiredAccess: [nae.COORDENADOR.descricao, nae.ADMINISTRADOR.descricao],
         },
         {

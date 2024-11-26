@@ -41,6 +41,8 @@ export class GerenciarConfiguracoesSistemaComponent {
   selectedConfiguracao: any;
   newConfiguracao: any = {};
   selectedYear: any;
+  selectedDataInicio: any;
+  selectedDataFim: any;
 
   constructor(
     private configuracaoService: ConfiguracaoService,
@@ -60,9 +62,15 @@ export class GerenciarConfiguracoesSistemaComponent {
 
 
   mostrarDialogEditar(configuracao: any) {
-    this.selectedConfiguracao = { ...configuracao };
+    this.selectedConfiguracao = configuracao;
+    this.displayDialogEditar = true;
+
     this.selectedYear = new Date(this.selectedConfiguracao.anoLetivo);
     this.selectedYear.setYear(this.selectedConfiguracao.anoLetivo);
+
+    this.selectedDataInicio = new Date(this.selectedConfiguracao.InicioAnoLetivo);
+    this.selectedDataFim = new Date(this.selectedConfiguracao.FimAnoLetivo);
+
     this.displayDialogEditar = true;
   }
 
@@ -72,16 +80,17 @@ export class GerenciarConfiguracoesSistemaComponent {
   }
 
   salvarConfiguracao() {
-    if ( this.selectedConfiguracao.id
+    if (this.selectedConfiguracao.id
       && this.selectedYear.getFullYear() > 0
+      && this.selectedDataInicio
+      && this.selectedDataFim
       && this.selectedConfiguracao.tempoMinimoAssiduidade > 0
       && this.selectedConfiguracao.tempoMinimoTitulo > 0
-      && this.selectedConfiguracao.cursoHorasMinimas > 0
-      && this.selectedConfiguracao.cursoValidade > 0
-      && this.selectedConfiguracao.CursoHorasMaxAno > 0
     ) {
+      this.selectedConfiguracao.InicioAnoLetivo = this.selectedDataInicio;
+      this.selectedConfiguracao.FimAnoLetivo = this.selectedDataFim;
       this.selectedConfiguracao.anoLetivo = this.selectedYear.getFullYear();
-      
+
       this.selectedConfiguracao.updatedAt = new Date();
       this.configuracaoService.editarConfiguracao(this.selectedConfiguracao).then(() => {
         this.displayDialogEditar = false;
@@ -94,24 +103,39 @@ export class GerenciarConfiguracoesSistemaComponent {
   }
 
   criarConfiguracao() {
-    if ( this.selectedYear.getFullYear() > 0
+    if (this.selectedYear.getFullYear() > 0
+      && this.selectedDataInicio
+      && this.selectedDataFim
       && this.newConfiguracao.tempoMinimoAssiduidade > 0
       && this.newConfiguracao.tempoMinimoTitulo > 0
-      && this.newConfiguracao.cursoHorasMinimas > 0
-      && this.newConfiguracao.cursoValidade > 0
-      && this.newConfiguracao.CursoHorasMaxAno > 0
     ) {
+      console.log('ano: ', this.selectedYear.getFullYear())
+
+
+      this.newConfiguracao.InicioAnoLetivo = this.selectedDataInicio;
+      this.newConfiguracao.FimAnoLetivo = this.selectedDataFim;
       this.newConfiguracao.anoLetivo = this.selectedYear.getFullYear();
-      
+
       this.newConfiguracao.createdAt = new Date();
       this.configuracaoService.criarConfiguracao(this.newConfiguracao).then(() => {
         this.displayDialogCriar = false;
         this.carregarConfiguracoes();
       });
-
     } else {
       this.mostrarMensagem('Erro', 'Por favor, preencha todos os campos corretamente.', 'error');
     }
+  }
+
+  formatData(data: Date) {
+    data = new Date(data);
+
+    // Formata para "dd/MM/aaaa"
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const ano = data.getFullYear();
+
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+    return dataFormatada;
   }
 
   mostrarMensagem(titulo: string, detalhe: string, tipo: 'success' | 'info' | 'warn' | 'error') {

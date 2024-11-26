@@ -14,6 +14,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { jwtDecode } from 'jwt-decode';
 import { ProgressaoService } from '../services/progressao.service';
 import { DocumentoService } from '../services/documento.service';
+import { environment } from 'src/environments/environment';
 
 export interface JwtPayload {
   id: number;
@@ -122,7 +123,7 @@ export class HomeComponent2 implements OnInit {
     this.documentoService.getDocumentoCaminho(4).subscribe(
       (response) => {
         if (response.caminho) {
-          const pdfUrl = `http://localhost:3333/docs/${response.caminho}`;
+          const pdfUrl = `${environment.docsApiURL}${response.caminho}`;
           window.open(pdfUrl, '_blank');
         } else {
           console.error('Caminho do documento não encontrado.');

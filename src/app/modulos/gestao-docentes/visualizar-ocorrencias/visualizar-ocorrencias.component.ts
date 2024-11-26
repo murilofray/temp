@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { TableModule } from 'primeng/table'; // Importando o módulo Table
 import { ButtonModule } from 'primeng/button'; // Importando o módulo Button
 import { DropdownModule } from 'primeng/dropdown'; // Importando o módulo Dropdown
@@ -50,7 +50,6 @@ export class VisualizarOcorrenciasComponent {
   displayDialogJustificar: boolean = false;
   selectedOcorrencia: any;
   selectedAbono: any;
-  filteredOcorrencias: any[] = [];
   ocorrencias: any;
   abonos: any;
   abonosNomes: any;
@@ -66,7 +65,8 @@ export class VisualizarOcorrenciasComponent {
     private abonoService: AbonoService,
     private servidorService: ServidorService,
     private formBuilder: FormBuilder,
-    private documentoService: DocumentoService
+    private documentoService: DocumentoService,
+    private cdr: ChangeDetectorRef // Injetar ChangeDetectorRef
   ) {
   }
 
@@ -84,8 +84,21 @@ export class VisualizarOcorrenciasComponent {
 
     this.ocorrenciaService.buscarOcorrenciasDoServidor(decodedToken.servidor.id).then((data) => {
       this.ocorrencias = data;
-      this.filteredOcorrencias = this.ocorrencias;
     });
+  }
+  carregarOcorrencias() {
+    const tokenJWT = localStorage.getItem('jwt');
+    const decodedToken: JwtPayload = jwtDecode(tokenJWT);
+  
+    this.ocorrenciaService
+      .buscarOcorrenciasDoServidor(decodedToken.servidor.id)
+      .then((data) => {
+        this.ocorrencias = data;
+        this.cdr.detectChanges(); // Forçar atualização da view
+      })
+      .catch((error) => {
+        console.error('Erro ao carregar ocorrências:', error);
+      });
   }
 
   buscarDocente(id: any): string {
@@ -216,6 +229,7 @@ export class VisualizarOcorrenciasComponent {
 
             this.mostrarMensagem("Sucesso","Ocorrência justificada com sucesso",'success');
 
+            window.location.reload();
             this.displayDialogJustificar = false;
 
             this.selectedAbono = null;
@@ -311,11 +325,6 @@ export class VisualizarOcorrenciasComponent {
     return contador;
   }
   
-
-  filterOcorrencias() {
-    this.filteredOcorrencias = this.ocorrencias.filter((ocorrencia) => ocorrencia.dataOcorrencia);
-  }
-
   mostrarMensagem(titulo: string, detalhe: string, tipo: 'success' | 'info' | 'warn' | 'error') {
     this.messageService.add({ severity: tipo, summary: titulo, detail: detalhe, life: 3000 });
   }

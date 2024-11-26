@@ -58,7 +58,7 @@ export class ValidationService {
     validarCep(cepControl: any): Promise<any> {
         return new Promise((resolve, reject) => {
             if (cepControl) {
-                const cep = cepControl.value.replace(/\D/g, ''); // Remove caracteres não numéricos do CEP
+                const cep = cepControl.replace(/\D/g, ''); // Remove caracteres não numéricos do CEP
                 if (cep.length === 8) {
                     this.viaCepService.validarCep(cep).subscribe(
                         (resposta) => {
