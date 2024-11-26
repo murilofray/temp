@@ -3,6 +3,8 @@
     <div class="configuracoes-container">
         <h2 class="titulo-configuracoes">Configurações do Sistema</h2>
 
+        <button pButton type="button" label="Criar" class="p-button-success"
+        (click)="mostrarDialogCriar()"></button>
         <!-- Exibição da configuração -->
         <div *ngIf="configuracoes.length > 0">
             <p-table [value]="configuracoes" [paginator]="true" [rows]="5">
@@ -35,8 +37,6 @@
                 </ng-template>
             </p-table>
 
-            <button pButton type="button" label="Criar" class="p-button-success"
-                (click)="mostrarDialogCriar()"></button>
         </div>
     </div>
 </div>

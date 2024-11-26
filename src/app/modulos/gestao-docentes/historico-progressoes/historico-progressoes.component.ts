@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common'; // Importando CommonModule
 import { FileUploadModule } from 'primeng/fileupload';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { ServidorService } from 'src/app/comum/services/servidor.service';
+import { ServidorService } from '../services/servidor.service';
 import { OcorrenciaService } from '../services/ocorrencia.service';
 import { ProgressaoService } from '../services/progressao.service';
 import { ConfirmationService } from 'primeng/api';
@@ -44,7 +44,7 @@ export class HistoricoProgressoesComponent {
   displayDialogDetalhes: boolean = false;
   diretorLogado: any;
   professores: any;
-  progressoes: any = [];
+  progressoes: any[] = [];
   selectedProgressao: any;
 
   constructor(
@@ -58,9 +58,21 @@ export class HistoricoProgressoesComponent {
     const tokenJWT = localStorage.getItem('jwt');
     const decodedToken: JwtPayload = jwtDecode(tokenJWT);
 
-    this.servidorService.buscarServidoresPorEscola(decodedToken.escolaId).then((data) => {
-      this.professores = data;
-    });
+      this.professores = await this.servidorService.getAll();
+
+      console.log(this.professores)
+      this.professores = this.professores.data;
+      console.log(this.professores)
+      
+      this.professores.forEach((prof) => {
+        this.progressaoService.buscarProgressoesDoServidor(prof.id).then((data) => {
+          if (data.data) {
+            data.data.forEach((prog) => {
+              this.progressoes.push(prog);
+            });
+          }
+        });
+      });
   }
   atualizarProgressao(progressao: any, aprovado: boolean) {
     try {
