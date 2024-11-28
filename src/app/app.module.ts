@@ -39,7 +39,7 @@ import { JwtInterceptor } from './interceptors/jwt.interceptor';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppLayoutModule } from './layout/app.layout.module';
-
+import { HashLocationStrategy } from '@angular/common'; 
 angularRegisterLocaleData(localePt, 'pt-BR');
 
 @NgModule({
@@ -63,7 +63,7 @@ angularRegisterLocaleData(localePt, 'pt-BR');
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'pt-BR' },
-    { provide: LocationStrategy, useClass: PathLocationStrategy },
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
     CountryService,
     CustomerService,
     EventService,
