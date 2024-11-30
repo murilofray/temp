@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3333/api',
-  docsApiURL: 'http://localhost:3333/docs/',
+  apiUrl: 'https://seceduepitacio.azurewebsites.net/api',
+  docsApiURL: 'https://seceduepitacio.azurewebsites.net/docs/',
 };
 
 /*
