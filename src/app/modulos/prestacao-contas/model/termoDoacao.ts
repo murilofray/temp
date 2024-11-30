@@ -1,6 +1,6 @@
 import { DocumentoScan } from 'src/app/comum/model/documentoScan';
 import { Escola } from 'src/app/comum/model/escola';
-import { Bem } from './bem';
+import { Item } from './item';
 
 export interface TermoDoacao {
   id: number;
@@ -13,5 +13,5 @@ export interface TermoDoacao {
   deletedAt?: Date;
   Escola?: Escola;
   DocumentosScan?: DocumentoScan;
-  Bem?: Bem[];
+  Item?: Item[];
 }

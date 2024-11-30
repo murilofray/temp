@@ -221,3 +221,15 @@
 .pagination a:hover {
   text-decoration: underline;
 }
+
+.p-editor-container {
+  width: 100% !important;
+  background-color: #ffffff !important;
+}
+
+.p-editor-content {
+  min-height: 200px;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 10px;
+}

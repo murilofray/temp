@@ -1,6 +1,5 @@
 import { PrestacaoContas } from './prestacaoContas';
-import { Bem } from './bem';
-import { Servico } from './servico';
+import { Item } from './item';
 import { DocumentoScan } from 'src/app/comum/model/documentoScan';
 import { Programa } from './programa';
 
@@ -25,6 +24,5 @@ export interface PesquisaPreco {
   DocumentoScanB?: DocumentoScan;
   DocumentoScanC?: DocumentoScan;
   Programa?: Programa;
-  Bem?: Bem[];
-  Servico?: Servico[];
+  Item?: Item[];
 }

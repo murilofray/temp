@@ -35,10 +35,10 @@ import { jwtDecode } from 'jwt-decode';
 })
 export class AcompanharPontuacaoComponent {
   assiduidadeData = [
-    { ano: '2024', pontos: 1 },
-    { ano: '2023', pontos: 2 },
-    { ano: '2022', pontos: 1 },
-    { ano: '2021', pontos: 2 },
+    { ano: '2023', pontos: 0 },
+    { ano: '2022', pontos: 2 },
+    { ano: '2021', pontos: 1 },
+    { ano: '2020', pontos: 2 },
   ];
 
   titulosData = [

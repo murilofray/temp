@@ -15,13 +15,22 @@
           (click)="navigateToPesquisa()"
         ></button>
         <button
-          *ngIf="isAprovarPesquisaPreco()"
+          *ngIf="isAprovarPesquisaPreco() && isGestor"
           pButton
           pRipple
           label="Aprovar a Pesquisa de Preços"
           icon="pi pi-check"
           class="p-button-success"
           (click)="aprovarPesquisaPreco()"
+        ></button>
+        <button
+          *ngIf="isAprovarPesquisaPreco() && isGestor"
+          pButton
+          pRipple
+          label="GERAR PDF"
+          icon="pi pi-check"
+          class="p-button-success"
+          (click)="gerarPDF()"
         ></button>
       </div>
     </ng-template>
@@ -33,7 +42,7 @@
       <div class="card">
         <p-table
           #dt
-          [value]="listaBens"
+          [value]="listaItens"
           styleClass="p-datatable-striped"
           responsiveLayout="scroll"
           [rows]="10"
@@ -95,21 +104,21 @@
             </tr>
           </ng-template>
 
-          <ng-template pTemplate="body" let-bem let-i="rowIndex">
+          <ng-template pTemplate="body" let-item let-i="rowIndex">
             <tr>
               <td style="width: 19%; min-width: 10rem">
-                {{ bem.descricao }}
+                {{ item.descricao }}
               </td>
 
               <td style="width: 5%; min-width: 10rem">
-                {{ bem.quantidade }}
+                {{ item.quantidade }}
               </td>
 
               <!-- Proponente A -->
               <td style="width: 22%; min-width: 12rem">
                 <div *ngIf="proponentesTopo(0).existe">
                   <div style="display: flex; align-items: center">
-                    <div>{{ valorProponente(bem, 0).valor | currency: 'BRL' }}</div>
+                    <div>{{ valorProponente(item, 0).valor | currency: 'BRL' }}</div>
                   </div>
                 </div>
               </td>
@@ -118,7 +127,7 @@
               <td style="width: 22%; min-width: 12rem">
                 <div *ngIf="proponentesTopo(1).existe">
                   <div style="display: flex; align-items: center">
-                    <div>{{ valorProponente(bem, 1).valor | currency: 'BRL' }}</div>
+                    <div>{{ valorProponente(item, 1).valor | currency: 'BRL' }}</div>
                   </div>
                 </div>
               </td>
@@ -127,20 +136,20 @@
               <td style="width: 22%; min-width: 12rem">
                 <div *ngIf="proponentesTopo(2).existe">
                   <div style="display: flex; align-items: center">
-                    <div>{{ valorProponente(bem, 2).valor | currency: 'BRL' }}</div>
+                    <div>{{ valorProponente(item, 2).valor | currency: 'BRL' }}</div>
                   </div>
                 </div>
               </td>
 
               <!-- Apresentação do Melhor Proponente e o Valor -->
               <td style="width: 5%; min-width: 12rem">
-                <div>{{ bem.melhorFornecedor.razaoSocial }}</div>
-                <div>{{ bem.melhorValor | currency: 'BRL' }}</div>
+                <div>{{ item.melhorFornecedor.razaoSocial }}</div>
+                <div>{{ item.melhorValor | currency: 'BRL' }}</div>
               </td>
 
-              <!-- Ações para cada Bem -->
+              <!-- Ações para cada Item -->
               <td style="width: 5%; min-width: 10rem">
-                <div class="button-group" *ngIf="!bem.aprovado">
+                <div class="button-group" *ngIf="!item.aprovado && isGestor">
                   <button
                     pButton
                     pRipple
@@ -149,7 +158,7 @@
                     label="Aprovar"
                     pTooltip="Aprovar Proponente"
                     tooltipPosition="top"
-                    (click)="aprovarProponente(bem)"
+                    (click)="aprovarProponente(item)"
                   ></button>
                   <button
                     pButton
@@ -159,7 +168,7 @@
                     label="Alterar"
                     pTooltip="Alterar Proponente"
                     tooltipPosition="top"
-                    (click)="alterarProponente(bem)"
+                    (click)="alterarProponente(item)"
                   ></button>
                 </div>
 
@@ -169,7 +178,7 @@
                   optionLabel="proponente"
                   optionValue="value"
                   [(ngModel)]="proponenteSelecionado"
-                  (onChange)="onFornecedorChange(bem, i)"
+                  (onChange)="onFornecedorChange(item, i)"
                 >
                 </p-dropdown> -->
               </td>
@@ -202,7 +211,7 @@
             optionValue="value"
             [(ngModel)]="proponenteSelecionadoDropdown"
             placeholder="Selecione um Proponente"
-            (onChange)="onProponenteChange($event, bem)"
+            (onChange)="onProponenteChange($event, item)"
           >
             <div *ngIf="submitted && !proponenteSelecionadoDropdown" class="p-invalid">
               <span>Selecione um Proponente.</span>
@@ -242,7 +251,7 @@
           label="Salvar"
           icon="pi pi-check"
           class="p-button-success"
-          (click)="submitAlterarProponente(bem)"
+          (click)="submitAlterarProponente(item)"
         ></button>
         <button
           pButton

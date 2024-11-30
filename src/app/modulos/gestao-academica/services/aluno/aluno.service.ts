@@ -331,7 +331,7 @@ export class AlunoService {
       .then((response) => {
         return response.data.map((aluno: any) => ({
           ...aluno,
-          turmaDescricao: `${aluno.Turma.ano} ${aluno.Turma.letra}`,
+          turmaDescricao: `${aluno.Turma.ano} ${aluno.Turma.letra} ${aluno.Turma.anoLetivo}`,
         }));
       })
       .catch((err) => {

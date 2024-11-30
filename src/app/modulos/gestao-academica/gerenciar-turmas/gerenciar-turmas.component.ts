@@ -23,6 +23,7 @@ import { JwtPayload } from '../model/jwtPayload';
 import { Escola } from '../model/escola';
 import { Servidor } from '../model/servidor';
 import { Turma } from '../model/turma';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-gerenciar-turmas',
@@ -41,6 +42,7 @@ import { Turma } from '../model/turma';
     ToolbarModule,
     ListboxModule,
     RouterModule,
+    DividerModule
   ],
   providers: [ConfirmationService],
   templateUrl: './gerenciar-turmas.component.html',
@@ -54,15 +56,23 @@ export class GerenciarTurmasComponent {
   public isLoading: boolean = false
 
   public turmas: Turma[];
+  public turmasRematriculas: Turma[];
+
   public turmaSelecionada: Turma;
+  public turmaRematricula: Turma;
   public turmaDetalhes: Turma;
   public detalheTurmaVisivel = false;
 
   public turmaDetalhesAlunos: [] = [];
+  public alunosTurma: [] = [];
 
   public turmaForm!: FormGroup;
+  public editarTurmaForm!: FormGroup;
 
   public isCadastrarTurmaOpen: boolean = false
+  public isEditarTurmaOpen: boolean = false
+  public isRematricularDialogOpen: boolean = false
+  public isAlunosDaTurmaDialog: boolean = false
 
   public escolas: Escola[] = [];
 
@@ -104,10 +114,10 @@ export class GerenciarTurmasComponent {
     });
 
     this.initForms()
-    
+
   }
 
-  async getUserInfo(){
+  async getUserInfo() {
     try {
       const tokenJWT = localStorage.getItem('jwt');
       if (tokenJWT) {
@@ -119,24 +129,30 @@ export class GerenciarTurmasComponent {
         let servidor = await this.servidorService.buscarServidorPorId(servidorId)
         this.servidor = servidor
 
-        if(this.userService.podeRealizarEssaFuncao(this.user.NivelAcessoServidor, [NivelAcessoEnum.ADMINISTRADOR])){ // ADMIN
+        if (this.userService.podeRealizarEssaFuncao(this.user.NivelAcessoServidor, [NivelAcessoEnum.ADMINISTRADOR])) { // ADMIN
           this.isUserAdmin = true
 
-          this.turmaService.getTurmas().then((data) => {
+          this.turmaService.getTurmasDescricao().then((data) => {
             this.turmas = data
           })
         } else {
           this.escola = this.escolas.find(x => x.id == this.servidor.Escola.id)
 
+
+          // Forms
           this.turmaForm.patchValue({
             escola: this.escola.id,
           });
-  
+
+          this.editarTurmaForm.patchValue({
+            escola: this.escola.id,
+          });
+
           this.servidorService.buscarServidorPorNivelAcessoAndEscola(this.escola.id, NivelAcessoEnum.DOCENTE.id).then((data) => {
             this.docentesEscola = data
           })
-  
-          this.turmaService.getTurmaByEscola(this.servidor.escolaId).then((data) => {
+
+          this.turmaService.getTurmaByEscolaComDescricao(this.servidor.escolaId).then((data) => {
             this.turmas = data
           })
         }
@@ -154,6 +170,14 @@ export class GerenciarTurmasComponent {
 
   initForms(): void {
     this.turmaForm = this.fb.group({
+      escola: ['', Validators.required],
+      docente: ['', Validators.required],
+      letra: ['', Validators.required],
+      ano: ['', Validators.required],
+      anoLetivo: ['', Validators.required],
+    });
+
+    this.editarTurmaForm = this.fb.group({
       escola: ['', Validators.required],
       docente: ['', Validators.required],
       letra: ['', Validators.required],
@@ -185,6 +209,7 @@ export class GerenciarTurmasComponent {
       this.turmas.push({
         ano: data.ano,
         anoLetivo: data.anoLetivo,
+        descricao: `${data.ano} ${data.letra} ${data.anoLetivo}`,
         createdAt: data.createdAt,
         deletedAt: data.deletedAt,
         escolaId: data.escolaId,
@@ -203,12 +228,115 @@ export class GerenciarTurmasComponent {
     this.turmasTable.reset()
   }
 
-  async detalhesTurma(turma: Turma){
+  async editarTurmaDialog() {
+    this.editarTurmaForm.reset({
+      escola: this.escola.id,
+      docente: this.turmaSelecionada.servidorId,
+      letra: this.turmaSelecionada.letra,
+      ano: this.turmaSelecionada.ano,
+      anoLetivo: this.turmaSelecionada.anoLetivo
+    })
+
+
+    this.isEditarTurmaOpen = true
+  }
+
+  async editarTurma() {
+    const escola = this.editarTurmaForm.get('escola').value
+    const servidor = this.editarTurmaForm.get('docente').value
+    const ano = this.editarTurmaForm.get('ano').value
+    const anoLetivo = this.editarTurmaForm.get('anoLetivo').value
+    const letra = this.editarTurmaForm.get('letra').value
+
+    this.turmaService.editarTurma(
+      this.turmaSelecionada.id,
+      +escola,
+      +servidor,
+      ano,
+      anoLetivo,
+      letra
+    ).then((data) => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Turma editada com sucesso!',
+      })
+
+      let idx = this.turmas.findIndex((item) => item.id == data.id);
+      this.turmas[idx] = {
+        ano: data.ano,
+        anoLetivo: data.anoLetivo,
+        descricao: `${data.ano} ${data.letra} ${data.anoLetivo}`,
+        createdAt: data.createdAt,
+        deletedAt: data.deletedAt,
+        escolaId: data.escolaId,
+        Escola: { nome: (this.escolas.find((x: any) => x.id == data.escolaId).nome) },
+        id: data.id,
+        letra: data.letra,
+        servidorId: data.servidorId,
+        updatedAt: data.updatedAt,
+        Servidor: data.Servidor
+      };
+    })
+
+    this.editarTurmaForm.reset()
+    this.turmasTable.reset()
+    this.isEditarTurmaOpen = false
+  }
+
+  async detalhesTurma(turma: Turma) {
     this.turmaDetalhes = turma;
     this.detalheTurmaVisivel = true
 
     this.turmaDetalhesAlunos = await this.alunoService.getAlunosByTurmaId(turma.id)
-    console.log(this.turmaDetalhesAlunos)
+  }
+  
+  async alunosDaTurmaDialog() {
+    this.isAlunosDaTurmaDialog = true
+  }
+
+  async getAlunosDaTurma(turma: Turma){
+    return  await this.alunoService.getAlunosByTurmaId(turma.id)
+  }
+
+  async rematricularDialog(){
+
+    this.alunosTurma = await this.getAlunosDaTurma(this.turmaSelecionada)
+    this.turmasRematriculas = this.turmas.filter(t => t.id !== this.turmaSelecionada.id)
+
+    this.isRematricularDialogOpen = true
+  }
+
+  private async rematricular(){
+    if(this.turmaSelecionada && this.turmaRematricula){
+      try {
+        const resposta = await this.turmaService.rematricular(this.turmaSelecionada.id, this.turmaRematricula.id)
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: resposta.message,
+        })
+
+      } catch(err) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: "Ocorreu um erro durante a rematrícula.",
+        })
+
+        console.error(err)
+      }
+    }
+
+    this.resetRematriculaAction()
+  }
+
+  private resetRematriculaAction(){
+    this.turmaSelecionada = null
+    this.turmaRematricula = null
+
+    this.isRematricularDialogOpen = false
   }
 
   deletarTurmaDialog() {
@@ -229,7 +357,7 @@ export class GerenciarTurmasComponent {
     });
   }
 
-  deletarTurma(){
+  deletarTurma() {
     this.turmaService.deletarTurma(this.turmaSelecionada.id).then((data) => {
       this.messageService.add({
         severity: 'success',
@@ -240,7 +368,7 @@ export class GerenciarTurmasComponent {
       this.turmas = this.turmas.filter((x) => x.id != this.turmaSelecionada.id)
       this.turmaSelecionada = null;
     }).catch((err) => {
-      if(err.response.data.resposta.data == 400){
+      if (err.response.data.resposta.data == 400) {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
@@ -251,11 +379,23 @@ export class GerenciarTurmasComponent {
 
     this.turmasTable.reset();
   }
- 
 
-  async onDocenteChange(e){
-    if(e.value){
+  async onDocenteChange(e) {
+    if (e.value) {
       this.docentesEscolaAdmin = await this.servidorService.buscarServidorPorNivelAcessoAndEscola(e.value, NivelAcessoEnum.DOCENTE.id)
     }
+  }
+
+  public abrirConfirmDialog() {
+    this.confirmationService.confirm({
+      key: 'reMatriculaDialog',
+      message: '', 
+      accept: () => {
+        this.rematricular()
+      },
+      reject: () => {
+        this.resetRematriculaAction()
+      }
+    });
   }
 }

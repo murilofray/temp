@@ -11,7 +11,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToolbarModule } from 'primeng/toolbar';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ListboxModule } from 'primeng/listbox';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Component, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
@@ -108,7 +108,6 @@ export class GerenciarAlunosComponent {
 
   public niveis = NivelAcessoEnum;
 
-
   constructor(
     private alunoService: AlunoService,
     private alergiaService: AlergiaService,
@@ -121,6 +120,7 @@ export class GerenciarAlunosComponent {
     private turmaService: TurmaService,
     private servidorService: ServidorService,
     public userService: UserInfoService,
+    private router: Router,
   ) {
     this.alunoForm = this.formBuilder.group({
       nome: ['', Validators.required],
@@ -162,18 +162,12 @@ export class GerenciarAlunosComponent {
     this.documentoForm = this.formBuilder.group({
       tipoDocumento: [null, Validators.required],
       documento: [null, Validators.required],
-      descricao: ['', Validators.nullValidator]
+      descricao: ['', Validators.nullValidator],
     });
     this.alergiaForm = this.formBuilder.group({
       alergiasSelecionadas: [[], Validators.nullValidator],
     });
-    this.racas = [
-      { name: 'Amarelo' },
-      { name: 'Branco' },
-      { name: 'Indígena' },
-      { name: 'Pardo' },
-      { name: 'Preto' }
-    ];
+    this.racas = [{ name: 'Amarelo' }, { name: 'Branco' }, { name: 'Indígena' }, { name: 'Pardo' }, { name: 'Preto' }];
   }
 
   ngOnInit() {
@@ -194,7 +188,7 @@ export class GerenciarAlunosComponent {
         const jwtServidor = decodedToken['servidor'];
         this.user = jwtServidor;
         // Armazena as descrições dos níveis de acesso em um array
-        this.userNiveis = this.user.NivelAcessoServidor.map(nivel => nivel.Acesso.descricao);
+        this.userNiveis = this.user.NivelAcessoServidor.map((nivel) => nivel.Acesso.descricao);
 
         if (!this.userNiveis.includes('ADMINISTRADOR')) {
           const servidorId = jwtServidor.id;
@@ -205,7 +199,6 @@ export class GerenciarAlunosComponent {
 
           this.turmas = await this.turmaService.getTurmaByEscola(this.escola.id);
         }
-
       }
     } catch (error) {
       this.messageService.add({
@@ -213,25 +206,23 @@ export class GerenciarAlunosComponent {
         summary: 'Erro',
         detail: 'Erro ao identificar o usuário.',
       });
-
     }
   }
 
   async carregarAlunos() {
     try {
       this.isLoading = true;
-      console.log('oi');
 
       const tokenJWT = localStorage.getItem('jwt');
       if (tokenJWT) {
-
         if (this.mostrarDesabilitados) {
           this.alunos = await this.alunoService.getDisabledAlunos(); // Busca alunos desabilitados
           this.alunosFiltrados = this.alunos;
         } else {
           this.alunos = await this.alunoService.getActiveAlunos(); // Busca alunos ativos
           this.alunosFiltrados = this.alunos;
-          if (!this.userNiveis.includes('ADMINISTRADOR')) { //se não for admin, traz apenas os da escola do servidor logado
+          if (!this.userNiveis.includes('ADMINISTRADOR')) {
+            //se não for admin, traz apenas os da escola do servidor logado
             //filtro por turmas da escola ou alunos sem turma
             this.alunosFiltrados = this.filtrarPorTuma(this.alunos);
           }
@@ -303,43 +294,49 @@ export class GerenciarAlunosComponent {
   validarCep() {
     const cepControl = this.alunoForm.get('cep');
 
-    this.validacaoService.validarCep(cepControl).then(result => {
-      // preenche os campos do formulário
-      this.alunoForm.patchValue({
-        logradouro: result.logradouro,
-        bairro: result.bairro,
-        cidade: result.cidade,
-        uf: result.uf
+    this.validacaoService
+      .validarCep(cepControl)
+      .then((result) => {
+        // preenche os campos do formulário
+        this.alunoForm.patchValue({
+          logradouro: result.logradouro,
+          bairro: result.bairro,
+          cidade: result.cidade,
+          uf: result.uf,
+        });
+      })
+      .catch((erro) => {
+        // exibe mensagem de erro
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: erro,
+        });
       });
-    }).catch(erro => {
-      // exibe mensagem de erro
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: erro,
-      });
-    });
   }
 
   validarCep2() {
     const cepControl = this.editarAlunoForm.get('cep');
 
-    this.validacaoService.validarCep(cepControl).then(result => {
-      // preenche os campos do formulário
-      this.editarAlunoForm.patchValue({
-        logradouro: result.logradouro,
-        bairro: result.bairro,
-        cidade: result.cidade,
-        uf: result.uf
+    this.validacaoService
+      .validarCep(cepControl)
+      .then((result) => {
+        // preenche os campos do formulário
+        this.editarAlunoForm.patchValue({
+          logradouro: result.logradouro,
+          bairro: result.bairro,
+          cidade: result.cidade,
+          uf: result.uf,
+        });
+      })
+      .catch((erro) => {
+        // exibe mensagem de erro
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: erro,
+        });
       });
-    }).catch(erro => {
-      // exibe mensagem de erro
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: erro,
-      });
-    });
   }
 
   async detalhesDialog() {
@@ -350,16 +347,16 @@ export class GerenciarAlunosComponent {
     }
 
     // IDs dos tipos de documento
-    const tipoDocIds = await this.tipoDocumentoService.getTipoDocIds() as {
-      certidaoNascimento: number,
-      nis: number,
-      rg: number,
-      cpf: number,
-      declaracaoVacinacao: number,
-      comprovanteResidencia: number,
-      autodeclaracaoRacial: number,
-      documentosResponsavel: number,
-      laudo: number
+    const tipoDocIds = (await this.tipoDocumentoService.getTipoDocIds()) as {
+      certidaoNascimento: number;
+      nis: number;
+      rg: number;
+      cpf: number;
+      declaracaoVacinacao: number;
+      comprovanteResidencia: number;
+      autodeclaracaoRacial: number;
+      documentosResponsavel: number;
+      laudo: number;
     };
 
     this.alunoSelecionado.documentos = {
@@ -371,7 +368,7 @@ export class GerenciarAlunosComponent {
       declaracaoVacinacao: null,
       autodeclaracaoRacial: null,
       documentosResponsavel: [],
-      laudos: []
+      laudos: [],
     };
 
     // documentos do aluno
@@ -419,7 +416,7 @@ export class GerenciarAlunosComponent {
     if (this.alunoSelecionado.dataNascimento != null) {
       dataNascimentoFormatada = new Date(this.alunoSelecionado.dataNascimento).toISOString().split('T')[0];
     }
-    const racaSelecionada = this.racas.find(r => r.name === this.alunoSelecionado.raca);
+    const racaSelecionada = this.racas.find((r) => r.name === this.alunoSelecionado.raca);
 
     this.editarAlunoForm.patchValue({
       nome: this.alunoSelecionado.nome,
@@ -437,7 +434,6 @@ export class GerenciarAlunosComponent {
       uf: this.alunoSelecionado.uf,
       raca: racaSelecionada,
       beneficiarioBF: this.alunoSelecionado.beneficiarioBF ? 'S' : 'N',
-
     });
     this.editarAlunoDialogVisivel = true;
   }
@@ -446,9 +442,17 @@ export class GerenciarAlunosComponent {
     this.loading = true;
 
     if (this.editarAlunoForm.valid) {
-      const cepControl = this.editarAlunoForm.value.cep;
-      this.validacaoService.validarCep(cepControl).then(result => {
-      }).catch(erro => {
+      const numero = this.editarAlunoForm.value.numero;
+      if (numero <= 0) {
+        this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Número do endereço não pode ser negativo.' });
+        return;
+      }
+      const cepControl = this.editarAlunoForm.get('cep');
+
+      try {
+        await this.validacaoService.validarCep(cepControl);
+      } catch (erro) {
         // exibe mensagem de erro
         this.messageService.add({
           severity: 'error',
@@ -457,7 +461,7 @@ export class GerenciarAlunosComponent {
         });
         this.loading = false;
         return;
-      });
+      }
 
       const nome = this.editarAlunoForm.value.nome;
       const nomeMae = this.editarAlunoForm.value.nomeMae;
@@ -471,7 +475,6 @@ export class GerenciarAlunosComponent {
       }
       const logradouro = this.editarAlunoForm.value.logradouro;
       const cep = this.editarAlunoForm.value.cep;
-      const numero = this.editarAlunoForm.value.numero;
       const bairro = this.editarAlunoForm.value.bairro;
       const cidade = this.editarAlunoForm.get('cidade').value;
       const uf = this.editarAlunoForm.get('uf').value;
@@ -490,7 +493,7 @@ export class GerenciarAlunosComponent {
         numero,
         bairro,
         cidade,
-        uf
+        uf,
       );
 
       if (resposta.error) {
@@ -502,13 +505,12 @@ export class GerenciarAlunosComponent {
       }
 
       this.loading = false;
-    } else {
-      this.loading = false;
     }
   }
 
   cadastroDocumentoDialog(aluno: Aluno) {
     this.alunoSelecionado = aluno;
+    this.mostrarDescricao = false;
     this.displayDocumentoDialog = true;
   }
 
@@ -521,16 +523,16 @@ export class GerenciarAlunosComponent {
     const tipoDocumento = this.documentoForm.get('tipoDocumento')?.value;
     const tiposDocumento = await this.tipoDocumentoService.index();
     // IDs dos tipos de documento
-    const tipoDocIds = await this.tipoDocumentoService.getTipoDocIds() as {
-      certidaoNascimento: number,
-      nis: number,
-      rg: number,
-      cpf: number,
-      declaracaoVacinacao: number,
-      comprovanteResidencia: number,
-      autodeclaracaoRacial: number,
-      documentosResponsavel: number,
-      laudo: number
+    const tipoDocIds = (await this.tipoDocumentoService.getTipoDocIds()) as {
+      certidaoNascimento: number;
+      nis: number;
+      rg: number;
+      cpf: number;
+      declaracaoVacinacao: number;
+      comprovanteResidencia: number;
+      autodeclaracaoRacial: number;
+      documentosResponsavel: number;
+      laudo: number;
     };
     // IDs dos tipos de documentos que são únicos
     const tiposQueRequeremConfirmacao = [
@@ -540,7 +542,7 @@ export class GerenciarAlunosComponent {
       tipoDocIds.cpf,
       tipoDocIds.declaracaoVacinacao,
       tipoDocIds.comprovanteResidencia,
-      tipoDocIds.autodeclaracaoRacial
+      tipoDocIds.autodeclaracaoRacial,
     ];
 
     // Verifica se o tipo de documento requer confirmação
@@ -559,21 +561,21 @@ export class GerenciarAlunosComponent {
       if (this.documentoForm.valid) {
         const tipoDocumento = this.documentoForm.get('tipoDocumento')?.value;
         const docFile = this.documentoForm.get('documento')?.value;
-        const caminhoPasta = this.alunoSelecionado.ra + "/";
+        const caminhoPasta = this.alunoSelecionado.ra + '/';
         const descricao = this.documentoForm.get('descricao')?.value;
         const resposta = await this.alunoService.adicionarDocumento(
-          this.alunoSelecionado.id,   // alunoId
-          tipoDocumento.id,           // tipoDocumentoId
-          caminhoPasta,                 // caminho
-          docFile,                     // pdf
-          descricao
+          this.alunoSelecionado.id, // alunoId
+          tipoDocumento.id, // tipoDocumentoId
+          caminhoPasta, // caminho
+          docFile, // pdf
+          descricao,
         );
 
         if (resposta.error) {
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
-            detail: resposta.data
+            detail: resposta.data,
           });
         } else {
           this.displayConfirmDialog = false;
@@ -581,15 +583,15 @@ export class GerenciarAlunosComponent {
           this.messageService.add({
             severity: 'success',
             summary: 'Sucesso',
-            detail: 'Documento cadastrado com sucesso!'
+            detail: 'Documento cadastrado com sucesso!',
           });
-          this.resetar();
+          this.documentoForm.reset();
         }
       } else {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Preencha todos os campos obrigatórios.'
+          detail: 'Preencha todos os campos obrigatórios.',
         });
       }
     } catch (error) {
@@ -597,7 +599,7 @@ export class GerenciarAlunosComponent {
       this.messageService.add({
         severity: 'error',
         summary: 'Erro',
-        detail: 'Erro ao cadastrar documento.'
+        detail: 'Erro ao cadastrar documento.',
       });
     } finally {
       this.loading = false;
@@ -626,7 +628,6 @@ export class GerenciarAlunosComponent {
 
       this.loading = false;
     }
-
   }
 
   async cadastrarAluno() {
@@ -643,20 +644,29 @@ export class GerenciarAlunosComponent {
 
         if (nomeMaeExistente === nomeMaeNovo) {
           this.loading = false;
-          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Aluno já cadastrado com o mesmo RA e nome da mãe.' });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Aluno já cadastrado com o mesmo RA e nome da mãe.',
+          });
           return;
         }
       }
       const numero = this.alunoForm.value.numero;
       if (numero <= 0) {
         this.loading = false;
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Número do endereço não pode ser negativo.' });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Número do endereço não pode ser negativo.',
+        });
         return;
       }
       const cepControl = this.alunoForm.get('cep');
 
-      this.validacaoService.validarCep(cepControl).then(result => {
-      }).catch(erro => {
+      try {
+        await this.validacaoService.validarCep(cepControl);
+      } catch (erro) {
         // exibe mensagem de erro
         this.messageService.add({
           severity: 'error',
@@ -665,7 +675,7 @@ export class GerenciarAlunosComponent {
         });
         this.loading = false;
         return;
-      });
+      }
 
       const cpf = this.alunoForm.value.cpf.replace(/\D/g, ''); // Remove caracteres não numéricos
       if (!this.validacaoService.validarCpf(cpf)) {
@@ -693,21 +703,21 @@ export class GerenciarAlunosComponent {
         alergiaIds = this.alunoForm.value.alergiasSelecionadas.map((alergia) => alergia.id);
       }
       let tiposDocumento = await this.tipoDocumentoService.index();
-      const certidaoNascimentoId = tiposDocumento.find(doc => doc.descricao === "CERTIDAO_NASCIMENTO")?.id;
-      const comprovanteResidenciaId = tiposDocumento.find(doc => doc.descricao === "COMPROVANTE_RESIDENCIA")?.id;
+      const certidaoNascimentoId = tiposDocumento.find((doc) => doc.descricao === 'CERTIDAO_NASCIMENTO')?.id;
+      const comprovanteResidenciaId = tiposDocumento.find((doc) => doc.descricao === 'COMPROVANTE_RESIDENCIA')?.id;
       const documentos = [
         {
           tipoDocumentoId: certidaoNascimentoId, // ID para "CERTIDAO_NASCIMENTO"
-          caminho: ra + "/",
+          caminho: ra + '/',
           pdf: this.certidaoNascimentoFile,
-          descricao: ''
+          descricao: '',
         },
         {
           tipoDocumentoId: comprovanteResidenciaId, // ID para "COMPROVANTE_RESIDENCIA"
-          caminho: ra + "/",
+          caminho: ra + '/',
           pdf: this.comprovanteFile,
-          descricao: ''
-        }
+          descricao: '',
+        },
       ];
       const nome = this.alunoForm.value.nome;
       const dataNascimento = new Date(this.alunoForm.value.dataNascimento);
@@ -728,7 +738,25 @@ export class GerenciarAlunosComponent {
       const celular = this.alunoForm.value.celular;
       const celularFormatado = celular.replace(/\D/g, '');
 
-      const resposta = await this.alunoService.criarAluno(nome, dataNascimento, nomeMae, celularFormatado, ra, cpf, sexo, raca.name, beneficiario, logradouro, cep, numero, bairro, cidade, uf, alergiaIds, documentos);
+      const resposta = await this.alunoService.criarAluno(
+        nome,
+        dataNascimento,
+        nomeMae,
+        celularFormatado,
+        ra,
+        cpf,
+        sexo,
+        raca.name,
+        beneficiario,
+        logradouro,
+        cep,
+        numero,
+        bairro,
+        cidade,
+        uf,
+        alergiaIds,
+        documentos,
+      );
 
       if (resposta.error) {
         this.messageService.add({ severity: 'error', summary: 'Erro', detail: resposta.data });
@@ -752,10 +780,7 @@ export class GerenciarAlunosComponent {
   }
 
   async reativarAluno(aluno: Aluno) {
-    const resposta = await this.alunoService.editarAluno(
-      aluno.id,
-      false
-    );
+    const resposta = await this.alunoService.editarAluno(aluno.id, false);
 
     if (resposta.error) {
       this.messageService.add({ severity: 'error', summary: 'Erro', detail: resposta.data });
@@ -793,8 +818,8 @@ export class GerenciarAlunosComponent {
     this.alunoForm.patchValue({ certidaoNascimento: null });
   }
 
-  async downloadDocumento(caminho: string) {
-    const response = await this.documentoService.downloadPDF(caminho);
+  verDocumento(caminho: string): void {
+    this.documentoService.verPDF(caminho);
   }
 
   deletarAlunoDialog() {
@@ -818,7 +843,8 @@ export class GerenciarAlunosComponent {
   formatarCPF(cpf: string): string {
     if (!cpf) return '';
     cpf = cpf.replace(/\D/g, '');
-    return cpf.replace(/(\d{3})(\d)/, '$1.$2')
+    return cpf
+      .replace(/(\d{3})(\d)/, '$1.$2')
       .replace(/(\d{3})(\d)/, '$1.$2')
       .replace(/(\d{3})(\d{2})$/, '$1-$2');
   }
@@ -845,34 +871,32 @@ export class GerenciarAlunosComponent {
 
     // Se o campo está vazio, retorna todos os alunos
     if (!inputValue) {
-      this.carregarAlunos(); // Carrega alunos com base no estado do switch
+      this.carregarAlunos(); 
       return;
     }
-    
-    // Identifica se é RA ou nome
-    if (this.validacaoService.isRA(inputValue)) {
-      // Filtra alunos pelo RA
-      const aluno = this.alunos.find(aluno => aluno.ra.trim().toUpperCase() === inputValue.trim().toUpperCase());
-      this.alunosFiltrados = aluno ? [aluno] : [];
 
-      if (!this.userNiveis.includes('ADMINISTRADOR')) {
-        this.alunosFiltrados = this.filtrarPorTuma(this.alunosFiltrados);
-      }
+    const isNumber = !isNaN(Number(inputValue));
+
+    if (isNumber) {
+        // Filtra alunos pelo RA, considerando que a entrada pode ser apenas parte do RA
+        this.alunosFiltrados = this.alunos.filter(aluno => 
+            aluno.ra.trim().startsWith(inputValue.trim())
+        );
+
+        if (!this.userNiveis.includes('ADMINISTRADOR')) {
+            this.alunosFiltrados = this.filtrarPorTuma(this.alunosFiltrados);
+        }
     } else {
       // Filtra alunos pelo nome
-      this.alunosFiltrados = this.alunos.filter(aluno =>
-        aluno.nome.toLowerCase().includes(inputValue.toLowerCase())
-      );
+      this.alunosFiltrados = this.alunos.filter((aluno) => aluno.nome.toLowerCase().includes(inputValue.toLowerCase()));
       if (!this.userNiveis.includes('ADMINISTRADOR')) {
         this.alunosFiltrados = this.filtrarPorTuma(this.alunosFiltrados);
       }
     }
-}
+  }
 
   filtrarPorTuma(alunos: Aluno[]) {
-    return alunos.filter(aluno =>
-      aluno.turmaId === null || this.turmas.some(turma => turma.id === aluno.turmaId)
-    );
+    return alunos.filter((aluno) => aluno.turmaId === null || this.turmas.some((turma) => turma.id === aluno.turmaId));
   }
 
   onToggleMostrarDesabilitados(event: any) {
@@ -880,4 +904,8 @@ export class GerenciarAlunosComponent {
     this.carregarAlunos(); // Recarrega os alunos com base no novo estado
   }
 
+  goToVisualizarQuestionarios(aluno: Aluno) {
+    this.router.navigate(['/academico/questionarios/aluno', { alunoId: aluno.id, visualizar: true }]);
+  }
 }
+

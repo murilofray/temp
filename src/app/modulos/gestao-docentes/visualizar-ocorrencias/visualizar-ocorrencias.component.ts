@@ -171,14 +171,13 @@ export class VisualizarOcorrenciasComponent {
         if (this.selectedAbono.nome == 'Injustificada') {
           this.justificarOcorrencia(this.selectedAbono);
         } else {
-          if (this.contarOcorrenciasDoAno(this.selectedAbono) < this.selectedAbono.maximoDiasAno) {
-            if (this.contarOcorrenciasDoMes(this.selectedAbono) < this.selectedAbono.maximoDiasMes) {
+          if (this.contarOcorrenciasDoAno(this.selectedAbono)<this.selectedAbono.maximoDiasAno||this.selectedAbono.maximoDiasAno==0) {
+            if (this.contarOcorrenciasDoMes(this.selectedAbono)<this.selectedAbono.maximoDiasMes||this.selectedAbono.maximoDiasMes==0) {
               if(this.atestadoFile){
                 this.justificarOcorrencia(this.selectedAbono.id);
               } else {
                 this.mostrarMensagem('Aviso', 'Selecione o atestado!','warn')
               }
-              
             } else {
               this.mostrarMensagem('Aviso', 'Você já esgotou esse tipo de abono para esse mês.', 'warn');
             }

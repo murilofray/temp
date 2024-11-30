@@ -47,6 +47,8 @@ export class GerenciarQuestionarioAlunoComponent {
 
   servidorId: number;
 
+  isVisualizacao: boolean = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -64,14 +66,19 @@ export class GerenciarQuestionarioAlunoComponent {
     this.route.params.subscribe((params) => {
       if (params['alunoId']) {
         this.alunoId = params['alunoId'];
+
+        if (params['visualizar']) {
+          this.isVisualizacao = true;
+        } else {
+          const token = localStorage.getItem('jwt');
+          const decodedToken = this.parseJwt(token);
+
+          this.servidorId = decodedToken?.id;
+        }
+
+        this.initializeAluno();
+        this.initializeQuestionariosAluno();
       }
-      this.initializeAluno();
-      this.initializeQuestionariosAluno();
-
-      const token = localStorage.getItem('jwt');
-      const decodedToken = this.parseJwt(token);
-
-      this.servidorId = decodedToken?.id;
     });
   }
 
@@ -105,7 +112,6 @@ export class GerenciarQuestionarioAlunoComponent {
 
   async initializeAluno() {
     this.aluno = await this.alunoService.getAlunoById(this.alunoId);
-    console.log(this.aluno);
   }
 
   async initializeQuestionariosAluno() {

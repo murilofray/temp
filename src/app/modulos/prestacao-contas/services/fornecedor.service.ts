@@ -97,4 +97,13 @@ export class FornecedorService {
       throw error;
     }
   }
+
+  async getById(id: number) {
+    try {
+      const resposta = await apiClient.get(`${this.apiUrl}/${id}`);
+      return resposta.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

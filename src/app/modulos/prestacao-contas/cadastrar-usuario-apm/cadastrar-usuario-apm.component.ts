@@ -79,9 +79,9 @@ export class CadastrarUsuarioApmComponent {
   };
 
   ngOnInit(): void {
-    this.apmService.getAll().subscribe((apms) => {
-      this.apms = apms;
-    })
+    // this.apmService.getAll().subscribe((apms) => {
+    //   this.apms = apms;
+    // })
 
     this.carregarEscolas();
   }

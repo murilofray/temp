@@ -29,6 +29,8 @@ export interface JwtPayload {
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
+  isGestor: boolean = false;
+  isApenasAPM: boolean = false;
   private selecionadoPDDE: PDDE;
   pddeList: any[] = [];
   display: boolean = false;
@@ -97,11 +99,14 @@ export class HomeComponent implements OnInit {
     this.loadPDDEs();
     this.loadContasBancarias();
     this.pddeData.escolaId = this.escolaId;
+
+    this.isGestor = this.nivelAcesso.isGestor();
+    this.isApenasAPM = this.nivelAcesso.isApenasAPM();
   }
 
   definirAnosDisponiveis() {
     const anoAtual = new Date().getFullYear();
-    for (let ano = 2024; ano <= anoAtual + 1; ano++) {
+    for (let ano = 2024; ano <= anoAtual; ano++) {
       this.anosDisponiveis.push(ano);
     }
   }
@@ -113,7 +118,7 @@ export class HomeComponent implements OnInit {
       try {
         const decodedToken = JSON.parse(atob(tokenJWT.split('.')[1])); // Decodifica o token
         console.log('Decoded JWT:', decodedToken); // Para depuração
-        this.nivelAcessoId = this.nivelAcesso.extrairNivelAcessoId(tokenJWT)
+        this.nivelAcessoId = this.nivelAcesso.extrairNivelAcessoId(tokenJWT);
         const escolaId = decodedToken.servidor?.escolaId; // Extração do escolaId
         if (escolaId) {
           this.escolaId = escolaId;
@@ -145,9 +150,10 @@ export class HomeComponent implements OnInit {
 
   async loadPDDEs() {
     try {
-      const response = await this.pddeService.listarComSaldoPorEscola(this.escolaId);
-      console.log('PDDEs carregados com saldo:', response);
+      const response = await this.pddeService.getByEscola(this.escolaId);
       this.pddeList = response;
+      console.log('Lista de PDDE: ', this.pddeList);
+
       this.loadContaBancariaInfo();
     } catch (error) {
       console.error('Erro ao carregar a lista de PDDEs:', error);

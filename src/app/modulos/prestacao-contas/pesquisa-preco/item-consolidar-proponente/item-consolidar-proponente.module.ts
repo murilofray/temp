@@ -7,4 +7,4 @@ import { MessageService } from 'primeng/api';
   providers: [MessageService],
   exports: [],
 })
-export class ServicoConsolidarProponenteModule {}
+export class ItemConsolidarProponenteModule {}

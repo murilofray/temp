@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import localePt from '@angular/common/locales/pt';
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { HashLocationStrategy } from '@angular/common'; 
 
 // Sakai Template
 import { NotfoundComponent } from './demo/components/notfound/notfound.component';
@@ -23,8 +24,7 @@ import { HomeModule } from './modulos/prestacao-contas/home/home.module';
 import { ContaBancariaModule } from './modulos/prestacao-contas/conta-bancaria-cadastro/conta-bancaria.module';
 import { PddeCadastroModule } from './modulos/prestacao-contas/pdde-cadastro/pdde-cadastro.module';
 import { ProgramaCadastroModule } from './modulos/prestacao-contas/programa/programa-cadastro.module';
-import { BemPesquisaPrecoModule } from './modulos/prestacao-contas/pesquisa-preco/bem-pesquisar-preco/bem-pesquisa-preco.modules';
-import { ServicoPesquisaPrecoModule } from './modulos/prestacao-contas/pesquisa-preco/servico-pesquisa-preco/servico-pesquisa-preco.modules';
+import { ItemPesquisaPrecoModule } from './modulos/prestacao-contas/pesquisa-preco/item-pesquisar-preco/item-pesquisa-preco.modules';
 import { ListaPesquisaPrecosModule } from './modulos/prestacao-contas/pesquisa-preco/lista-pesquisa-precos/lista-pesquisa-precos.modules';
 import { GerenciarAtaModule } from './modulos/prestacao-contas/ata/gerenciar-ata.module';
 import { ListaFornecedorModule } from './modulos/prestacao-contas/fornecedor/lista-fornecedor/lista-fornecedor.modules';
@@ -39,7 +39,7 @@ import { JwtInterceptor } from './interceptors/jwt.interceptor';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppLayoutModule } from './layout/app.layout.module';
-import { HashLocationStrategy } from '@angular/common'; 
+
 angularRegisterLocaleData(localePt, 'pt-BR');
 
 @NgModule({
@@ -54,8 +54,7 @@ angularRegisterLocaleData(localePt, 'pt-BR');
     ProgramaCadastroModule,
     HttpClientModule,
     AppLayoutModule,
-    BemPesquisaPrecoModule,
-    ServicoPesquisaPrecoModule,
+    ItemPesquisaPrecoModule,
     ListaPesquisaPrecosModule,
     ListarMovimentacaoModule,
     ListaFornecedorModule,
@@ -63,7 +62,7 @@ angularRegisterLocaleData(localePt, 'pt-BR');
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'pt-BR' },
-    { provide: LocationStrategy, useClass: HashLocationStrategy },
+    { provide: LocationStrategy, useClass: HashLocationStrategy  },
     CountryService,
     CustomerService,
     EventService,

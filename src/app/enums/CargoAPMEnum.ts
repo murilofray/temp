@@ -1,0 +1,8 @@
+export const CargoAPMEnum = {
+  PRESIDENTE: 'PRESIDENTE',
+  DIRETOR_EXECUTIVO: 'DIRETOR_EXECUTIVO',
+  DIRETOR_FINANCEIRO: 'DIRETOR_FINANCEIRO',
+  CONSELHEIRO_FISCAL: 'CONCELHEIRO_FISCAL',
+} as const;
+
+export type CargoAPMTEnum = typeof CargoAPMEnum[keyof typeof CargoAPMEnum];

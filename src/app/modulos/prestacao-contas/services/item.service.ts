@@ -4,23 +4,23 @@ import { apiClient } from 'src/app/interceptors/axios.interceptor';
 @Injectable({
   providedIn: 'root',
 })
-export class BemService {
-  private apiUrl = `/contas/bem`;
+export class ItemService {
+  private apiUrl = `/contas/item`;
 
   constructor() {}
 
-  async create(bem: any) {
+  async create(item: any) {
     try {
-      const resposta = await apiClient.post(`${this.apiUrl}`, bem);
+      const resposta = await apiClient.post(`${this.apiUrl}`, item);
       return resposta.data;
     } catch (error) {
       throw error;
     }
   }
 
-  async update(bem: any) {
+  async update(item: any) {
     try {
-      const resposta = await apiClient.put(`${this.apiUrl}/${bem.id}`, bem);
+      const resposta = await apiClient.put(`${this.apiUrl}/${item.id}`, item);
       return resposta.data;
     } catch (error) {
       throw error;
@@ -45,19 +45,19 @@ export class BemService {
     }
   }
 
-  async createPropostaBem(propostaBem: any) {
+  async createPropostaItem(propostaItem: any) {
     try {
-      const resposta = await apiClient.post(`${this.apiUrl}/proposta`, propostaBem);
+      const resposta = await apiClient.post(`${this.apiUrl}/proposta`, propostaItem);
       return resposta.data;
     } catch (error) {
       throw error;
     }
   }
-  async updatePropostaBem(propostaBem: any) {
+  async updatePropostaItem(propostaItem: any) {
     try {
       const resposta = await apiClient.put(
-        `${this.apiUrl}/proposta/${propostaBem.bemId}/${propostaBem.fornecedorId}`,
-        propostaBem,
+        `${this.apiUrl}/proposta/${propostaItem.itemId}/${propostaItem.fornecedorId}`,
+        propostaItem,
       );
       return resposta.data;
     } catch (error) {
@@ -65,15 +65,14 @@ export class BemService {
     }
   }
 
-  async deletePropostaBem(propostaBem: any) {
+  async deletePropostaItem(propostaItem: any) {
     try {
       const resposta = await apiClient.delete(
-        `${this.apiUrl}/proposta/${propostaBem.bemId}/${propostaBem.fornecedorId}`,
-        propostaBem,
+        `${this.apiUrl}/proposta/${propostaItem.itemId}/${propostaItem.fornecedorId}`,
+        propostaItem,
       );
       return resposta.data;
     } catch (error) {
-      throw error;
     }
   }
 }

@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+
 <div class="tabela-container">
     <h2 class="titulo-tabela">Servidores Ativos</h2>
     <h5 class="titulo-infos"></h5>
@@ -75,12 +77,15 @@
                 <th>Ano da Última Assiduidade</th>
                 <th>Ano do Última Título</th>
                 <th>Ano do Último Quinquênio</th>
+                <th></th>
+                <th>Ações</th>
+                <th></th>
                 
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-servidor>
               <tr>
-                <td>{{ servidor.cpf }}</td>
+                <td>{{ censurarCpf(servidor.cpf) || servidor.cpf }}</td>
                 <td>{{ servidor.nome }}</td>
                 <td>{{ servidor.dataContratacao | date: 'dd/MM/yyyy' }}</td>
                 <td>{{ servidor.Escola?.nome }}</td>
@@ -91,19 +96,348 @@
                 <td>{{ servidor.anoDaUltimaProgressaoPorTitulo }}</td>
                 <td>{{ servidor.anoDoUltimoQuinquenio }}</td>
                 
-                <!-- <td>
-                  <p-button
-                    label="Ver"
+                <td>
+                  <button
+                    pButton
+                    pRipple
                     icon="pi pi-eye"
+                    class="mr-2"
+                    (click)="visualizarServidor(servidor)"
+                    pTooltip="Visualizar servidor"
+                    tooltipPosition="top"
+                  ></button>
+                </td>
 
-                    class="p-button-text"
+                <td>
+                  <p-button
+                    icon="pi pi-pencil"
+                    (click)="abrirEditarServidorDialog(servidor)"
+                    severity="warning"
                   ></p-button>
-                </td> -->
+                </td>
+
+                <td>
+                  <p-button
+                    icon="pi pi-trash"
+                    class="p-button-rounded mr-2"
+                    severity="danger"
+                    (click)="abrirConfirmacaoExclusao(servidor.id)"
+                  ></p-button>
+                </td>
               </tr>
             </ng-template>
           </p-table>
         </div>
       </div>
     </div>
+
+
+    <p-dialog
+  [(visible)]="visualizarServidorDialog"
+  header="Detalhes do Servidor"
+  [modal]="true"
+  [style]="{ width: '50%', maxHeight: '70vh' }"
+  [closable]="true"
+  [dismissableMask]="false"
+  class="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <div *ngIf="servidorSelecionado">
+      <div class="p-grid">
+        <div class="p-col-12 p-md-6">
+          <label>Nome</label>
+          <input pInputText [value]="servidorSelecionado.nome" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>CPF</label>
+          <input pInputText [value]="servidorSelecionado.cpf" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>RG</label>
+          <input pInputText [value]="servidorSelecionado.rg" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Escola</label>
+          <input pInputText [value]="servidorSelecionado.Escola?.nome" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Email</label>
+          <input pInputText [value]="servidorSelecionado.email" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Data de Contratação</label>
+          <input
+            pInputText
+            [value]="servidorSelecionado.dataContratacao | date: 'dd/MM/yyyy'"
+            readonly
+          />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Pontuação Anual</label>
+          <input pInputText [value]="servidorSelecionado.pontuacaoAnual" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Categoria</label>
+          <input pInputText [value]="servidorSelecionado.categoria" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Grau</label>
+          <input pInputText [value]="servidorSelecionado.grau" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Ano da Última Progressão por Assiduidade</label>
+          <input pInputText [value]="servidorSelecionado.anoDaUltimaProgressaoPorAssiduidade" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Ano da Última Progressão por Título</label>
+          <input pInputText [value]="servidorSelecionado.anoDaUltimaProgressaoPorTitulo" readonly />
+        </div>
+        <div class="p-col-12 p-md-6">
+          <label>Ano do Último Quinquênio</label>
+          <input pInputText [value]="servidorSelecionado.anoDoUltimoQuinquenio" readonly />
+        </div>
+        <br/>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <br/>
+    <button
+      pButton
+      pRipple
+      label="Fechar"
+      icon="pi pi-times"
+      class="p-button-secondary"
+      (click)="visualizarServidorDialog = false"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+
+
+<p-dialog
+  [(visible)]="editarServidorDialog"
+  header="Editar Servidor"
+  [modal]="true"
+  [style]="{ width: '50%', maxHeight: '70vh' }"
+  [closable]="true"
+  [dismissableMask]="false"
+  class="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <form (ngSubmit)="onEditSubmit()" #editarServidorForm="ngForm">
+      <div *ngIf="servidorSelecionado">
+        <div class="p-grid">
+          <div class="p-col-12 p-md-6">
+            <label for="nome">Nome *</label>
+            <input
+              type="text"
+              [(ngModel)]="servidorSelecionado.nome"
+              pInputText
+              id="nome"
+              name="nome"
+              required
+            />
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="email">Email *</label>
+            <input
+              type="text"
+              [(ngModel)]="servidorSelecionado.email"
+              pInputText
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="rg">RG *</label>
+            <input
+              pInputText
+              [(ngModel)]="servidorSelecionado.rg"
+              id="rg"
+              name="rg"
+              required
+              pattern="^\d{1,11}$"
+              maxlength="11"
+              (keypress)="allowOnlyNumbers($event)"
+            />
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="cpf">CPF *</label>
+            <p-inputMask
+              mask="999.999.999-99"
+              [(ngModel)]="servidorSelecionado.cpf"
+              id="cpf"
+              name="cpf"
+              readonly
+              disabled="true"
+            ></p-inputMask>
+          </div>  
+
+          <div class="p-col-12 p-md-6">
+            <label for="dataContratacao">Data de Contratação *</label>
+            <p-calendar
+              [(ngModel)]="servidorSelecionado.dataContratacao"
+              id="dataContratacao"
+              name="dataContratacao"
+              dateFormat="dd/mm/yy"
+              [maxDate]="today"
+              required
+            ></p-calendar>
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="escolaId">Escolha uma Escola *</label>
+            <p-dropdown
+              id="escolaId"
+              [options]="escolas"
+              [(ngModel)]="servidorSelecionado.escolaId"
+              optionLabel="nome"
+              optionValue="id"
+              placeholder="Selecionar Escola"
+              name="escolaId"
+              required
+            ></p-dropdown>
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="nivel">Nível de Acesso *</label>
+            <p-multiSelect
+              id="nivel"
+              [options]="niveisAcesso"
+              [(ngModel)]="niveisSelecionados"
+              name="niveisAcesso"
+              optionLabel="descricao"
+              placeholder="Selecionar Níveis de Acesso"
+            ></p-multiSelect>
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="categoria">Categoria</label>
+            <input
+              type="text"
+              [(ngModel)]="servidorSelecionado.categoria"
+              pInputText
+              id="categoria"
+              name="categoria"
+            />
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="grau">Grau</label>
+            <input
+              type="text"
+              [(ngModel)]="servidorSelecionado.grau"
+              pInputText
+              id="grau"
+              name="grau"
+            />
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="pontuacaoAnual">Pontuação Anual</label>
+            <p-inputNumber
+              [(ngModel)]="servidorSelecionado.pontuacaoAnual"
+              id="pontuacaoAnual"
+              name="pontuacaoAnual"
+            ></p-inputNumber>
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="anoDaUltimaProgressaoPorAssiduidade">
+              Ano da Última Progressão por Assiduidade
+            </label>
+            <input
+              pInputText
+              [(ngModel)]="servidorSelecionado.anoDaUltimaProgressaoPorAssiduidade"
+              id="anoDaUltimaProgressaoPorAssiduidade"
+              name="anoDaUltimaProgressaoPorAssiduidade"
+              pattern="^\d{1,11}$"
+              maxlength="4"
+              (keypress)="allowOnlyNumbers($event)"
+            />
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="anoDaUltimaProgressaoPorTitulo">Ano da Última Progressão por Título</label>
+            <input
+              pInputText
+              [(ngModel)]="servidorSelecionado.anoDaUltimaProgressaoPorTitulo"
+              id="anoDaUltimaProgressaoPorTitulo"
+              name="anoDaUltimaProgressaoPorTitulo"
+              pattern="^\d{1,11}$"
+              maxlength="4"
+              (keypress)="allowOnlyNumbers($event)"
+            />
+          </div>
+
+          <div class="p-col-12 p-md-6">
+            <label for="anoDoUltimoQuinquenio">Ano do Último Quinquênio</label>
+            <input
+              pInputText
+              [(ngModel)]="servidorSelecionado.anoDoUltimoQuinquenio"
+              id="anoDoUltimoQuinquenio"
+              name="anoDoUltimoQuinquenio"
+              pattern="^\d{1,11}$"
+              maxlength="4"
+              (keypress)="allowOnlyNumbers($event)"
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button
+      type="submit"
+      [disabled]="isInvalid()"
+      pButton
+      label="Salvar Alterações"
+      class="p-button-primary"
+      (click)="onEditSubmit()"
+    ></button>
+    <button
+      pButton
+      label="Fechar"
+      class="p-button-secondary"
+      (click)="editarServidorDialog = false"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="confirmacaoExclusaoDialog"
+  header="Confirmar Exclusão"
+  [modal]="true"
+  [closable]="false"
+  [dismissableMask]="false"
+  [style]="{ width: '350px' }"
+>
+  <ng-template pTemplate="content">
+    <p>Tem certeza de que deseja excluir este servidor?</p>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      label="Cancelar"
+      icon="pi pi-times"
+      class="p-button-secondary"
+      (click)="cancelarExclusao()"
+    ></button>
+    <button
+      pButton
+      label="Confirmar"
+      icon="pi pi-check"
+      class="p-button-danger"
+      (click)="confirmarExclusao()"
+    ></button>
+  </ng-template>
+</p-dialog>
+
   </div>
   

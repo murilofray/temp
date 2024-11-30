@@ -96,18 +96,30 @@ export class LancarTitulosComponent implements OnInit {
       instituicao: ['', Validators.required],
       tipoId: ['', Validators.required],
       cargaHoraria: ['', [Validators.required, Validators.min(1)]],
-      pontos: [{ value: 0, disabled: true }], // Garantir que o valor inicial seja número
+      pontos: [{ value: 0, disabled: true }], // Campo desativado, para evitar edição manual
       dataConclusao: ['', Validators.required],
       validade: [''],
       aprovadoPor: [''],
     });
-
-    this.tituloForm.get('tipoId')?.valueChanges.subscribe((tipoId) => {
-      const cargaHoraria = this.tituloForm.get('cargaHoraria')?.value || 0;
+  
+    // Observa mudanças em tipoId e cargaHoraria
+    this.tituloForm.valueChanges.subscribe(() => {
+      this.atualizarPontos();
+    });
+  }
+  
+  // Função para calcular os pontos
+  atualizarPontos(): void {
+    const tipoId = this.tituloForm.get('tipoId')?.value;
+    const cargaHoraria = this.tituloForm.get('cargaHoraria')?.value || 0;
+  
+    if (tipoId && cargaHoraria) {
       const categoria = this.categoriasCertificado.find(cat => cat.id === tipoId);
       const pontosCalculados = categoria ? parseFloat((categoria.pontosPorHora * cargaHoraria).toFixed(2)) : 0;
-      this.tituloForm.get('pontos')?.setValue(pontosCalculados);
-    });
+      this.tituloForm.get('pontos')?.setValue(pontosCalculados, { emitEvent: false }); // Evita loop infinito
+    } else {
+      this.tituloForm.get('pontos')?.setValue(0, { emitEvent: false }); // Define 0 caso algum campo esteja vazio
+    }
   }
 
   loadServidores(): void {

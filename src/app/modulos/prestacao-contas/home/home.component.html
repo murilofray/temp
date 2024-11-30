@@ -8,12 +8,7 @@
     <ng-template pTemplate="left">
       <div class="my-2 toolbar-flex-spacing">
         <button
-          *ngIf="
-            nivelAcessoId === NivelAcessoEnum.DIRETOR.id ||
-            nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id ||
-            nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id ||
-            nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id
-          "
+          *ngIf="isGestor"
           pButton
           pRipple
           label="Cadastrar Conta Bancária"
@@ -24,12 +19,7 @@
           (click)="createConta()"
         ></button>
         <button
-          *ngIf="
-            nivelAcessoId === NivelAcessoEnum.DIRETOR.id ||
-            nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id ||
-            nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id ||
-            nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id
-          "
+          *ngIf="isGestor"
           pButton
           pRipple
           label="Cadastrar PDDE"
@@ -40,12 +30,7 @@
           (click)="abrirCadastroPDDE()"
         ></button>
         <button
-          *ngIf="
-            nivelAcessoId === NivelAcessoEnum.DIRETOR.id ||
-            nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id ||
-            nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id ||
-            nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id
-          "
+          *ngIf="isGestor"
           pButton
           pRipple
           label="Cadastrar Programa"

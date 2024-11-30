@@ -228,7 +228,7 @@ export class CadastrarServidorComponent {
   }
 
   onNiveisChange() {
-    console.log(this.niveisSelecionados);
+    // console.log(this.niveisSelecionados);
   }
 
   validarCPF(cpf: string): boolean {

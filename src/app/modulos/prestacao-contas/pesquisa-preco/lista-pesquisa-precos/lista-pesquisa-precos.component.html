@@ -6,6 +6,7 @@
     <ng-template pTemplate="left">
       <div class="my-2 toolbar-flex-spacing">
         <button
+          *ngIf="isGestor"
           pButton
           pRipple
           label="Nova Pesquisa de Bens"
@@ -14,6 +15,7 @@
           (click)="createPesquisa('B')"
         ></button>
         <button
+          *ngIf="isGestor"
           pButton
           pRipple
           label="Nova Pesquisa de Serviços"
@@ -74,7 +76,6 @@
 
           <ng-template pTemplate="body" let-pesquisa>
             <tr [pSelectableRow]="pesquisa">
-
               <td style="width: 10%; min-width: 12rem">
                 <span class="p-column-title">Data de Início</span>
                 {{ pesquisa.createdAt | date: 'dd/MM/yyyy' }}
@@ -104,6 +105,17 @@
               <td style="width: 20%; min-width: 10rem">
                 <span class="p-column-title">Ações</span>
                 <button
+                  *ngIf="pesquisa.consolidado"
+                  pButton
+                  pRipple
+                  icon="pi pi-chevron-right"
+                  label="Gerar documentos"
+                  class="p-button-outlined p-button-rounded p-button-info mr-2"
+                  pTooltip="Gerar Planilhas e Consolidação"
+                  tooltipPosition="top"
+                  (click)="gerarTodosPDF(pesquisa)"
+                ></button>
+                <button
                   pButton
                   pRipple
                   icon="pi pi-chevron-right"
@@ -114,6 +126,7 @@
                   (click)="acessarPesquisa(pesquisa.id)"
                 ></button>
                 <button
+                  *ngIf="isGestor && !pesquisa.consolidado"
                   pButton
                   pRipple
                   icon="pi pi-trash"

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import axios, { AxiosError } from 'axios';
+import { apiClient } from 'src/app/interceptors/axios.interceptor';
 
 @Injectable({
   providedIn: 'root',
@@ -12,55 +13,45 @@ export class ApmService {
 
   constructor(private http: HttpClient) {}
 
-  cadastrarApm(apm: any): Observable<any> {
-    return this.http.post(this.apiUrl, apm);
-  }
-
-  getAll(): Observable<any> {
-    return this.http.get(this.apiUrl);
-  }
-
-  async buscarApmPorId(id: number) {
-    const resposta = await axios
-      .get(`${this.apiUrl}/${id}`)
-      .then((data) => {
-        return {
-          error: false,
-          data: data.data,
-        };
-      })
-      .catch((err) => {
-        return {
-          error: true,
-          data: err.response?.data?.message || 'Erro ao buscar APM',
-        };
-      });
-
-    return resposta;
-  }
-
-  async buscarApmsPorEscola(escolaId: number) {
-    const resposta = await axios
-      .get(`${this.apiUrl}/escola/${escolaId}`)
-      .then((data) => {
-        return {
-          error: false,
-          data: data.data,
-        };
-      })
-      .catch((err) => {
-        return {
-          error: true,
-          data: err.response?.data?.message || 'Erro ao buscar APMs',
-        };
-      });
-
-    return resposta;
-  }
-
-  async atualizarApm(id: number, apm: any) {
+  async create(apm: any) {
     try {
-      const response = await axios.put(`${this.apiUrl}/${id}`, apm);
+      const resposta = await apiClient.post(this.apiUrl, apm);
+      return resposta.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAll() {
+    try {
+      const resposta = await apiClient.get(this.apiUrl);
+      return resposta.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getById(id: number) {
+    try {
+      const resposta = await apiClient.get(`${this.apiUrl}/${id}`);
+      return resposta.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getByEscola(escolaId: number) {
+    try {
+      const resposta = await apiClient.get(`${this.apiUrl}/escola/${escolaId}`);
+      return resposta.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async update(id: number, apm: any) {
+    try {
+      const response = await apiClient.put(`${this.apiUrl}/${id}`, apm);
       return {
         success: true,
         message: 'APM atualizada com sucesso',
@@ -74,9 +65,9 @@ export class ApmService {
     }
   }
 
-  async excluirApmLogicamente(id: number) {
+  async delete(id: number) {
     try {
-      const response = await axios.delete(`${this.apiUrl}/${id}`);
+      const response = await apiClient.delete(`${this.apiUrl}/${id}`);
       return {
         success: true,
         message: 'APM excluída logicamente com sucesso',
@@ -87,6 +78,15 @@ export class ApmService {
         success: false,
         message: error.response?.data?.error || 'Erro ao excluir APM',
       };
+    }
+  }
+
+  async getByEscolaDetails(idEscola: number) {
+    try {
+      const resposta = await apiClient.get(`${this.apiUrl}/details/${idEscola}`);
+      return resposta.data;
+    } catch (error) {
+      throw error;
     }
   }
 }

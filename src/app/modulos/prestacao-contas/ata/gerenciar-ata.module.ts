@@ -11,6 +11,9 @@ import { CalendarModule } from 'primeng/calendar';
 import { GerenciarAtaComponent } from './gerenciar-ata.component';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TooltipModule } from 'primeng/tooltip';
+import { EditorModule } from 'primeng/editor';
+import { FileUploadModule } from 'primeng/fileupload';
+
 
 @NgModule({
   declarations: [GerenciarAtaComponent],
@@ -26,6 +29,8 @@ import { TooltipModule } from 'primeng/tooltip';
     CalendarModule,
     ToolbarModule,
     TooltipModule,
+    EditorModule,
+    FileUploadModule
   ],
   providers: [MessageService],
   exports: [GerenciarAtaComponent],

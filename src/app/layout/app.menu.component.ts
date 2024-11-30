@@ -191,7 +191,7 @@ export class AppMenuComponent implements OnInit {
       items: [
         { label: 'Tela Inicial', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
         {
-          label: 'Turma',
+          label: 'Minha Turma',
           icon: 'pi pi-fw pi-id-card',
           routerLink: ['/academico/questionarios/turma'],
           requiredAccess: [nae.DOCENTE.descricao],
@@ -202,41 +202,47 @@ export class AppMenuComponent implements OnInit {
           routerLink: ['/academico/questionarios'],
           requiredAccess: [nae.COORDENADOR.descricao],
         },
-        {
-
-          label: 'Gerenciar Alergias',
-
-          icon: 'pi pi-fw pi-book',
-
-          routerLink: ['/academico/gerenciar-alergias'],
-
-          requiredAccess: [nae.COORDENADOR.descricao, nae.ADMINISTRADOR.descricao],
-        },
-        {
-          label: 'Categorias de Alergias',
-          icon: 'pi pi-fw pi-book',
-          routerLink: ['/academico/gerenciar-tipos-alergias'],
-          requiredAccess: [nae.COORDENADOR.descricao, nae.ADMINISTRADOR.descricao],
-        },
-        { label: 'Gerenciar Alunos', icon: 'pi pi-fw pi-user', routerLink: ['/academico/gerenciar-alunos'] },
-        { label: 'Relatórios', icon: 'pi pi-fw pi-file-o', routerLink: ['/academico/gerenciar-relatorios'] },
-        {
-          label: 'Gerenciar Turmas',
-          icon: 'pi pi-fw pi-users',
-          routerLink: ['/academico/gerenciar-turmas'],
-          requiredAccess: [nae.COORDENADOR.descricao, nae.DIRETOR.descricao, nae.ADMINISTRADOR.descricao],
+        { 
+          label: 'Gerenciar Alunos', 
+          icon: 'pi pi-fw pi-user', 
+          routerLink: ['/academico/gerenciar-alunos'],
+          requiredAccess: [nae.ESCRITUARIO.descricao, nae.ADMINISTRADOR.descricao, nae.DIRETOR.descricao],
         },
         {
           label: 'Realizar Matrícula',
           icon: 'pi pi-id-card',
           routerLink: ['/academico/realizar-matricula'],
-          requiredAccess: [nae.ESCRITUARIO.descricao, nae.DIRETOR.descricao],
+          requiredAccess: [nae.ESCRITUARIO.descricao, nae.DIRETOR.descricao, nae.DIRETOR.descricao  ],
         },
         {
           label: 'Realizar Transferência',
           icon: 'pi pi-id-card',
           routerLink: ['/academico/realizar-transferencia'],
           requiredAccess: [nae.ESCRITUARIO.descricao, nae.DIRETOR.descricao],
+        },
+        {
+          label: 'Gerenciar Turmas',
+          icon: 'pi pi-fw pi-users',
+          routerLink: ['/academico/gerenciar-turmas'],
+          requiredAccess: [nae.ESCRITUARIO.descricao, nae.ADMINISTRADOR.descricao, nae.DIRETOR.descricao],
+        },
+        { 
+          label: 'Relatórios', 
+          icon: 'pi pi-fw pi-file-o', 
+          routerLink: ['/academico/gerenciar-relatorios'],
+          requiredAccess: [nae.ADMINISTRADOR.descricao, nae.DIRETOR.descricao],
+        },
+        {
+          label: 'Gerenciar Alergias',
+          icon: 'pi pi-fw pi-book',
+          routerLink: ['/academico/gerenciar-alergias'],
+          requiredAccess: [nae.ESCRITUARIO.descricao, nae.ADMINISTRADOR.descricao, nae.DIRETOR.descricao],
+        },
+        {
+          label: 'Categorias de Alergias',
+          icon: 'pi pi-fw pi-book',
+          routerLink: ['/academico/gerenciar-tipos-alergias'],
+          requiredAccess: [nae.ESCRITUARIO.descricao, nae.ADMINISTRADOR.descricao, nae.DIRETOR.descricao],
         },
       ],
     };

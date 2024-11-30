@@ -413,6 +413,10 @@ export class ListaOfiMemComponent implements OnInit {
     if (file) {
       if (file.type === 'application/pdf') {
         this.uploadedFile = file;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Arquivo realizado',
+        });
       } else {
         this.messageService.add({
           severity: 'error',

@@ -6,7 +6,12 @@
     <ng-template pTemplate="left">
       <div class="my-2 toolbar-flex-spacing">
         <button
-        *ngIf="nivelAcessoId === NivelAcessoEnum.DIRETOR.id || nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id || nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id || nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id"
+          *ngIf="
+            nivelAcessoId === NivelAcessoEnum.DIRETOR.id ||
+            nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id ||
+            nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id ||
+            nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id
+          "
           pButton
           pRipple
           label="Cadastrar Ata"
@@ -38,7 +43,7 @@
     header="Cadastrar Nova Ata"
     [(visible)]="isAtaModalOpen"
     modal="true"
-    [style]="{ width: '500px', minHeight: '600px' }"
+    [style]="{ width: '800px', minHeight: '800px' }"
   >
     <ng-template pTemplate="content">
       <div class="modal-content">
@@ -48,11 +53,11 @@
         <!-- Formulário -->
         <form [formGroup]="ataForm" (ngSubmit)="createAta()" class="form-container">
           <div class="form-row">
-            <div class="form-group col-md-8">
+            <div class="form-group col-md-6">
               <label for="titulo">Título</label>
               <input type="text" pInputText formControlName="titulo" />
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-6">
               <label for="data">Data</label>
               <p-calendar
                 formControlName="data"
@@ -63,27 +68,49 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="documento">Documento</label>
-            <input type="file" (change)="onFileSelected($event)" />
+          <!-- Dropdown para selecionar o modo -->
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="modoAta">Modo</label>
+              <p-dropdown [options]="modes" formControlName="modoAta" placeholder="Selecione um modo"></p-dropdown>
+            </div>
+
+            <!-- Novo Dropdown para "Tipo" -->
+            <div class="form-group col-md-6">
+              <label for="tipoAta">Tipo</label>
+              <p-dropdown [options]="tipoOptions" formControlName="tipoAta" placeholder="Selecione um tipo">
+              </p-dropdown>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="ata">Ata</label>
-            <textarea pInputTextarea formControlName="ata"></textarea>
+          <!-- Campo para upload de arquivo com PrimeNG -->
+          <div *ngIf="ataForm.get('modoAta').value === 'upload'" class="form-group">
+            <label for="documento">Upload de Documento</label>
+            <p-fileUpload
+              name="documento"
+              [auto]="true"
+              [customUpload]="true"
+              (uploadHandler)="onUpload($event)"
+              [chooseLabel]="'Selecionar Arquivo'"
+              [uploadLabel]="'Enviar'"
+              [cancelLabel]="'Cancelar'"
+            >
+            </p-fileUpload>
+          </div>
+
+          <!-- Campo para editor de texto -->
+          <div *ngIf="ataForm.get('modoAta').value === 'editor'" class="form-group">
+            <label for="ata">Escrever Ata</label>
+            <p-editor
+              formControlName="ata"
+              [style]="{ height: '200px' }"
+              [placeholder]="'Escreva o conteúdo da ata aqui...'"
+            ></p-editor>
           </div>
 
           <!-- Botões -->
           <div class="modal-actions">
-            <button
-              pButton
-              pRipple
-              class="p-button-success"
-              label="Salvar"
-              icon="pi pi-check"
-              type="submit"
-              [disabled]="ataForm.invalid"
-            ></button>
+            <button pButton pRipple class="p-button-success" label="Salvar" icon="pi pi-check" type="submit"></button>
             <button
               pButton
               pRipple
@@ -92,6 +119,16 @@
               icon="pi pi-times"
               type="button"
               (click)="closeAtaModal()"
+            ></button>
+            <button
+              *ngIf="ataForm.get('modoAta').value === 'editor'"
+              pButton
+              pRipple
+              class="p-button-info"
+              label="Gerar PDF"
+              icon="pi pi-file-pdf"
+              type="button"
+              (click)="generatePDF()"
             ></button>
           </div>
         </form>
@@ -104,17 +141,17 @@
     header="Editar Ata"
     [(visible)]="isEditModalOpen"
     modal="true"
-    [style]="{ width: '500px', minHeight: '600px' }"
+    [style]="{ width: '800px', minHeight: '800px' }"
   >
     <ng-template pTemplate="content">
       <div class="modal-content">
         <form [formGroup]="editAtaForm" (ngSubmit)="updateAta()" class="form-container">
           <div class="form-row">
-            <div class="form-group col-md-8">
+            <div class="form-group col-md-6">
               <label for="titulo">Título</label>
               <input type="text" pInputText formControlName="titulo" />
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-6">
               <label for="data">Data</label>
               <p-calendar
                 formControlName="data"
@@ -125,20 +162,46 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="documento">Documento</label>
-            <input type="file" (change)="onFileSelected($event)" />
-            <!-- Exibe o nome do arquivo existente -->
-            <p *ngIf="existingFileName" class="file-name">
-              Arquivo atual: {{ existingFileName }}
-            </p>
+          <!-- Dropdown para selecionar o modo -->
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="modoAta">Modo</label>
+              <p-dropdown [options]="modes" formControlName="modoAta" placeholder="Selecione um modo"></p-dropdown>
+            </div>
+
+            <div class="form-group col-md-6">
+              <label for="tipoAta">Tipo</label>
+              <p-dropdown [options]="tipoOptions" formControlName="tipoAta" placeholder="Selecione um tipo">
+              </p-dropdown>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="ata">Ata</label>
-            <textarea pInputTextarea formControlName="ata"></textarea>
+          <!-- Campo para upload de arquivo com PrimeNG no Modal de Edição -->
+          <div *ngIf="editAtaForm.get('modoAta').value === 'upload'" class="form-group">
+            <label for="documento">Upload de Documento</label>
+            <p-fileUpload
+              name="documento"
+              [auto]="true"
+              [customUpload]="true"
+              (uploadHandler)="onEditUpload($event)"
+              [chooseLabel]="'Selecionar Arquivo'"
+              [uploadLabel]="'Enviar'"
+              [cancelLabel]="'Cancelar'"
+            >
+            </p-fileUpload>
           </div>
 
+          <!-- Campo para editor de texto -->
+          <div *ngIf="editAtaForm.get('modoAta').value === 'editor'" class="form-group">
+            <label for="ata">Editar Ata</label>
+            <p-editor
+              formControlName="ata"
+              [style]="{ height: '200px' }"
+              [placeholder]="'Edite o conteúdo da ata aqui...'"
+            ></p-editor>
+          </div>
+
+          <!-- Botões -->
           <div class="modal-actions">
             <button pButton pRipple class="p-button-success" label="Salvar" icon="pi pi-check" type="submit"></button>
             <button
@@ -149,6 +212,16 @@
               icon="pi pi-times"
               type="button"
               (click)="closeEditModal()"
+            ></button>
+            <button
+              *ngIf="editAtaForm.get('modoAta').value === 'editor'"
+              pButton
+              pRipple
+              class="p-button-info"
+              label="Gerar PDF"
+              icon="pi pi-file-pdf"
+              type="button"
+              (click)="generatePDFForEdit()"
             ></button>
           </div>
         </form>
@@ -199,8 +272,13 @@
                     pButton
                     pRipple
                     class="p-button-outlined p-button-rounded p-button-success mr-2"
-                    *ngIf="nivelAcessoId === NivelAcessoEnum.DIRETOR.id || nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id || nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id || nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id"
-                  label="Editar"
+                    *ngIf="
+                      nivelAcessoId === NivelAcessoEnum.DIRETOR.id ||
+                      nivelAcessoId === NivelAcessoEnum.VICE_DIRETOR.id ||
+                      nivelAcessoId === NivelAcessoEnum.ESCRITUARIO.id ||
+                      nivelAcessoId === NivelAcessoEnum.ADMINISTRADOR.id
+                    "
+                    label="Editar"
                     icon="pi pi-pencil"
                     pTooltip="Editar a ata"
                     tooltipPosition="top"

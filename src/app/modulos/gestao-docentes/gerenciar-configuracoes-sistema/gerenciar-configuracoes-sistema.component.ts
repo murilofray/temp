@@ -53,14 +53,12 @@ export class GerenciarConfiguracoesSistemaComponent {
   ngOnInit() {
     this.carregarConfiguracoes();
   }
-
   carregarConfiguracoes() {
     this.configuracaoService.index().then((data) => {
-      this.configuracoes = data.data;
+      this.configuracoes = data.data.sort((a: any, b: any) => b.anoLetivo - a.anoLetivo);
     });
   }
-
-
+  
   mostrarDialogEditar(configuracao: any) {
     this.selectedConfiguracao = configuracao;
     this.displayDialogEditar = true;
@@ -94,7 +92,11 @@ export class GerenciarConfiguracoesSistemaComponent {
       this.selectedConfiguracao.updatedAt = new Date();
       this.configuracaoService.editarConfiguracao(this.selectedConfiguracao).then(() => {
         this.displayDialogEditar = false;
+        this.selectedYear = null;
+        this.selectedDataInicio = null;
+        this.selectedDataFim = null;
         this.carregarConfiguracoes();
+        this.mostrarMensagem('Salvo com sucesso','A configuração foi salva com sucesso.','success');
       });
 
     } else {
@@ -109,21 +111,38 @@ export class GerenciarConfiguracoesSistemaComponent {
       && this.newConfiguracao.tempoMinimoAssiduidade > 0
       && this.newConfiguracao.tempoMinimoTitulo > 0
     ) {
-      console.log('ano: ', this.selectedYear.getFullYear())
+      if(this.anoExistente(this.selectedYear.getFullYear())){
+        this.mostrarMensagem('Erro','A configuração desse ano letivo já foi cadastrada.','error');
+      } else {
+        console.log('ano: ', this.selectedYear.getFullYear())
 
-
-      this.newConfiguracao.InicioAnoLetivo = this.selectedDataInicio;
-      this.newConfiguracao.FimAnoLetivo = this.selectedDataFim;
-      this.newConfiguracao.anoLetivo = this.selectedYear.getFullYear();
-
-      this.newConfiguracao.createdAt = new Date();
-      this.configuracaoService.criarConfiguracao(this.newConfiguracao).then(() => {
-        this.displayDialogCriar = false;
-        this.carregarConfiguracoes();
-      });
+        this.newConfiguracao.InicioAnoLetivo = this.selectedDataInicio;
+        this.newConfiguracao.FimAnoLetivo = this.selectedDataFim;
+        this.newConfiguracao.anoLetivo = this.selectedYear.getFullYear();
+  
+        this.newConfiguracao.createdAt = new Date();
+        this.configuracaoService.criarConfiguracao(this.newConfiguracao).then(() => {
+          this.displayDialogCriar = false;
+          this.selectedYear = null;
+          this.selectedDataInicio = null;
+          this.selectedDataFim = null;
+          this.carregarConfiguracoes();
+          this.mostrarMensagem('Salvo com sucesso','A configuração foi cadastrada com sucesso.','success');
+        });
+      }
     } else {
       this.mostrarMensagem('Erro', 'Por favor, preencha todos os campos corretamente.', 'error');
     }
+  }
+
+  anoExistente(ano: number){
+    let anoExistente = false;
+    this.configuracoes.forEach(conf => {
+      if(conf.anoLetivo==ano){
+        anoExistente = true;
+      }
+    });
+    return anoExistente;
   }
 
   formatData(data: Date) {

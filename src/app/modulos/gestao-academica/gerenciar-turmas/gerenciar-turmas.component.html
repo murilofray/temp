@@ -7,17 +7,32 @@
     <p-toolbar *ngIf="!isLoading">
         <ng-template pTemplate="left">
             <div class="my-2 toolbar-flex-spacing">
-                <button pButton pRipple label="Cadastrar" icon="pi pi-plus" class="p-button"
+                <button pButton pRipple *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ESCRITUARIO])" label="Cadastrar" icon="pi pi-plus" class="p-button"
                     (click)="isCadastrarTurmaOpen = true"></button>
 
-                <button *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ADMINISTRADOR])" pButton (click)="deletarTurmaDialog()" [disabled]="turmaSelecionada == null" type="button"
+                <button pButton pRipple *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ESCRITUARIO])" label="Editar" class="p-button-help" (click)="editarTurmaDialog()"
+                    [disabled]="turmaSelecionada == null"></button>
+
+                <button *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ESCRITUARIO])" pButton pRipple label="Realizar Rematrícula" class="p-button" (click)="rematricularDialog()"
+                    [disabled]="turmaSelecionada == null"></button>
+
+                <button *ngIf="userService.podeRealizarEssaFuncao(user.NivelAcessoServidor, [niveis.ADMINISTRADOR])"
+                    pButton (click)="deletarTurmaDialog()" [disabled]="turmaSelecionada == null" type="button"
                     label="Deletar" class="p-button-danger button-spacing mr-2"></button>
             </div>
         </ng-template>
 
         <ng-template pTemplate="right">
-            <div class="my-2 toolbar-flex-spacing">
+            <div class="my-2 toolbar-flex-spacing mr-4">
                 <p-button [routerLink]="['/academico/realizar-matricula']" label="Realizar Matricula"></p-button>
+            </div>
+
+            <div class="my-2 toolbar-flex-spacing">
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pinputtext="" type="text" (input)="dt1.filterGlobal($event.target.value, 'contains')"
+                        placeholder="Docente / Ano Letivo" class="p-inputtext p-component p-element w-full" />
+                </span>
             </div>
         </ng-template>
 
@@ -47,9 +62,9 @@
                     </div>
                     <div *ngIf="isUserAdmin" class="field col-12 md:col-4 label">
                         <label for="escola">Escola </label>
-                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="escola"
-                            [options]="escolas" optionLabel="nome" optionValue="id"
-                            formControlName="escola" (onChange)="onDocenteChange($event)"></p-dropdown>
+                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="escola" [options]="escolas"
+                            optionLabel="nome" optionValue="id" formControlName="escola"
+                            (onChange)="onDocenteChange($event)"></p-dropdown>
                     </div>
                     <div *ngIf="!isUserAdmin" class="field col-12 md:col-8 label">
                         <label for="docente">Docente </label>
@@ -72,7 +87,7 @@
                     </div>
                     <div class="field col-12 md:col-4 label">
                         <label for="ano">Ano</label>
-                        <input id="ano" type="text" maxlength="5" pInputText formControlName="ano" />
+                        <input id="ano" type="text" maxlength="6" pInputText formControlName="ano" />
                     </div>
                     <div class="field col-12 md:col-4 label">
                         <label for="ano-letivo">Ano Letivo</label>
@@ -137,13 +152,14 @@
     <div class="grid">
         <div class="col-12">
             <div class="card">
-                <p-table #dt1 [value]="turmas" responsiveLayout="scroll" [paginator]="true" [rows]="10"
-                    [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                <p-table #dt1 [value]="turmas" [globalFilterFields]="['anoLetivo', 'Servidor.nome', 'descricao']"
+                    responsiveLayout="scroll" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 30]"
+                    [showCurrentPageReport]="true"
                     currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
                     [rowHover]="true" dataKey="id" [(selection)]="turmaSelecionada" selectionMode="single">
                     <ng-template pTemplate="header">
                         <tr>
-                            <th>Turma Id</th>
+                            <th>Turma</th>
                             <th>Escola</th>
                             <th>Docente</th>
                             <th>Letra</th>
@@ -154,7 +170,7 @@
                     </ng-template>
                     <ng-template pTemplate="body" let-turma>
                         <tr [pSelectableRow]="turma">
-                            <td>{{ turma.id }}</td>
+                            <td>{{ turma.descricao }}</td>
                             <td>{{ turma.Escola.nome }}</td>
                             <td>{{ turma.Servidor.nome }}</td>
                             <td>{{ turma.letra }}</td>
@@ -172,4 +188,211 @@
     </div>
 
     <p-confirmDialog [style]="{ width: '450px' }" />
+
+    <p-dialog header="Editar Turma" [(visible)]="isEditarTurmaOpen" modal="true" [style]="{ width: '400px' }">
+        <ng-template pTemplate="content">
+            <form [formGroup]="editarTurmaForm" class="gap" (ngSubmit)="editarTurma()">
+                <div class="p-grid p-fluid p-formgrid grid">
+                    <div *ngIf="!isUserAdmin" class="field col-12 md:col-4 label">
+                        <label for="escola">Escola </label>
+                        <input id="escola" type="text" [disabled]="true" [value]="escola.nome" pInputText />
+                    </div>
+                    <div *ngIf="isUserAdmin" class="field col-12 md:col-4 label">
+                        <label for="escola">Escola </label>
+                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="escola" [options]="escolas"
+                            optionLabel="nome" optionValue="id" formControlName="escola"
+                            (onChange)="onDocenteChange($event)"></p-dropdown>
+                    </div>
+                    <div *ngIf="!isUserAdmin" class="field col-12 md:col-8 label">
+                        <label for="docente">Docente </label>
+                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="docente"
+                            [options]="docentesEscola" optionLabel="nome" optionValue="id"
+                            formControlName="docente"></p-dropdown>
+                    </div>
+                    <div *ngIf="isUserAdmin" class="field col-12 md:col-8 label">
+                        <label for="docente">Docente</label>
+                        <p-dropdown [filter]="true" filterBy="nome" [showClear]="true" id="docente"
+                            [options]="docentesEscolaAdmin" optionLabel="nome" optionValue="id"
+                            formControlName="docente"></p-dropdown>
+                    </div>
+                </div>
+
+                <div class="p-grid p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-4 label">
+                        <label for="letra">Letra </label>
+                        <input id="letra" type="text" maxlength="1" pInputText formControlName="letra" />
+                    </div>
+                    <div class="field col-12 md:col-4 label">
+                        <label for="ano">Ano</label>
+                        <input id="ano" type="text" maxlength="6" pInputText formControlName="ano" />
+                    </div>
+                    <div class="field col-12 md:col-4 label">
+                        <label for="ano-letivo">Ano Letivo</label>
+                        <input id="ano-letivo" type="number" pInputText formControlName="anoLetivo" />
+                    </div>
+                </div>
+            </form>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <div class="dialog-footer-button">
+                <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-success" type="submit"
+                    [disabled]="editarTurmaForm.invalid" (click)="editarTurma()"></button>
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-warning"
+                    (click)="isEditarTurmaOpen = false"></button>
+            </div>
+        </ng-template>
+    </p-dialog>
+
+
+
+    <p-dialog header="Realizar Rematrícula" [(visible)]="isRematricularDialogOpen" modal="true"
+        [style]="{ width: '60%' }">
+        <ng-template pTemplate="content">
+            <p style="font-weight: bold; font-size: medium;">Turma Atual - {{ turmaSelecionada.ano }} {{
+                turmaSelecionada.letra }}</p>
+            <p-divider />
+            <button pButton pRipple severity="info" label="Visualizar Alunos" type="submit"
+                (click)="alunosDaTurmaDialog()"></button>
+            <div class="p-grid p-fluid p-formgrid grid items-center justify-content-center">
+                <div class="field col-12 md:col-4 label">
+                    <label for="ano">Ano</label>
+                    <input id="ano" type="text" [disabled]="true" [value]="turmaSelecionada.ano" pInputText />
+                </div>
+
+                <div class="field col-12 md:col-4 label">
+                    <label for="letra">Letra</label>
+                    <input id="letra" type="text" [disabled]="true" [value]="turmaSelecionada.letra" pInputText />
+                </div>
+
+                <div class="field col-12 md:col-4 label">
+                    <label for="anoLetivo">Ano Letivo</label>
+                    <input id="anoLetivo" type="text" [disabled]="true" [value]="turmaSelecionada.anoLetivo"
+                        pInputText />
+                </div>
+                <div class="field col-12 md:col-4 label">
+                    <label for="escola">Escola</label>
+                    <input id="escola" type="text" [disabled]="true" [value]="turmaSelecionada.Escola.nome"
+                        pInputText />
+                </div>
+                <div class="field col-12 md:col-4 label">
+                    <label for="escola">Docente</label>
+                    <input id="escola" type="text" [disabled]="true" [value]="turmaSelecionada.Servidor.nome"
+                        pInputText />
+                </div>
+            </div>
+
+
+            <p style="font-weight: bold; font-size: medium;">Turmas Disponíveis</p>
+            <p-divider />
+            <div class="my-2 toolbar-flex-spacing">
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pinputtext="" type="text"
+                        (input)="rematriculadt.filterGlobal($event.target.value, 'contains')"
+                        placeholder="Docente / Ano Letivo" class="p-inputtext p-component p-element w-full" />
+                </span>
+            </div>
+            <p-table #rematriculadt [value]="turmasRematriculas" [globalFilterFields]="['anoLetivo', 'Servidor.nome']"
+                responsiveLayout="scroll" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 30]"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas"
+                [rowHover]="true" dataKey="id" [(selection)]="turmaRematricula" selectionMode="single">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Turma Id</th>
+                        <th>Escola</th>
+                        <th>Docente</th>
+                        <th>Letra</th>
+                        <th>Ano</th>
+                        <th>Ano Letivo</th>
+                        <th>Visualizar</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-turma>
+                    <tr [pSelectableRow]="turma">
+                        <td>{{ turma.id }}</td>
+                        <td>{{ turma.Escola.nome }}</td>
+                        <td>{{ turma.Servidor.nome }}</td>
+                        <td>{{ turma.letra }}</td>
+                        <td>{{ turma.ano }}</td>
+                        <td>{{ turma.anoLetivo }}</td>
+                        <td>
+                            <p-button label="Ver" (click)="detalhesTurma(turma)" icon="pi pi-eye"
+                                class="p-button-text"></p-button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <div class="dialog-footer-button">
+                <button pButton pRipple label="Rematricular" icon="pi pi-check" class="p-button-success" type="submit"
+                    [disabled]="turmaRematricula == null" (click)="abrirConfirmDialog()"></button>
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-warning"
+                    (click)="isRematricularDialogOpen = false"></button>
+            </div>
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog header="Alunos" [(visible)]="isAlunosDaTurmaDialog" modal="true" [style]="{ width: '60%' }">
+        <ng-template pTemplate="content">
+            <p-table [value]="alunosTurma" [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                currentPageReportTemplate="Apresentando {first} - {last} do total de {totalRecords} entradas">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>RA</th>
+                        <th>Aluno</th>
+                        <th>Mãe</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-aluno>
+                    <tr>
+                        <td>{{ aluno.ra }}</td>
+                        <td>{{ aluno.nome }}</td>
+                        <td>{{ aluno.nomeMae }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </ng-template>
+    </p-dialog>
+
+    <p-confirmDialog #reMatriculaDialog key="reMatriculaDialog" [style]="{ width: '50%' }"
+        [header]="'Confirmar Rematrícula'" [closable]="false" [baseZIndex]="10000">
+        <ng-template pTemplate="message">
+            <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                <p style="font-weight: bold; font-size: 1.2rem;">
+                    Todos os alunos listados abaixo serão transferidos para a turma 
+                    <span style="color: rgb(62, 110, 244); font-weight: bold;">
+                        {{ turmaRematricula.ano }} {{ turmaRematricula.letra }} {{ turmaRematricula.anoLetivo }}
+                    </span>
+                </p>
+
+                <p-table [value]="alunosTurma" [rowsPerPageOptions]="[10]" [showCurrentPageReport]="true">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>RA</th>
+                            <th>Aluno</th>
+                            <th>Mãe</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-aluno>
+                        <tr>
+                            <td>{{ aluno.ra }}</td>
+                            <td>{{ aluno.nome }}</td>
+                            <td>{{ aluno.nomeMae }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </ng-template>
+        <ng-template let-confirmation pTemplate="footer">
+            <button type="button" pButton label="Rematricular" class="p-button-danger p-button-text"
+                (click)="reMatriculaDialog.accept()">
+            </button>
+            <button type="button" pButton label="Cancelar" class="p-button-text" (click)="reMatriculaDialog.reject()">
+            </button>
+        </ng-template>
+    </p-confirmDialog>
 </div>

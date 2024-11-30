@@ -14,15 +14,17 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Masker } from 'mask-validation-br';
-import { Bem } from '../../model/bem';
-import { PropostaBem } from '../../model/propostaBem';
-import { BemService } from '../../services/bem.service';
+import { Item } from '../../model/item';
+import { PropostaItem } from '../../model/propostaItem';
+import { ItemService } from '../../services/item.service';
 import { FornecedorService } from '../../services/fornecedor.service';
 import { PesquisaPreco } from '../../model/pesquisaPreco';
 import { PesquisaPrecoService } from '../../services/pesquisa-preco.service';
+import { GerarPDFConsolidaçãoPesquisaPreco } from '../../services/gerar-pdf-consolidacao-pesquisa.service';
+import { NivelAcessoHandler } from '../../services/nivel-acesso-handler.service';
 
 @Component({
-  selector: 'app-bem-consolidar-proponente',
+  selector: 'app-item-consolidar-proponente',
   standalone: true,
   imports: [
     FormsModule,
@@ -37,22 +39,26 @@ import { PesquisaPrecoService } from '../../services/pesquisa-preco.service';
     TooltipModule,
     InputTextareaModule,
   ],
-  templateUrl: './bem-consolidar-proponente.component.html',
-  styleUrl: './bem-consolidar-proponente.component.scss',
+  templateUrl: './item-consolidar-proponente.component.html',
+  styleUrl: './item-consolidar-proponente.component.scss',
 })
-export class BemConsolidarProponenteComponent {
+export class ItemConsolidarProponenteComponent {
   @ViewChildren('justificativaInput') justificativaInputs: QueryList<ElementRef>;
 
   constructor(
-    private bemService: BemService,
+    private itemService: ItemService,
     private fornecedorService: FornecedorService,
     private pesquisaPrecoService: PesquisaPrecoService,
+    private gerarPDFPesquisaPreco: GerarPDFConsolidaçãoPesquisaPreco,
+    private nivelAcesso: NivelAcessoHandler,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
+  isGestor: boolean = false;
+  isApenasAPM: boolean = false;
   proponentesDropdown: { value: number; proponente: string }[] = [];
   proponenteSelecionadoDropdown: any;
   private proponenteDoDropdown: number;
@@ -62,8 +68,8 @@ export class BemConsolidarProponenteComponent {
   campoJustificativa: string = '';
   tituloPesquisa = '';
   private pesquisaPreco: PesquisaPreco;
-  listaBens: any[] = [];
-  bem: Bem = {
+  listaItens: any[] = [];
+  item: Item = {
     id: undefined,
     pesquisaPrecoId: undefined,
     notaFiscalId: undefined,
@@ -71,6 +77,7 @@ export class BemConsolidarProponenteComponent {
     descricao: undefined,
     menorValor: undefined,
     quantidade: undefined,
+    unidade:undefined,
     justificativa: undefined,
     aprovado: undefined,
     createdAt: undefined,
@@ -79,9 +86,9 @@ export class BemConsolidarProponenteComponent {
     PesquisaPreco: undefined,
     NotaFiscal: undefined,
     TermoDoacao: undefined,
-    PropostaBem: undefined,
+    PropostaItem: undefined,
   };
-  bensSelecionados: Bem[] = [];
+itensSelecionados: Item[] = [];
   dialogAlterarProponente: boolean = false;
 
   private listaFornecedores: Fornecedor[] = [];
@@ -108,7 +115,11 @@ export class BemConsolidarProponenteComponent {
     const dataPesquisa = localStorage.getItem('pesquisaPreco');
 
     if (dataPesquisa) {
+      this.isGestor = this.nivelAcesso.isGestor();
+      this.isApenasAPM = this.nivelAcesso.isApenasAPM();
       this.pesquisaPreco = await this.pesquisaPrecoService.getById(Number(JSON.parse(dataPesquisa).id));
+      console.log(this.pesquisaPreco);
+
       await this.buscarTodos(this.pesquisaPreco.id);
       const programa = this.pesquisaPreco.Programa ? `${this.pesquisaPreco.Programa.nome}: ` : '';
       const titulo = this.pesquisaPreco.titulo ? this.pesquisaPreco.titulo : '';
@@ -118,29 +129,29 @@ export class BemConsolidarProponenteComponent {
     }
   }
 
-  aprovarProponente(bem: any) {
+  aprovarProponente(item: any) {
     this.confirmationService.confirm({
-      message: `Deseja aprovar o proponente <strong>"${bem.melhorFornecedor.razaoSocial}</strong> para o bem <strong>${bem.descricao}?</strong>`,
+      message: `Deseja aprovar o proponente <strong>"${item.melhorFornecedor.razaoSocial}</strong> para o item <strong>${item.descricao}?</strong>`,
       header: 'Confirmação',
       acceptLabel: 'Sim',
       rejectLabel: 'Não',
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-secondary',
       accept: async () => {
-        bem.aprovado = true;
-        bem.menorValor = bem.melhorValor;
-        bem.melhorProponente = bem.melhorFornecedor.id;
-        await this.bemService.update(bem);
+        item.aprovado = true;
+        item.menorValor = item.melhorValor;
+        item.melhorProponente = item.melhorFornecedor.id;
+        await this.itemService.update(item);
       },
       reject: () => {},
     });
   }
 
-  alterarProponente(bem: any) {
-    this.bem = bem;
-    this.idProponenteOriginalAlterar = bem.melhorFornecedor.id;
+  alterarProponente(item: any) {
+    this.item = item;
+    this.idProponenteOriginalAlterar = item.melhorFornecedor.id;
     this.dialogAlterarProponente = true;
-    this.headerAlterarProponente = bem.descricao;
+    this.headerAlterarProponente = item.descricao;
   }
 
   async submitAlterarProponente() {
@@ -148,7 +159,7 @@ export class BemConsolidarProponenteComponent {
     let hasError = false;
 
     this.campoJustificativa = this.campoJustificativa.trim();
-    const propostaNova = this.bem.PropostaBem.find((pb: PropostaBem) => pb.fornecedorId === this.proponenteDoDropdown);
+    const propostaNova = this.item.PropostaItem.find((pb: PropostaItem) => pb.fornecedorId === this.proponenteDoDropdown);
 
     if (this.isCampoJustificativa && !this.campoJustificativa) {
       this.mensagemErroCampo('uma Justificativa');
@@ -175,10 +186,10 @@ export class BemConsolidarProponenteComponent {
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-secondary',
       accept: async () => {
-        this.bem.menorValor = propostaNova.valor;
-        this.bem.aprovado = true;
-        this.bem.melhorProponente = propostaNova.Fornecedor.id;
-        await this.bemService.update(this.bem);
+        this.item.menorValor = propostaNova.valor;
+        this.item.aprovado = true;
+        this.item.melhorProponente = propostaNova.Fornecedor.id;
+        await this.itemService.update(this.item);
       },
       reject: () => {},
     });
@@ -187,7 +198,7 @@ export class BemConsolidarProponenteComponent {
   }
 
   isAprovarPesquisaPreco() {
-    return !this.pesquisaPreco.consolidado && this.listaBens.every((b: Bem) => b.aprovado);
+    return !this.pesquisaPreco.consolidado && this.listaItens.every((b: Item) => b.aprovado);
   }
 
   aprovarPesquisaPreco() {
@@ -195,28 +206,30 @@ export class BemConsolidarProponenteComponent {
     this.pesquisaPrecoService.update(this.pesquisaPreco);
   }
 
-  valorProponente(bem: any, pos: number) {
+  valorProponente(item: any, pos: number) {
     let existe: boolean = false;
     let valor: string = '';
     const fornecedor = this.listaProponentes[pos];
-    const propostaBem =
-      Array.isArray(bem.PropostaBem) && bem.PropostaBem.find((p: PropostaBem) => p.fornecedorId === fornecedor.id);
-    if (propostaBem) {
+    const propostaItem =
+      Array.isArray(item.PropostaItem) && item.PropostaItem.find((p: PropostaItem) => p.fornecedorId === fornecedor.id);
+    if (propostaItem) {
       existe = true;
-      valor = propostaBem.valor ? propostaBem.valor.toString() : '';
+      valor = propostaItem.valor ? propostaItem.valor.toString() : '';
     }
     return { existe, valor };
   }
 
   /**
-   * Recupera todos os bens e seus respectivos proponentes relacionados a uma pesquisa de preço específica.
+   * Recupera todos os itens e seus respectivos proponentes relacionados a uma pesquisa de preço específica.
    *
    * @param idPesquisa - O identificador único da pesquisa de preço.
-   * @returns Uma promessa que resolve para um objeto contendo a lista de bens e seus proponentes.
+   * @returns Uma promessa que resolve para um objeto contendo a lista de itens e seus proponentes.
    */
   private async buscarTodos(idPesquisa: number) {
-    this.listaBens = await this.bemService.getByPesquisa(idPesquisa);
+    this.listaItens = await this.itemService.getByPesquisa(idPesquisa);
+    console.log(this.listaItens);
     this.listaFornecedores = await this.fornecedorService.getByPesquisa(idPesquisa);
+    console.log(this.listaFornecedores);
     await this.construirListaProponentes();
     await this.coletarProponentes();
     await this.melhorProponente();
@@ -246,26 +259,26 @@ export class BemConsolidarProponenteComponent {
   }
 
   private async melhorProponente() {
-    for (const bem of this.listaBens) {
-      if (!bem.melhorProponente) {
-        const { menorValor, melhorFornecedor } = await this.menorPreco(bem);
-        bem.melhorFornecedor = melhorFornecedor ? (melhorFornecedor as Fornecedor) : null;
-        bem.melhorValor = menorValor;
+    for (const item of this.listaItens) {
+      if (!item.melhorProponente) {
+        const { menorValor, melhorFornecedor } = await this.menorPreco(item);
+        item.melhorFornecedor = melhorFornecedor ? (melhorFornecedor as Fornecedor) : null;
+        item.melhorValor = menorValor;
 
-        bem.showJustificativa = false;
-        bem.justificativa = '';
+        item.showJustificativa = false;
+        item.justificativa = '';
       } else {
-        bem.melhorValor = bem.menorValor;
-        bem.melhorFornecedor = this.listaFornecedores.find((f) => f.id == bem.melhorProponente);
+        item.melhorValor = item.menorValor;
+        item.melhorFornecedor = this.listaFornecedores.find((f) => f.id == item.melhorProponente);
       }
     }
   }
 
-  private menorPreco(bem: Bem) {
-    if (!bem.PropostaBem || bem.PropostaBem.length === 0) {
+  private menorPreco(item: Item) {
+    if (!item.PropostaItem || item.PropostaItem.length === 0) {
       return { menorValor: null, melhorFornecedor: null };
     }
-    let { menorValor, melhorFornecedor } = bem.PropostaBem.reduce(
+    let { menorValor, melhorFornecedor } = item.PropostaItem.reduce(
       (acc, proposta) => {
         const valorProposta = Number(proposta.valor);
         if (valorProposta < acc.menorValor) {
@@ -332,7 +345,7 @@ export class BemConsolidarProponenteComponent {
 
   navigateToPesquisa() {
     localStorage.setItem('pesquisaPreco', JSON.stringify(this.pesquisaPreco));
-    this.router.navigate([`conta/pesquisa/${this.pesquisaPreco.tipo}`]);
+    this.router.navigate([`conta/pesquisa`]);
   }
 
   hideDialog() {
@@ -344,10 +357,14 @@ export class BemConsolidarProponenteComponent {
     this.submitted = false;
   }
 
-  onProponenteChange(event: any, bem: any) {
-    if (event.value !== bem.melhorFornecedor.id) {
+  onProponenteChange(event: any, item: any) {
+    if (event.value !== item.melhorFornecedor.id) {
       this.isCampoJustificativa = true;
     } else this.isCampoJustificativa = false;
     this.proponenteDoDropdown = event.value;
+  }
+
+  gerarPDF() {
+    this.gerarPDFPesquisaPreco.salvarPDFConsolidacaoPesquisa(this.pesquisaPreco);
   }
 }

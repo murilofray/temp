@@ -1,6 +1,7 @@
-import { ServidorApm } from 'src/app/modulos/prestacao-contas/model/servidorAPM';
+import { ServidorAPM } from 'src/app/modulos/prestacao-contas/model/servidorAPM';
 import { Escola } from './escola';
 import { Diretor } from './diretor';
+import { NivelAcessoServidor } from './nivelAcessoServidor';
 
 export interface Servidor {
   id: number;
@@ -22,12 +23,12 @@ export interface Servidor {
   deletedAt?: Date;
   escola?: Escola;
   diretor?: Diretor;
-  servidorApm: ServidorApm[];
+  servidorApm: ServidorAPM[];
+  niveisAcessoServidor: NivelAcessoServidor[];
   // ocorrencias: Ocorrencia[];
   // progressao: Progressao[];
   // titulos: Titulo[];
   // quinquenios: Quinquenio[];
-  // niveisAcessoServidor: NivelAcessoServidor[];
   // turmas: Turma[];
   // questionarios: Questionario[];
   // questionariosAluno: QuestionarioAluno[];

@@ -5,6 +5,8 @@ import { PesquisaPrecoService } from '../../services/pesquisa-preco.service';
 import { PesquisaPreco } from '../../model/pesquisaPreco';
 import { PrestacaoContas } from '../../model/prestacaoContas';
 import { PrestacaoContasService } from '../../services/prestacao-contas.service';
+import { NivelAcessoHandler } from '../../services/nivel-acesso-handler.service';
+import { GerarPDFConsolidaçãoPesquisaPreco } from '../../services/gerar-pdf-consolidacao-pesquisa.service';
 
 @Component({
   selector: 'app-lista-pesquisa-precos',
@@ -15,9 +17,13 @@ export class ListaPesquisaPrecosComponent implements OnInit {
   constructor(
     private pesquisaPrecoService: PesquisaPrecoService,
     private prestacaoContasService: PrestacaoContasService,
+    private gerarPDFPesquisaPreco: GerarPDFConsolidaçãoPesquisaPreco,
     private messageService: MessageService,
+    private niveisAcesso: NivelAcessoHandler,
     private router: Router,
   ) {}
+  isGestor: boolean = false;
+  isApenasAPM: boolean = false;
   private prestacaoContas: PrestacaoContas;
   private createPesquisaPreco: PesquisaPreco = {
     id: undefined,
@@ -40,8 +46,7 @@ export class ListaPesquisaPrecosComponent implements OnInit {
     DocumentoScanB: undefined,
     DocumentoScanC: undefined,
     Programa: undefined,
-    Bem: undefined,
-    Servico: undefined,
+    Item: undefined,
   };
   submitted: boolean = false;
   headerDialogNew: string = '';
@@ -69,6 +74,8 @@ export class ListaPesquisaPrecosComponent implements OnInit {
     const dataPrestacao = localStorage.getItem('prestacaoContas');
 
     if (dataPrestacao) {
+      this.isGestor = this.niveisAcesso.isGestor();
+      this.isApenasAPM = this.niveisAcesso.isApenasAPM();
       this.prestacaoContas = await this.prestacaoContasService.getById(Number(JSON.parse(dataPrestacao).id));
       this.buscarTodas(this.prestacaoContas.id);
       this.coletarProgramas();
@@ -80,7 +87,7 @@ export class ListaPesquisaPrecosComponent implements OnInit {
   acessarPesquisa(id: number) {
     this.pesquisaSelecionada = this.listaPesquisa.find((item) => item.id === id);
     localStorage.setItem('pesquisaPreco', JSON.stringify(this.pesquisaSelecionada));
-    this.router.navigate([`/conta/pesquisa/${this.pesquisaSelecionada.tipo}`]);
+    this.router.navigate([`/conta/pesquisa`]);
   }
 
   /**
@@ -105,7 +112,7 @@ export class ListaPesquisaPrecosComponent implements OnInit {
    *
    * Esta função define o título do novo registro de PesquisaPreco para o valor de `this.tituloPesquisa`,
    * em seguida, tenta criar o registro usando o método `create` do `pesquisaPrecoService`.
-   * Se a criação for bem-sucedida, ele exibe uma mensagem de sucesso, atualiza o armazenamento local com o novo registro,
+   * Se a criação for item-sucedida, ele exibe uma mensagem de sucesso, atualiza o armazenamento local com o novo registro,
    * e navega para a página correspondente da PesquisaPreco.
    * Se a criação falhar, ele exibe uma mensagem de erro.
    *
@@ -142,7 +149,7 @@ export class ListaPesquisaPrecosComponent implements OnInit {
         this.createPesquisaPreco = await this.pesquisaPrecoService.getById(resposta.id);
         localStorage.setItem('prestacaoContas', JSON.stringify(this.prestacaoContas));
         localStorage.setItem('pesquisaPreco', JSON.stringify(this.createPesquisaPreco as PesquisaPreco));
-        this.router.navigate([`/conta/pesquisa/${this.createPesquisaPreco.tipo}`]);
+        this.router.navigate([`/conta/pesquisa`]);
         this.hideDialog();
       } else {
         this.messageService.add({
@@ -163,29 +170,23 @@ export class ListaPesquisaPrecosComponent implements OnInit {
 
   async confirmDelete() {
     try {
-      const resposta = await this.pesquisaPrecoService.delete(this.pesquisaSelecionada.id);
-      if (resposta) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Pesquisa Preço excluída com sucesso.',
-        });
-      } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: 'Não foi possível excluir a Pesquisa de Preço.',
-        });
-      }
-      this.buscarTodas(this.prestacaoContas.id);
-      this.hideDialog();
+      await this.pesquisaPrecoService.delete(this.pesquisaSelecionada.id);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Pesquisa Preço excluída com sucesso.',
+      });
     } catch (error) {
       console.error(`Erro aconteceu:\n ${error}`);
       this.messageService.add({
         severity: 'error',
-        summary: 'Erro',
-        detail: 'Não foi possível excluir a Pesquisa de Preço.',
+        summary: 'Proponentes Associados!',
+        detail: `Não foi possível excluir a Pesquisa de Preço. \nA Pesquisa possui proponentes associados.`,
+        life: 8000,
       });
+    } finally {
+      this.buscarTodas(this.prestacaoContas.id);
+      this.hideDialog();
     }
   }
 
@@ -195,7 +196,7 @@ export class ListaPesquisaPrecosComponent implements OnInit {
    * @remarks
    * Esta função busca todos os registros de PesquisaPreco associados ao `this.prestacaoContas.id` fornecido
    * usando o método `getByPrestacao` do `PesquisaPrecoService`.
-   * Se bem-sucedido, ele atualiza a propriedade `listaPesquisa` com os registros recuperados.
+   * Se item-sucedido, ele atualiza a propriedade `listaPesquisa` com os registros recuperados.
    * Se ocorrer um erro durante a busca, ele exibe uma mensagem de erro usando o `MessageService`
    * e registra o erro no console.
    *
@@ -251,8 +252,7 @@ export class ListaPesquisaPrecosComponent implements OnInit {
       DocumentoScanB: undefined,
       DocumentoScanC: undefined,
       Programa: undefined,
-      Bem: undefined,
-      Servico: undefined,
+      Item: undefined,
     };
   }
 
@@ -296,5 +296,9 @@ export class ListaPesquisaPrecosComponent implements OnInit {
           ? new Date(pesquisaPreco.createdAt).toISOString().includes(query)
           : pesquisaPreco.createdAt.toISOString().includes(query)),
     );
+  }
+
+  gerarTodosPDF(pesquisaPreco: PesquisaPreco) {
+    this.gerarPDFPesquisaPreco.salvarPDFConsolidacaoPesquisa(pesquisaPreco);
   }
 }

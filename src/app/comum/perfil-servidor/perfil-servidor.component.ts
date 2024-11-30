@@ -79,7 +79,7 @@ export class PerfilServidorComponent {
       }
     }
     else{
-      console.log('Token JWT nao encontrado ou invalido.');
+      // console.log('Token JWT nao encontrado ou invalido.');
       // this.router.navigate(['/login']);
     }
   }
@@ -114,7 +114,6 @@ export class PerfilServidorComponent {
     }
 
     if (this.senhaAtual && this.novaSenha) {
-      // Aqui você pode implementar a lógica para redefinir a senha
       const response = await this.servidorService.redefinirSenha(this.servidor.id, this.senhaAtual, this.novaSenha);
       if (!response.success) {
         this.messageService.add({ severity: 'error', summary: 'Erro', detail: response.message });
@@ -123,6 +122,9 @@ export class PerfilServidorComponent {
 
       this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Senha redefinida com sucesso!' });
       this.fecharDialogoRedefinirSenha();
+      this.confirmarNovaSenha = '';
+      this.senhaAtual = '';
+      this.novaSenha = '';
     } else {
       this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Preencha todos os campos.' });
     }

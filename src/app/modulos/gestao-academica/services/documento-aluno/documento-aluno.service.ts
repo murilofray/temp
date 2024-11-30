@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 })
 export class DocumentoAlunoService {
   private urlBase = `${environment.apiUrl}/doc`;
+  
 
   constructor() {}
 
@@ -109,27 +110,9 @@ export class DocumentoAlunoService {
     }
   }
 
-  async downloadPDF(caminho: string) {
-    // URL do endpoint para download
-
-    const url = `${environment.apiUrl}/doc/download?docPath=${caminho}`;
-
-    // Faz a requisição para o backend usando axios.get
-    axios
-      .get(url, {
-        // Configura para receber a resposta como um blob
-        responseType: 'blob',
-      })
-      .then((response) => {
-        // Cria um link temporário para iniciar o download
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-        link.download = caminho + '.pdf'; // Nome do arquivo ao salvar
-        link.click(); // Simula o clique para baixar o arquivo
-        window.URL.revokeObjectURL(link.href); // Limpa a URL criada
-      })
-      .catch((error) => {
-        console.error('Erro ao baixar o documento:', error);
-      });
+  verPDF(caminho: string){
+    const pdfUrl = `${environment.docsApiURL}${caminho}`;
+    window.open(pdfUrl, '_blank');
   }
+
 }

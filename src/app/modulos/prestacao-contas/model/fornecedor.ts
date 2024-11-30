@@ -1,6 +1,5 @@
 import { NotaFiscal } from './notaFiscal';
-import { PropostaBem } from './propostaBem';
-import { PropostaServico } from './propostaServico';
+import { PropostaItem } from './propostaItem';
 
 export interface Fornecedor {
   id: number;
@@ -17,6 +16,5 @@ export interface Fornecedor {
   updatedAt?: Date;
   deletedAt?: Date;
   NotaFiscal?: NotaFiscal[];
-  PropostaBem?: PropostaBem[];
-  PropostaServico?: PropostaServico[];
+  PropostaItem?: PropostaItem[];
 }

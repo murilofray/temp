@@ -50,15 +50,11 @@ export class ValidationService {
         return true
     }
 
-    isRA(ra: string): boolean {
-        const raRegex = /^\d{3}\.\d{3}\.\d{3}\.\d{3}-[A-Z0-9]$/i;
-        return raRegex.test(ra);
-    }
-
     validarCep(cepControl: any): Promise<any> {
         return new Promise((resolve, reject) => {
             if (cepControl) {
-                const cep = cepControl.replace(/\D/g, ''); // Remove caracteres não numéricos do CEP
+                const cepString = cepControl.value + '';
+                const cep = cepString.replace(/\D/g, ''); // Remove caracteres não numéricos do CEP
                 if (cep.length === 8) {
                     this.viaCepService.validarCep(cep).subscribe(
                         (resposta) => {

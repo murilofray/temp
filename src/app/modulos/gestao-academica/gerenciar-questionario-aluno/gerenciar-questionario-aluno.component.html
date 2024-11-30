@@ -3,9 +3,10 @@
     <div>
       <h2 class="titulo-questionarios">Questionários respondidos</h2>
       <span class="titulo-questionarios"
-        >Aluno: {{ aluno?.nome }} - Turma: {{ aluno?.Turma.ano }} {{ aluno?.Turma.letra }} ({{
-          aluno?.Turma.anoLetivo
-        }})</span
+        >Aluno: {{ aluno?.nome }}
+        <span *ngIf="aluno?.Turma"
+          >- Turma: {{ aluno?.Turma?.ano }} {{ aluno?.Turma?.letra }} ({{ aluno?.Turma?.anoLetivo }})</span
+        ></span
       >
     </div>
     <div>
@@ -15,6 +16,7 @@
         icon="pi pi-plus"
         class="p-button-sm p-button-sm ml-2"
         (click)="showDialogNovoQuestionario()"
+        *ngIf="!isVisualizacao"
       ></button>
     </div>
   </div>
@@ -64,6 +66,7 @@
               class="p-button-danger button-spacing"
               [disabled]="questionario.Servidor.id != servidorId"
               (click)="confirmDelete(questionario)"
+              *ngIf="!isVisualizacao"
             >
               Deletar
             </button>
@@ -118,7 +121,7 @@
   <hr />
   <div class="button-group flex justify-content-between">
     <button pButton type="button" label="Voltar" (click)="displayDialog = false" class="p-button-secondary"></button>
-    <button pButton type="button" label="Baixar (PDF)" class="p-button-primary"></button>
+    <!-- <button pButton type="button" label="Baixar (PDF)" class="p-button-primary"></button> -->
   </div>
 </p-dialog>
 

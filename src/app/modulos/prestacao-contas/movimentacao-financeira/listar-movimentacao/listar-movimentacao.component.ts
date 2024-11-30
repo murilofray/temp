@@ -437,6 +437,10 @@ export class ListarMovimentacaoComponent implements OnInit {
     if (file) {
       if (file.type === 'application/pdf') {
         this.uploadedFile = file;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Arquivo realizado',
+        });
       } else {
         this.messageService.add({
           severity: 'error',
@@ -445,6 +449,15 @@ export class ListarMovimentacaoComponent implements OnInit {
         });
       }
     }
+  }
+
+  onFileCleared(): void {
+    this.uploadedFile = null;
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Arquivo descartado',
+      detail: 'Seleção de arquivo foi cancelada.',
+    });
   }
 
   get isUploadedFileObject(): boolean {

@@ -5,12 +5,13 @@ import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
+import { DividerModule } from 'primeng/divider';
 
 
 
 @NgModule({
   declarations: [],
-  imports: [CommonModule, TableModule, ButtonModule, DropdownModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, TableModule, ButtonModule, DropdownModule, FormsModule, ReactiveFormsModule, DividerModule],
   providers: [MessageService],
 })
 export class GerenciarTurmasModule { }

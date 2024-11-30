@@ -110,13 +110,24 @@ export class RelatorioOcorrenciasParaProgressaoDiretorComponent {
 
   gerarRelatorio() {
     if (this.selectedProfessor) {
-
       const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
 
-      doc.text(`Relatório de Ocorrências de ${this.selectedProfessor.nome}`, 10, 10);
+      const logoBase64 = 'assets/layout/images/logo.png';
+
+      const logoWidth = 20; // Largura
+      const logoHeight = 15; // Altura
+      const margin = 15;
+
+      doc.addImage(logoBase64, 'PNG', margin, margin, logoWidth, logoHeight);
+
+      doc.setFontSize(14);
+      const titleX = margin + logoWidth + 10;
+      doc.text(`Relatório de Ocorrências de ${this.selectedProfessor.nome}`, titleX, margin + logoHeight / 2 + 5);
 
       autoTable(doc, {
-        head: [['Data da Ocorrência', 'Registrado Por', 'Estado', 'É Abonada?', 'Tipo de Abono']],
+        head: [['Data da Ocorrência', 'Registrado Por', 'Situação', 'É Abonada?', 'Tipo de Abono']],
         body: this.ocorrencias.map((ocorrencia) =>
           [
             this.formatData(ocorrencia.dataOcorrencia),
@@ -125,15 +136,21 @@ export class RelatorioOcorrenciasParaProgressaoDiretorComponent {
             this.verSituacaoParaAbonada(ocorrencia.status, ocorrencia.abonoId),
             this.verSituacaoParaTipoAbono(ocorrencia.status, ocorrencia.abonoId),
           ]),
-        didDrawPage: () => {
-          doc.setFontSize(12);
-          doc.text('Relatório baixado em: '+this.formatDataComHora(new Date()), 10, doc.internal.pageSize.height - 10);
+        didDrawPage: (data) => {
+          // Adiciona o timbre em todas as páginas
+          doc.addImage(logoBase64, 'PNG', margin, margin, logoWidth, logoHeight);
+          doc.setFontSize(14);
+          doc.text(`Relatório de Ocorrências de ${this.selectedProfessor.nome}`, titleX, margin + logoHeight / 2 + 5);
+
+          doc.setFontSize(10);
+          doc.text('Relatório emitido em: ' + this.formatDataComHora(new Date()), margin, pageHeight - 10);
         },
+        startY: margin + logoHeight + 10
       });
 
-      doc.save('Relatorio de Ocorrencias de ' + this.selectedProfessor.nome + '.pdf');
+      doc.save('Relatorio_de_Ocorrencias_' + this.selectedProfessor.nome + '.pdf');
     } else {
-      this.mostrarMensagem("Aviso", "Selecione um docente para gerar relatório de ocorrências", "warn")
+      this.mostrarMensagem("Aviso", "Selecione um docente para gerar relatório de ocorrências", "warn");
     }
   }
 
@@ -153,6 +170,16 @@ export class RelatorioOcorrenciasParaProgressaoDiretorComponent {
     } else {
       return '-'
     }
+  }
+
+  verTamanhoArrayOcorrencias(): number {
+    let cont = 0;
+    if (this.ocorrencias) {
+      this.ocorrencias.forEach(ocorrencia => {
+        cont++;
+      });
+    }
+    return cont;
   }
 
   formatData(data: Date) {
@@ -179,7 +206,7 @@ export class RelatorioOcorrenciasParaProgressaoDiretorComponent {
     const horas = String(data.getHours()).padStart(2, '0');
     const minutos = String(data.getMinutes()).padStart(2, '0');
 
-    const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+    const dataFormatada = `${dia}/${mes}/${ano} às ${horas}:${minutos}`;
     return dataFormatada;
   }
 

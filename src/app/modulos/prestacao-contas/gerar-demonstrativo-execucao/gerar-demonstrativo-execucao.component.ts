@@ -5,7 +5,8 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { Bem } from 'src/app/modulos/prestacao-contas/model/bem';
+import { Item } from 'src/app/modulos/prestacao-contas/model/item';
+import { UnidadeEnum } from 'src/app/enums/UnidadeEnum';
 
 @Component({
   selector: 'app-gerar-demonstrativo-execucao',
@@ -17,11 +18,12 @@ import { Bem } from 'src/app/modulos/prestacao-contas/model/bem';
 export class GerarDemonstrativoExecucaoComponent {
   pdfSrc: any;
   pdfUrll: string | undefined;
-  bens: Bem[] = [
+  bens: Item[] = [
     {
       id: 1,
       pesquisaPrecoId: 1,
       quantidade: 1,
+      unidade: UnidadeEnum.UNIDADE.sigla,
       descricao: 'MINI RACK PAREDE PADRÃO',
       createdAt: new Date('2024-08-20'),
     },
@@ -29,6 +31,7 @@ export class GerarDemonstrativoExecucaoComponent {
       id: 2,
       pesquisaPrecoId: 1,
       quantidade: 2,
+      unidade: UnidadeEnum.UNIDADE.sigla,
       descricao: 'LIQUIDIFICADOR INDUSTRIAL',
       createdAt: new Date('2024-08-20'),
     },
@@ -36,6 +39,7 @@ export class GerarDemonstrativoExecucaoComponent {
       id: 3,
       pesquisaPrecoId: 1,
       quantidade: 3,
+      unidade: UnidadeEnum.UNIDADE.sigla,
       descricao: 'CONJUNTO DE MESA DE REFEITÓRIO',
       createdAt: new Date('2024-08-20'),
     },

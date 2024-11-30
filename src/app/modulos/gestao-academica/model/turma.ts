@@ -13,4 +13,5 @@ export interface Turma {
     deletedAt: string | null;
     Escola: Escola;
     Servidor: Servidor;
+    descricao?: string;
   }

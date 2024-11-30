@@ -1,13 +1,17 @@
 import { PesquisaPreco } from './pesquisaPreco';
 import { NotaFiscal } from './notaFiscal';
-import { PropostaServico } from './propostaServico';
+import { TermoDoacao } from './termoDoacao';
+import { PropostaItem } from './propostaItem';
 
-export interface Servico {
+export interface Item {
   id: number;
   pesquisaPrecoId: number;
   notaFiscalId?: number;
+  termoDoacaoId?: number;
   descricao: string;
   menorValor?: number;
+  quantidade: number;
+  unidade: string;
   justificativa?: string;
   aprovado?: boolean;
   melhorProponente?: number;
@@ -16,5 +20,6 @@ export interface Servico {
   deletedAt?: Date;
   PesquisaPreco?: PesquisaPreco;
   NotaFiscal?: NotaFiscal;
-  PropostaServico?: PropostaServico[];
+  TermoDoacao?: TermoDoacao;
+  PropostaItem?: PropostaItem[];
 }

@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { PesquisaPrecoService } from '../../services/pesquisa-preco.service';
 import { PesquisaPreco } from '../../model/pesquisaPreco';
-import { PrestacaoContas } from '../../model/prestacaoContas';
-import { PrestacaoContasService } from '../../services/prestacao-contas.service';
 import { FornecedorService } from '../../services/fornecedor.service';
 import { Fornecedor } from '../../model/fornecedor';
 import { Masker, Validator } from 'mask-validation-br';
@@ -52,8 +49,7 @@ export class ListaFornecedorComponent implements OnInit {
     updatedAt: undefined,
     deletedAt: undefined,
     NotaFiscal: undefined,
-    PropostaBem: undefined,
-    PropostaServico: undefined,
+    PropostaItem: undefined,
   };
   fornecedor: Fornecedor = {
     id: undefined,
@@ -70,8 +66,7 @@ export class ListaFornecedorComponent implements OnInit {
     updatedAt: undefined,
     deletedAt: undefined,
     NotaFiscal: undefined,
-    PropostaBem: undefined,
-    PropostaServico: undefined,
+    PropostaItem: undefined,
   };
   // Objeto Fornecedor que é transitado entre os estados da criação, update ou deletar
   private fornecedorOperador: Fornecedor = {
@@ -89,8 +84,7 @@ export class ListaFornecedorComponent implements OnInit {
     updatedAt: undefined,
     deletedAt: undefined,
     NotaFiscal: undefined,
-    PropostaBem: undefined,
-    PropostaServico: undefined,
+    PropostaItem: undefined,
   };
 
   /**
@@ -426,8 +420,7 @@ export class ListaFornecedorComponent implements OnInit {
       updatedAt: undefined,
       deletedAt: undefined,
       NotaFiscal: undefined,
-      PropostaBem: undefined,
-      PropostaServico: undefined,
+      PropostaItem: undefined,
     };
     this.fornecedor = {
       id: undefined,
@@ -444,8 +437,7 @@ export class ListaFornecedorComponent implements OnInit {
       updatedAt: undefined,
       deletedAt: undefined,
       NotaFiscal: undefined,
-      PropostaBem: undefined,
-      PropostaServico: undefined,
+      PropostaItem: undefined,
     };
     this.crudFornecedor = {
       id: undefined,
@@ -462,8 +454,7 @@ export class ListaFornecedorComponent implements OnInit {
       updatedAt: undefined,
       deletedAt: undefined,
       NotaFiscal: undefined,
-      PropostaBem: undefined,
-      PropostaServico: undefined,
+      PropostaItem: undefined,
     };
   }
 

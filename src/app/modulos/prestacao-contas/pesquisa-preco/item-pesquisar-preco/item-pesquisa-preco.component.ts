@@ -1,44 +1,48 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Servico } from '../../model/servico';
-import { ServicoService } from '../../services/servico.service';
+import { Item } from '../../model/item';
+import { ItemService } from '../../services/item.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Fornecedor } from '../../model/fornecedor';
-import { PropostaServico } from '../../model/propostaServico';
+import { PropostaItem } from '../../model/propostaItem';
 import { FornecedorService } from '../../services/fornecedor.service';
 import { Router } from '@angular/router';
 import { PesquisaPrecoService } from '../../services/pesquisa-preco.service';
 import { PesquisaPreco } from '../../model/pesquisaPreco';
-import { PrestacaoContas } from '../../model/prestacaoContas';
 import { TipoDocumentoEnum as tde } from 'src/app/enums/TipoDocumentoEnum';
 
 import { Validator, Masker } from 'mask-validation-br';
 import { PdfViewerComponent } from 'src/app/comum/pdf-viewer/pdf-viewer.component';
-import { DocumentoService } from '../../services/documento.service';
 import { DocumentoScan } from 'src/app/comum/model/documentoScan';
 import { environment } from 'src/environments/environment';
 import { CreateDOCtoScanService } from '../../services/createDOCtoScan.service';
+import { NivelAcessoHandler } from '../../services/nivel-acesso-handler.service';
+import { GerarPDFPlanilhaPreco } from '../../services/gerar-pdf-planilha-preco.service';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { UnidadeEnum } from 'src/app/enums/UnidadeEnum';
 
 @Component({
-  selector: 'app-servico-pesquisa-preco',
-  templateUrl: './servico-pesquisa-preco.component.html',
-  styleUrl: './servico-pesquisa-preco.component.scss',
+  selector: 'app-item-pesquisa-preco',
+  templateUrl: './item-pesquisa-preco.component.html',
+  styleUrl: './item-pesquisa-preco.component.scss',
 })
-export class ServicoPesquisaPrecoComponent implements OnInit {
+export class ItemPesquisaPrecoComponent implements OnInit {
   @ViewChild('proponenteDocInput') proponenteDocInput!: ElementRef;
   @ViewChild(PdfViewerComponent) pdfViewer!: PdfViewerComponent;
 
   constructor(
-    private servicoService: ServicoService,
+    private itemService: ItemService,
     private fornecedorService: FornecedorService,
     private pesquisaPrecoService: PesquisaPrecoService,
-    private documentoService: DocumentoService,
     private createDOCtoScanService: CreateDOCtoScanService,
+    private gerarPDFPlanilhaService: GerarPDFPlanilhaPreco,
+    private niveisAcesso: NivelAcessoHandler,
     private messageService: MessageService,
     private router: Router,
     private confirmationService: ConfirmationService,
   ) {}
 
-  private prestacaoContas: PrestacaoContas;
+  isGestor: boolean = false;
+  isApenasAPM: boolean = false;
   private pesquisaPreco: PesquisaPreco;
   private listaFornecedores: Fornecedor[] = [];
   private orcamentoProponente: string = undefined;
@@ -46,32 +50,37 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
   uploadedFile: File | { tipoDocumentoId: number; caminho: string } | null = null;
   tituloPesquisa = 'Não há pesquisa selecionada';
   isPesquisaPrecoConsolidada: boolean;
-  listaServicos: any[] = [];
-  servico: Servico = {
+  listaItens: any[] = [];
+  item: Item = {
     id: undefined,
     pesquisaPrecoId: undefined,
     notaFiscalId: undefined,
+    termoDoacaoId: undefined,
     descricao: '',
     menorValor: undefined,
+    quantidade: undefined,
+    unidade: undefined,
     justificativa: undefined,
     createdAt: undefined,
     updatedAt: undefined,
     deletedAt: undefined,
     PesquisaPreco: undefined,
     NotaFiscal: undefined,
-    PropostaServico: undefined,
+    TermoDoacao: undefined,
+    PropostaItem: undefined,
   };
-  servicoSelecionado: Servico;
+  itemSelecionado: Item;
 
   // Dialogs
-  // // Servico
-  servicoDialog: boolean = false;
-  editServicoDialog: boolean = false;
-  deleteServicoDialog: boolean = false;
-  deleteServicosDialog: boolean = false;
+  // // Item
+  itemDialog: boolean = false;
+  editItemDialog: boolean = false;
+  deleteItemDialog: boolean = false;
+  deleteItensDialog: boolean = false;
   permitirConsolidar: boolean = false;
   pesquisaCompleta: boolean = false;
   dialogOrcamento: boolean = false;
+  gerarPlanilha: boolean = false;
 
   // // Proponentes
   proponenteDialog: boolean = false;
@@ -87,6 +96,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
   valorProposto: number;
   deleteValorDialog = false;
   private editValor = false;
+  labelValorItem = '';
 
   listaProponentes: Fornecedor[] = [];
   crudProponente: Fornecedor = {
@@ -104,7 +114,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     updatedAt: undefined,
     deletedAt: undefined,
     NotaFiscal: undefined,
-    PropostaServico: undefined,
+    PropostaItem: undefined,
   };
   proponente: Fornecedor = {
     id: undefined,
@@ -121,8 +131,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     updatedAt: undefined,
     deletedAt: undefined,
     NotaFiscal: undefined,
-    PropostaServico: undefined,
-    PropostaBem: undefined,
+    PropostaItem: undefined,
   };
   // Objeto Fornecedor que é transitado entre os estados da criação, update ou deletar
   private fornecedorOperador: Fornecedor = {
@@ -140,11 +149,13 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     updatedAt: undefined,
     deletedAt: undefined,
     NotaFiscal: undefined,
-    PropostaServico: undefined,
-    PropostaBem: undefined,
+    PropostaItem: undefined,
   };
-  private propostaServico: PropostaServico;
 
+  unidadesDropdown = Object.values(UnidadeEnum).map((unid) => ({
+    unidade: unid.nome,
+    sigla: unid.sigla,
+  }));
   submitted: boolean = false;
   cols: any[] = [];
   isCNPJ: boolean = false;
@@ -163,6 +174,8 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
   async ngOnInit() {
     const dataPesquisa = localStorage.getItem('pesquisaPreco');
     if (dataPesquisa) {
+      this.isGestor = this.niveisAcesso.isGestor();
+      this.isApenasAPM = this.niveisAcesso.isApenasAPM();
       this.pesquisaPreco = await this.pesquisaPrecoService.getById(Number(JSON.parse(dataPesquisa).id));
       const nomePrograma = this.pesquisaPreco.Programa?.nome ? this.pesquisaPreco.Programa.nome : '';
       this.tituloPesquisa = `${nomePrograma}:  ${this.pesquisaPreco.titulo ? this.pesquisaPreco.titulo : ''}`;
@@ -173,17 +186,16 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     }
   }
 
-  valorProponente(servico: any, pos: number) {
+  valorProponente(item: any, pos: number) {
     let existe: boolean = false;
     let valor: string = '';
 
     const fornecedor = this.listaProponentes[pos];
-    const propostaServico =
-      Array.isArray(servico.PropostaServico) &&
-      servico.PropostaServico.find((p: PropostaServico) => p.fornecedorId === fornecedor.id);
-    if (propostaServico) {
+    const propostaItem =
+      Array.isArray(item.PropostaItem) && item.PropostaItem.find((p: PropostaItem) => p.fornecedorId === fornecedor.id);
+    if (propostaItem) {
       existe = true;
-      valor = propostaServico.valor ? propostaServico.valor.toString() : '';
+      valor = propostaItem.valor ? propostaItem.valor.toString() : '';
     }
     return { existe, valor };
   }
@@ -222,7 +234,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
 
   // Métodos para adicionar ou editar o valor de uma proposta
   async adicionarValor() {
-    const idServico = this.servico.id;
+    const idItem = this.item.id;
     const idFornecedor = this.fornecedorOperador.id;
     this.submitted = true;
 
@@ -232,8 +244,8 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     }
 
     if (this.editValor) {
-      const resposta = await this.servicoService.updatePropostaServico({
-        servicoId: Number(idServico),
+      const resposta = await this.itemService.updatePropostaItem({
+        itemId: Number(idItem),
         fornecedorId: Number(idFornecedor),
         valor: this.valorProposto,
       });
@@ -243,8 +255,8 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
         life: 2000,
       });
     } else {
-      const resposta = await this.servicoService.createPropostaServico({
-        servicoId: Number(idServico),
+      const resposta = await this.itemService.createPropostaItem({
+        itemId: Number(idItem),
         fornecedorId: Number(idFornecedor),
         valor: this.valorProposto,
       });
@@ -259,38 +271,39 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     this.resetForm();
   }
 
-  novoValor(servico: any, pos: number) {
+  novoValor(item: Item, pos: number) {
     this.resetForm();
     this.fornecedorOperador = this.listaProponentes[pos];
-    this.servico = servico;
+    this.item = item;
     this.editValor = false;
     this.valorDialog = true;
+    this.labelValorItem = this.item.descricao;
   }
 
-  editarValor(servico: any, pos: number) {
+  editarValor(item: any, pos: number) {
     this.resetForm();
     this.fornecedorOperador = this.listaProponentes[pos];
-    this.servico = servico;
-    this.valorProposto = Number(this.valorProponente(servico, pos).valor);
+    this.item = item;
+    this.valorProposto = Number(this.valorProponente(item, pos).valor);
     this.editValor = true;
     this.valorDialog = true;
   }
 
-  removerValor(servico: any, pos: number) {
+  removerValor(item: any, pos: number) {
     this.resetForm();
     this.fornecedorOperador = this.listaProponentes[pos];
     this.valorProposto = 0;
-    this.servico = servico;
+    this.item = item;
     this.deleteValorDialog = true;
   }
 
   async confirmDeleteValor() {
-    const idServico = this.servico.id;
+    const idItem = this.item.id;
     const idFornecedor = this.fornecedorOperador.id;
     try {
-      const resposta = await this.servicoService
-        .deletePropostaServico({
-          servicoId: idServico,
+      const resposta = await this.itemService
+        .deletePropostaItem({
+          itemId: idItem,
           fornecedorId: idFornecedor,
         })
         .then(() => {
@@ -312,60 +325,61 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     }
   }
 
-  // Método para cadastrar BEM
-  newServico() {
+  // Método para cadastrar ITEM
+  newItem() {
     this.resetForm();
-    this.servicoDialog = true;
+    this.itemDialog = true;
   }
 
-  alterServico() {
-    if (this.servicoSelecionado) {
-      this.servico = { ...this.servicoSelecionado };
+  alterItem() {
+    if (this.itemSelecionado) {
+      this.item = { ...this.itemSelecionado };
       this.isEditMode = true;
-      this.servicoDialog = true;
+      this.itemDialog = true;
     }
   }
 
-  removeServico() {
+  removeItem() {
     this.resetForm();
-    this.deleteServicoDialog = true;
+    this.deleteItemDialog = true;
   }
 
-  private async createServico() {
-    (this.servico.pesquisaPrecoId = this.pesquisaPreco.id), (this.servico.menorValor = 0);
+  private async createItem() {
+    this.item.pesquisaPrecoId = this.pesquisaPreco.id;
+    this.item.menorValor = 0;
 
     try {
-      const resposta = await this.servicoService.create(this.servico);
+      const resposta = await this.itemService.create(this.item);
       this.messageService.add({
         severity: 'success',
         summary: 'Adicionado',
         life: 3000,
-        detail: `${this.servico.descricao} foi adicionado à Pesquisa de Preço${this.tituloPesquisa}`,
+        detail: `${this.item.descricao} foi adicionado à Pesquisa de Preço${this.tituloPesquisa}`,
       });
     } catch (error) {
       console.error(error);
       this.messageService.add({
         severity: 'error',
-        summary: `Erro ao adicionar: ${this.servico.descricao}`,
+        summary: `Erro ao adicionar: ${this.item.descricao}`,
         life: 7000,
       });
     }
   }
 
-  private async updateServico() {
+  private async updateItem() {
     try {
-      const resposta = await this.servicoService.update(this.servico);
+      const resposta = await this.itemService.update(this.item);
       this.messageService.add({
         severity: 'success',
         summary: 'Alterado',
         life: 3000,
-        detail: `${this.servico.descricao} foi alterado na Pesquisa de Preço${this.tituloPesquisa}`,
+        detail: `${this.item.descricao} foi alterado na Pesquisa de Preço${this.tituloPesquisa}`,
       });
     } catch (error) {
       console.error(error);
       this.messageService.add({
         severity: 'error',
-        summary: `Erro ao alterar: ${this.servico.descricao}`,
+        summary: `Erro ao alterar: ${this.item.descricao}`,
         life: 7000,
       });
     }
@@ -374,17 +388,29 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
   /**
    * Registra um novo item no banco de dados relacionado à pesquisa atual.
    *
-   * @param servico - O item a ser registrado.
-   * @param servico.descricao - A descrição do item.
-   * @param servico.quantidade - A quantidade do item.
+   * @param item - O item a ser registrado.
+   * @param item.descricao - A descrição do item.
+   * @param item.quantidade - A quantidade do item.
    */
-  async submitedServico() {
+  async submitedItem() {
     this.submitted = true;
     let hasError = false;
 
     // Validação do campo descrição
-    if (!this.servico.descricao?.trim()) {
+    if (!this.item.descricao?.trim()) {
       this.mensagemErroCampo('uma descrição');
+      hasError = true;
+    }
+
+    // Validação do campo quantidade
+    if (!this.item.quantidade || Number(this.item.quantidade) <= 0) {
+      this.mensagemErroCampo('uma quantidade');
+      hasError = true;
+    }
+
+    // Validação do campo unidade
+    if (!this.item.unidade?.trim()) {
+      this.mensagemErroCampo('uma unidade');
       hasError = true;
     }
 
@@ -392,37 +418,37 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
       return;
     }
 
-    if (!this.isEditMode) await this.createServico();
-    else await this.updateServico();
+    if (!this.isEditMode) await this.createItem();
+    else await this.updateItem();
 
     this.buscarTodos(this.pesquisaPreco.id);
     this.resetForm();
   }
 
-  confirmDelete() {
-    const servicoDeletado = this.servicoSelecionado;
-    this.deleteServicosDialog = false;
-    this.listaServicos = this.listaServicos.filter((val) => val.id !== this.servicoSelecionado.id);
-    this.deleteServico(this.servicoSelecionado);
+  confirmDeleteItem() {
+    const itemDeletado = this.itemSelecionado;
+    this.deleteItensDialog = false;
+    this.listaItens = this.listaItens.filter((val) => val.id !== this.itemSelecionado.id);
+    this.deleteItem(this.itemSelecionado);
     this.messageService.add({
       severity: 'success',
       summary: 'Sucesso',
-      detail: `${servicoDeletado.descricao} deletado.`,
+      detail: `${itemDeletado.descricao} deletado.`,
       life: 3000,
     });
-    this.servicoSelecionado = null;
+    this.itemSelecionado = null;
     this.buscarTodos(this.pesquisaPreco.id);
     this.resetForm();
   }
 
-  private async deleteServico(servico: Servico) {
+  private async deleteItem(item: Item) {
     try {
-      const resposta = await this.servicoService.delete(servico.id);
+      const resposta = await this.itemService.delete(item.id);
       let respostaProposta;
       for (let index = 0; index < 3; index++) {
-        const element = servico.PropostaServico[index];
+        const element = item.PropostaItem[index];
         if (element) {
-          respostaProposta = await this.servicoService.deletePropostaServico(element);
+          respostaProposta = await this.itemService.deletePropostaItem(element);
         }
       }
     } catch (error) {
@@ -473,7 +499,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
         detail: `Proponente ${this.proponente.nomeFantasia} removido.`,
         life: 3000,
       });
-      this.deletarPropostasServicoProponente(this.proponente.id);
+      this.deletarPropostasItemProponente(this.proponente.id);
     } catch (error) {
       this.messageService.add({
         severity: 'error',
@@ -580,7 +606,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
    * @remarks
    * Esta função define a propriedade createdAt do fornecedorOperador caso ela ainda não esteja definida.
    * Em seguida, tenta criar ou atualizar o fornecedor no banco de dados usando o FornecedorService.
-   * Após a criação ou atualização servico-sucedida do fornecedor, ele atualiza a PesquisaPreco relacionada
+   * Após a criação ou atualização item-sucedida do fornecedor, ele atualiza a PesquisaPreco relacionada
    * definindo a propriedade proponenteA, proponenteB ou proponenteC com base na proponentePosicao.
    *
    * @throws Lança um erro se houver um problema ao criar ou atualizar o fornecedor ou PesquisaPreco.
@@ -692,10 +718,10 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     }
   }
 
-  novoProponente(servico: Servico) {
+  novoProponente(item: Item) {
     this.resetForm();
     this.proponenteDialog = true;
-    this.servico = servico;
+    this.item = item;
   }
 
   hideDialog() {
@@ -703,13 +729,13 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
   }
 
   /**
-   * Recupera todos os bens e seus respectivos proponentes relacionados a uma pesquisa de preço específica.
+   * Recupera todos os itens e seus respectivos proponentes relacionados a uma pesquisa de preço específica.
    *
    * @param idPesquisa - O identificador único da pesquisa de preço.
-   * @returns Uma promessa que resolve para um objeto contendo a lista de bens e seus proponentes.
+   * @returns Uma promessa que resolve para um objeto contendo a lista de itens e seus proponentes.
    */
   private async buscarTodos(idPesquisa: number) {
-    this.listaServicos = await this.servicoService.getByPesquisa(idPesquisa);
+    this.listaItens = await this.itemService.getByPesquisa(idPesquisa);
     this.listaFornecedores = await this.fornecedorService.getByPesquisa(idPesquisa);
     await this.construirListaProponentes();
     await this.todosValoresProponentesPreenchidos();
@@ -744,25 +770,27 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     this.listaProponentes = proponentesIds.map((id) => this.listaFornecedores.find((f) => f.id === id));
   }
 
-
+  /**
+   * Verifica se todos os valores de proponentes para cada item na lista de itens estão preenchidos.
+   *
+   * @remarks
+   * Essa função itera por cada item no vetor `listaItens`. Para cada item, ela verifica se o vetor `PropostaItem` é um vetor,
+   * se seu comprimento é 3, e se todos os objetos `PropostaItem` possuem uma propriedade `valor` diferente de zero.
+   * Se todas as condições são atendidas, ela define a propriedade `permitirConsolidar` como `true`. Caso contrário, ela a define como `false`.
+   */
   private async todosValoresProponentesPreenchidos() {
     const okFornecedores = this.listaFornecedores.length === 3;
     const okProponentes =
-      this.listaServicos.length > 0 &&
-      this.listaServicos.every((s: Servico) => {
+      this.listaItens.length > 0 &&
+      this.listaItens.every((item: Item) => {
         return (
-          Array.isArray(s.PropostaServico) &&
-          s.PropostaServico.length === 3 &&
-          s.PropostaServico.every((p: PropostaServico) => p.valor != 0)
+          Array.isArray(item.PropostaItem) &&
+          item.PropostaItem.length === 3 &&
+          item.PropostaItem.every((p: PropostaItem) => p.valor != 0)
         );
       });
 
-    const okOrcamentos =
-      (this.pesquisaPreco.DocumentoScanA ? true : false) &&
-      (this.pesquisaPreco.DocumentoScanB ? true : false) &&
-      (this.pesquisaPreco.DocumentoScanC ? true : false);
-
-    if (okFornecedores && !okProponentes && okOrcamentos && !this.pesquisaPreco.consolidado) {
+    if (okFornecedores && okProponentes && !this.pesquisaPreco.consolidado) {
       this.permitirConsolidar = true;
     } else if (this.pesquisaPreco.consolidado) {
       this.permitirConsolidar = false;
@@ -770,6 +798,9 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     } else {
       this.permitirConsolidar = false;
     }
+
+    if (okProponentes) this.gerarPlanilha = true;
+    else this.gerarPlanilha = false;
   }
 
   private verificarPesquisaPrecoConsolidada() {
@@ -802,25 +833,25 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
   }
 
   /**
-   * Exclui todos os itens de proposta relacionados a um determinado proponente da lista de Servicos.
+   * Exclui todos os itens de proposta relacionados a um determinado proponente da lista de Itens.
    *
    * @param proponenteId - O identificador exclusivo do proponente cujas propostas relacionadas precisam ser excluídas.
    *
    * @remarks
-   * Essa função itera por cada Servico na matriz `listaServicos`. Para cada Servico, ela verifica se a propriedade `PropostaServico`
-   * é uma matriz e se cada item `PropostaServico` possui uma propriedade `fornecedorId` que corresponde ao `proponenteId` fornecido.
-   * Se ambas as condições forem atendidas, ela chama o método `deletePropostaServico` do `servicoService` para excluir a proposta.
+   * Essa função itera por cada Item na matriz `listaItens`. Para cada Item, ela verifica se a propriedade `PropostaItem`
+   * é uma matriz e se cada item `PropostaItem` possui uma propriedade `fornecedorId` que corresponde ao `proponenteId` fornecido.
+   * Se ambas as condições forem atendidas, ela chama o método `deletePropostaItem` do `itemService` para excluir a proposta.
    *
    * @throws Registra uma mensagem de erro no console se ocorrer um erro durante a exclusão das propostas.
    */
-  private deletarPropostasServicoProponente(proponenteId: number) {
+  private deletarPropostasItemProponente(proponenteId: number) {
     try {
-      this.listaServicos.forEach((servico: Servico) => {
+      this.listaItens.forEach((item: Item) => {
         return (
-          Array.isArray(servico.PropostaServico) &&
-          servico.PropostaServico.every(async (p: PropostaServico) => {
-            return await this.servicoService.deletePropostaServico({
-              servicoId: servico.id,
+          Array.isArray(item.PropostaItem) &&
+          item.PropostaItem.every(async (p: PropostaItem) => {
+            return await this.itemService.deletePropostaItem({
+              itemId: item.id,
               fornecedorId: proponenteId,
             });
           })
@@ -841,10 +872,10 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
    */
   private resetForm() {
     this.submitted = false;
-    this.servicoDialog = false;
-    this.editServicoDialog = false;
-    this.deleteServicoDialog = false;
-    this.deleteServicosDialog = false;
+    this.itemDialog = false;
+    this.editItemDialog = false;
+    this.deleteItemDialog = false;
+    this.deleteItensDialog = false;
     this.editProponenteDialog = false;
     this.deleteProponenteDialog = false;
     this.isViewMode = false;
@@ -855,25 +886,30 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     this.valorProposto = null;
     this.editValor = false;
     this.proponenteDOC = '';
+    this.labelValorItem = '';
     this.dialogOrcamento = false;
-    this.resetServico();
+    this.resetItem();
     this.resetProponente();
     this.resetFornecedor();
   }
 
-  private resetServico() {
-    this.servico = {
+  private resetItem() {
+    this.item = {
       id: undefined,
       pesquisaPrecoId: undefined,
+      termoDoacaoId: undefined,
       descricao: undefined,
       menorValor: undefined,
+      quantidade: undefined,
+      unidade: undefined,
       justificativa: undefined,
       createdAt: undefined,
       updatedAt: undefined,
       deletedAt: undefined,
       PesquisaPreco: undefined,
       NotaFiscal: undefined,
-      PropostaServico: undefined,
+      TermoDoacao: undefined,
+      PropostaItem: undefined,
     };
   }
 
@@ -893,8 +929,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
       updatedAt: undefined,
       deletedAt: undefined,
       NotaFiscal: undefined,
-      PropostaServico: undefined,
-      PropostaBem: undefined,
+      PropostaItem: undefined,
     };
     this.crudProponente = {
       id: undefined,
@@ -911,8 +946,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
       updatedAt: undefined,
       deletedAt: undefined,
       NotaFiscal: undefined,
-      PropostaServico: undefined,
-      PropostaBem: undefined,
+      PropostaItem: undefined,
     };
   }
   private resetFornecedor() {
@@ -931,22 +965,21 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
       updatedAt: undefined,
       deletedAt: undefined,
       NotaFiscal: undefined,
-      PropostaServico: undefined,
-      PropostaBem: undefined,
+      PropostaItem: undefined,
     };
   }
 
   navigateToConsolidar() {
     localStorage.setItem('pesquisaPreco', JSON.stringify(this.pesquisaPreco));
-    this.router.navigate(['conta/consolidar/S']);
+    this.router.navigate(['conta/consolidar']);
   }
 
   onRowSelect(event: any) {
-    this.servicoSelecionado = event.data; // Armazena o servico selecionado
+    this.itemSelecionado = event.data; // Armazena o item selecionado
   }
 
   onRowUnselect(event: any) {
-    this.servicoSelecionado = null; // Limpa a seleção quando o item é desmarcado
+    this.itemSelecionado = null; // Limpa a seleção quando o item é desmarcado
   }
 
   /**
@@ -1017,6 +1050,10 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     if (file) {
       if (file.type === 'application/pdf') {
         this.uploadedFile = file;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Arquivo realizado',
+        });
       } else {
         this.messageService.add({
           severity: 'error',
@@ -1131,8 +1168,10 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
       rejectLabel: 'Não',
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-secondary',
-      accept: () => {
+      accept: async () => {
         this.removeUploadedFile();
+        await this.pesquisaPrecoService.update(this.pesquisaPreco);
+        this.buscarTodos(this.pesquisaPreco.id);
       },
       reject: () => {
         // Nada a fazer aqui
@@ -1140,7 +1179,7 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
     });
   }
 
-  async removeUploadedFile(): Promise<void> {
+  removeUploadedFile(): void {
     this.uploadedFile = null;
 
     switch (this.orcamentoProponente) {
@@ -1156,18 +1195,12 @@ export class ServicoPesquisaPrecoComponent implements OnInit {
       default:
         console.warn('Proponente não reconhecido');
     }
-    try {
-        const resposta = await this.pesquisaPrecoService.update(this.pesquisaPreco);
-        this.resetForm();
-      } catch (error) {
-        console.error(error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro ao remover',
-          life: 1500,
-        });
-      } finally {
-        this.buscarTodos(this.pesquisaPreco.id);
-      }
+  }
+
+  gerarPlanilhaPesquisa() {
+    const tokenJWT = localStorage.getItem('jwt');
+    const decodedToken: JwtPayload = jwtDecode(tokenJWT);
+    const idEscola = decodedToken['escolaId'];
+    this.gerarPDFPlanilhaService.salvarPDFPlanilhaPreco(this.pesquisaPreco, idEscola);
   }
 }

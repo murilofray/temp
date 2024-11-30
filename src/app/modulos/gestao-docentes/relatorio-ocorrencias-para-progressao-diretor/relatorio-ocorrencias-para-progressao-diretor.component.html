@@ -10,19 +10,19 @@
     optionLabel="nome" placeholder="Selecione um docente" [filter]="true"
     [filterBy]="'nome'" (onChange)="filtrarOcorrenciasPorProfessor()"></p-dropdown>
     
-    <button pButton type="button" label="Baixar Relatório de Ocorrências Do Docente"
+    <button pButton type="button" label="Emitir Relatório de Ocorrências"
     class="button-spacing"
     (click)="gerarRelatorio()"
     ></button>
   </div>
 
-  <p-table *ngIf="selectedProfessor" [value]="ocorrencias" [paginator]="true" [rows]="5">
+  <p-table *ngIf="selectedProfessor&&verTamanhoArrayOcorrencias()>0" [value]="ocorrencias" [paginator]="true" [rows]="5">
     <ng-template pTemplate="caption"> </ng-template>
     <ng-template pTemplate="header">
       <tr>
         <th pSortableColumn="data">Data da Ocorrência<p-sortIcon [field]="'data'"></p-sortIcon></th>
         <th pSortableColumn="lancadoPor">Registrado Por<p-sortIcon [field]="'lancadopor'"></p-sortIcon></th>
-        <th pSortableColumn="status">Estado <p-sortIcon [field]="'status'"></p-sortIcon></th>
+        <th pSortableColumn="status">Situação <p-sortIcon [field]="'status'"></p-sortIcon></th>
         <th pSortableColumn="abonada">É Abonada? <p-sortIcon [field]="'abonada'"></p-sortIcon></th>
         <th pSortableColumn="tipoAbono">Tipo de Abono <p-sortIcon [field]="'tipoabonada'"></p-sortIcon></th>
       </tr>
@@ -40,4 +40,7 @@
       </tr>
     </ng-template>
   </p-table>
+  <div *ngIf="selectedProfessor&&verTamanhoArrayOcorrencias()==0">
+    Esse docente não tem nenhuma ocorrência registrada.
+  </div>
 </div>

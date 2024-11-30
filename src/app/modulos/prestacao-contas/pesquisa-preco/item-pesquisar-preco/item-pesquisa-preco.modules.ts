@@ -5,7 +5,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { BemPesquisaPrecoComponent } from './bem-pesquisa-preco.component';
+import { ItemPesquisaPrecoComponent } from './item-pesquisa-preco.component';
 import { TableModule } from 'primeng/table';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
@@ -15,16 +15,17 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { InputMaskModule } from 'primeng/inputmask';
 import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadModule } from 'primeng/fileupload';
-import { SafeUrlPipe } from 'src/app/comum/pdf-viewer/safe-url.pipe';
 import { PdfViewerComponent } from 'src/app/comum/pdf-viewer/pdf-viewer.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DropdownModule } from 'primeng/dropdown';
 @NgModule({
-  declarations: [BemPesquisaPrecoComponent],
+  declarations: [ItemPesquisaPrecoComponent],
   imports: [
     CommonModule,
     FormsModule,
     ToastModule,
     DialogModule,
+    DropdownModule,
     ButtonModule,
     TableModule,
     RippleModule,
@@ -40,6 +41,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     PdfViewerComponent,
   ],
   providers: [MessageService, ConfirmationService],
-  exports: [BemPesquisaPrecoComponent],
+  exports: [ItemPesquisaPrecoComponent],
 })
-export class BemPesquisaPrecoModule {}
+export class ItemPesquisaPrecoModule {}

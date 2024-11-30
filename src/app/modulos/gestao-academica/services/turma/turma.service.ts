@@ -22,7 +22,7 @@ export class TurmaService {
     const response = await axios.get(`${this.urlBase}/`);
     return response.data.map((turma: any) => ({
       ...turma,
-      descricao: `${turma.ano} ${turma.letra}`,
+      descricao: `${turma.ano} ${turma.letra} ${turma.anoLetivo}`,
     }));
   }
 
@@ -43,7 +43,7 @@ export class TurmaService {
       const resposta = await axios.get(`${this.urlBase}/turma/escola/${escolaId}`);
       return resposta.data.map((turma: any) => ({
         ...turma,
-        descricao: `${turma.ano} ${turma.letra}`,
+        descricao: `${turma.ano} ${turma.letra} ${turma.anoLetivo}`,
       }));
     } catch (error) {
       if (axios.isAxiosError(error) && (error.response?.status === 404 || error.response?.status === 400 )) {
@@ -75,9 +75,34 @@ export class TurmaService {
     }
   }
 
+  async editarTurma(turmaId: number, escolaId: number, servidorId: number, ano: string, anoLetivo: string, letra: string){
+    const resposta = await axios.put(`${this.urlBase}/${turmaId}`, {
+      "escolaId": escolaId,
+      "servidorId": servidorId,
+      "ano": `${ano}`,
+      "anoLetivo": anoLetivo,
+      "letra": letra
+    })
+
+    if(resposta.status == 200){
+      return resposta.data
+    }
+  }
+
   async deletarTurma(turmaId: number){
     const resposta = await axios.delete(`${this.urlBase}/${turmaId}`)
 
     return resposta
+  }
+
+  async rematricular(turmaAtual: number, turmaNova: number) {
+    const body = { turmaAtual, turmaNova };
+    
+    try {
+      const response = await axios.post(`${this.urlBase}/rematricula`, body);
+      return response.data;
+    } catch (error) {
+      return null
+    }
   }
 }

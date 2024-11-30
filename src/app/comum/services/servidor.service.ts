@@ -135,4 +135,48 @@ export class ServidorService {
 
     return resposta.data;
   }
+
+  async atualizarServidorComNiveisAcesso(id: number, servidor: any, niveisAcesso: number[]) {
+    try {
+      const response = await axios.put(`${this.apiUrl}/${id}`, {
+        ...servidor,
+        niveisAcesso,
+      });
+  
+      return {
+        success: true,
+        message: 'Servidor atualizado com sucesso',
+        data: response.data,
+      };
+    } catch (error: AxiosError | any) {
+      if (error.response?.status === 409) {
+        return {
+          success: false,
+          message: error.response.data.error || 'Já existe um email com o mesmo valor cadastrado.',
+        };
+      }
+  
+      return {
+        success: false,
+        message: error.response?.data?.error || 'Erro ao atualizar o servidor',
+      };
+    }
+  }
+
+  async deletarServidor(id: number) {
+    try {
+      const response = await axios.delete(`${this.apiUrl}/${id}`);
+      return {
+        success: true,
+        message: 'Servidor deletado com sucesso',
+        data: response.data,
+      };
+    } catch (error: AxiosError | any) {
+      return {
+        success: false,
+        message: error.response?.data?.error || 'Erro ao deletar o servidor',
+      };
+    }
+  }
+
 }

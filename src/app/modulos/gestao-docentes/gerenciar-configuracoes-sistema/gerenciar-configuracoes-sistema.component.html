@@ -2,10 +2,9 @@
 <div class="configuracoes-container">
     <div class="configuracoes-container">
         <h2 class="titulo-configuracoes">Configurações do Sistema</h2>
-
-        <button pButton type="button" label="Criar" class="p-button-success"
-        (click)="mostrarDialogCriar()"></button>
         <!-- Exibição da configuração -->
+        <button pButton type="button" label="Criar configuração" class="p-button-success"
+            (click)="mostrarDialogCriar()"></button>
         <div *ngIf="configuracoes.length > 0">
             <p-table [value]="configuracoes" [paginator]="true" [rows]="5">
                 <ng-template pTemplate="header">
@@ -48,9 +47,11 @@
             <div class="field">
                 <label for="anoLetivo">Ano Letivo:</label>
                 <p-calendar [(ngModel)]="selectedYear" [yearNavigator]="true" [view]="'year'" [showIcon]="true"
-                    [showButtonBar]="true" [monthNavigator]="false" [dateFormat]="'yy'" class="custom-calendar">
+                    [showButtonBar]="true" [monthNavigator]="false" [dateFormat]="'yy'" [disabled]="true"
+                    class="custom-calendar">
                 </p-calendar>
             </div>
+
 
             <!-- Campo para o Início do Ano Letivo -->
             <div class="field">

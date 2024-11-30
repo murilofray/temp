@@ -22,7 +22,7 @@ export class PDDEService {
   }
 
   // Método para listar todos os PDDEs
-  async listarTodosPDDEs(): Promise<any[]> {
+  async listarTodosPDDEs() {
     try {
       const resposta = await apiClient.get(this.apiUrl);
       return resposta.data;
@@ -33,9 +33,9 @@ export class PDDEService {
   }
 
   // Método para listar PDDEs com saldo por escola
-  async listarComSaldoPorEscola(escolaId: number): Promise<any[]> {
+  async getByEscola(escolaId: number) {
     try {
-      const url = `${this.apiUrl}/listarPorEscola/${escolaId}`;
+      const url = `${this.apiUrl}/${escolaId}`;
       const resposta = await apiClient.get(url);
       return resposta.data;
     } catch (error) {
@@ -44,19 +44,8 @@ export class PDDEService {
     }
   }
 
-  // Método para listar PDDEs com saldo
-  async listarComSaldo(): Promise<any[]> {
-    try {
-      const resposta = await apiClient.get(`${this.apiUrl}/saldo`);
-      return resposta.data;
-    } catch (error) {
-      console.error('Erro ao listar PDDEs com saldo:', error);
-      throw error;
-    }
-  }
-
   // Método para obter PDDE por ID
-  async getById(id: number): Promise<any> {
+  async getById(id: number) {
     try {
       const resposta = await apiClient.get(`${this.apiUrl}/${id}`);
       return resposta.data;

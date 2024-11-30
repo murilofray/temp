@@ -68,28 +68,28 @@ export class CadastrarApmComponent {
 
   onSubmit() {
     this.newApm.dataFormacao = new Date(this.newApm.dataFormacao);
-    this.apmService.cadastrarApm(this.newApm).subscribe(
-      (response) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'APM cadastrada com sucesso!',
-        });
+    // this.apmService.cadastrarApm(this.newApm).subscribe(
+    //   (response) => {
+    //     this.messageService.add({
+    //       severity: 'success',
+    //       summary: 'Sucesso',
+    //       detail: 'APM cadastrada com sucesso!',
+    //     });
 
-        this.newApm.vigente = null;
-        this.newApm.dataFormacao = null;
-        this.newApm.escolaId = null;
+    //     this.newApm.vigente = null;
+    //     this.newApm.dataFormacao = null;
+    //     this.newApm.escolaId = null;
 
-      },
-      (error) => {
-        console.error('Erro ao cadastrar APM:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: 'Erro ao cadastrar APM!',
-        });
-      }
-    );
+    //   },
+    //   (error) => {
+    //     console.error('Erro ao cadastrar APM:', error);
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Erro',
+    //       detail: 'Erro ao cadastrar APM!',
+    //     });
+    //   }
+    // );
   }
 
   isInvalid() {

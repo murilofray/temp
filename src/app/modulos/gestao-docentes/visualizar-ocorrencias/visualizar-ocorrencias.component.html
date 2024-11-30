@@ -7,7 +7,7 @@
     <ng-template pTemplate="header">
       <tr>
         <th pSortableColumn="data">Data da Ocorrência<p-sortIcon [field]="'data'"></p-sortIcon></th>
-        <th pSortableColumn="status">Estado <p-sortIcon [field]="'status'"></p-sortIcon></th>
+        <th pSortableColumn="status">Situação <p-sortIcon [field]="'status'"></p-sortIcon></th>
         <th pSortableColumn="abonada">É Abonada? <p-sortIcon [field]="'abonada'"></p-sortIcon></th>
         <th pSortableColumn="tipoAbono">Tipo de Abono <p-sortIcon [field]="'tipoabonada'"></p-sortIcon></th>
         <th>Ações</th>
@@ -49,14 +49,14 @@
       <span>{{buscarDocente(selectedOcorrencia.lancadoPor)}}</span>
     </div>
     <div class="field">
-      <label>Estado: </label>
+      <label>Situação: </label>
       <span>{{selectedOcorrencia.status}}</span>
     </div>
-    <div class="field">
+    <div class="field" *ngIf="selectedOcorrencia.status.toLowerCase()=='aceita'||selectedOcorrencia.status.toLowerCase()=='recusada'">
       <label>É Abonada? </label>
       <span>{{buscarAbono(selectedOcorrencia.abonoId)}}</span>
     </div>
-    <div class="field">
+    <div class="field" *ngIf="selectedOcorrencia.status.toLowerCase()=='aceita'||selectedOcorrencia.status.toLowerCase()=='recusada'">
       <label>Tipo de Abono: </label>
       <span>{{buscarNomeAbono(selectedOcorrencia.abonoId)}}</span>
     </div>
@@ -78,20 +78,15 @@
       <br>
       <button *ngIf="selectedOcorrencia.documentoScanId" pButton label="Baixar Atestado" icon="pi pi-download"
         (click)="verDocumento(selectedOcorrencia.documentoScanId)"></button>
-
-
       <span *ngIf="!selectedOcorrencia.documentoScanId"> Não há atestado </span>
     </div>
-
-
-
   </div>
 </p-dialog>
 
 <!-- Dialog p justificar-->
 <p-dialog header="Justificar Ocorrência" [(visible)]="displayDialogJustificar"
-  [style]="{ width: '50vw', height: '35vw' }" modal="true">
-  <div *ngIf="selectedOcorrencia" class="dialog-content" [style]="{ height: '25vw' }">
+  [style]="{ width: '60vw', height: '45vw' }" modal="true">
+  <div *ngIf="selectedOcorrencia" class="dialog-content" [style]="{ height: '35vw' }">
     <div class="field">
       <label>Data da Falta:</label>
       <span>{{ formatData(selectedOcorrencia.dataOcorrencia) }}</span>

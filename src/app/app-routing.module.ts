@@ -39,17 +39,14 @@ import { LancarTitulosComponent } from './modulos/gestao-docentes/lancar-titulos
 import { GerenciarAbonoComponent } from './modulos/gestao-docentes/gerenciar-abono/gerenciar-abono.component';
 import { GerenciarCategoriaCertificadoComponent } from './modulos/gestao-docentes/gerenciar-categoria-certificado/gerenciar-categoria-certificado.component';
 
-
 // Módulo Prestação de Conta
 import { HomeComponent } from './modulos/prestacao-contas/home/home.component';
 import { CadastrarServidorComponent } from './comum/cadastrar-servidor/cadastrar-servidor.component';
-import { BemConsolidarProponenteComponent } from './modulos/prestacao-contas/pesquisa-preco/bem-consolidar-proponente/bem-consolidar-proponente.component';
+import { ItemConsolidarProponenteComponent } from './modulos/prestacao-contas/pesquisa-preco/item-consolidar-proponente/item-consolidar-proponente.component';
 import { ContaBancariaComponent } from './modulos/prestacao-contas/conta-bancaria-cadastro/conta-bancaria.component';
 import { PddeCadastroComponent } from './modulos/prestacao-contas/pdde-cadastro/pdde-cadastro.component';
 import { ProgramaCadastroComponent } from './modulos/prestacao-contas/programa/programa-cadastro.component';
-import { BemPesquisaPrecoComponent } from './modulos/prestacao-contas/pesquisa-preco/bem-pesquisar-preco/bem-pesquisa-preco.component';
-import { ServicoPesquisaPrecoComponent } from './modulos/prestacao-contas/pesquisa-preco/servico-pesquisa-preco/servico-pesquisa-preco.component';
-import { ServicoConsolidarProponenteComponent } from './modulos/prestacao-contas/pesquisa-preco/servico-consolidar-proponente/servico-consolidar-proponente.component';
+import { ItemPesquisaPrecoComponent } from './modulos/prestacao-contas/pesquisa-preco/item-pesquisar-preco/item-pesquisa-preco.component';
 import { GerarTermoDeDoacaoComponent } from './modulos/prestacao-contas/gerar-termo-de-doacao/gerar-termo-de-doacao.component';
 import { GerarDemonstrativoExecucaoComponent } from './modulos/prestacao-contas/gerar-demonstrativo-execucao/gerar-demonstrativo-execucao.component';
 import { ListaApmsComponent } from './modulos/prestacao-contas/lista-apms/lista-apms.component';
@@ -111,10 +108,10 @@ const routesDocentes: any = {
       path: 'relatorio-ocorrencias-para-progressao-diretor',
       component: RelatorioOcorrenciasParaProgressaoDiretorComponent,
     },
-    {  path: 'gerenciar-abono', component: GerenciarAbonoComponent },
-    { path: 'gerenciar-categoria-certificado', component: GerenciarCategoriaCertificadoComponent},
+    { path: 'gerenciar-abono', component: GerenciarAbonoComponent },
+    { path: 'gerenciar-categoria-certificado', component: GerenciarCategoriaCertificadoComponent },
     { path: 'visualizar-quinquenio', component: VisualizarQuinquenioComponent },
-    { path: 'gerenciar-configuracoes-sistema', component: GerenciarConfiguracoesSistemaComponent},
+    { path: 'gerenciar-configuracoes-sistema', component: GerenciarConfiguracoesSistemaComponent },
   ],
 };
 
@@ -123,13 +120,11 @@ const routesContas: any = {
   children: [
     { path: 'home', component: HomeComponent },
     { path: 'listarpesquisa', component: ListaPesquisaPrecosComponent },
-    { path: 'pesquisa/B', component: BemPesquisaPrecoComponent },
-    { path: 'pesquisa/S', component: ServicoPesquisaPrecoComponent },
+    { path: 'pesquisa', component: ItemPesquisaPrecoComponent },
     { path: 'conta-bancaria-cadastro', component: ContaBancariaComponent },
     { path: 'pdde-cadastro', component: PddeCadastroComponent },
     { path: 'programa-cadastro', component: ProgramaCadastroComponent },
-    { path: 'consolidar/B', component: BemConsolidarProponenteComponent },
-    { path: 'consolidar/S', component: ServicoConsolidarProponenteComponent },
+    { path: 'consolidar', component: ItemConsolidarProponenteComponent },
     { path: 'movimentacoes', component: ListarMovimentacaoComponent },
     { path: 'atas', component: GerenciarAtaComponent },
     { path: 'gerar-termo-doacao', component: GerarTermoDeDoacaoComponent },
@@ -217,4 +212,3 @@ const routerComum: any = {
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
-

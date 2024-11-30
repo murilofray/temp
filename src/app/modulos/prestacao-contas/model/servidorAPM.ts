@@ -1,12 +1,11 @@
 import { Servidor } from 'src/app/comum/model/servidor';
-import { APM } from './APM';
-import { CargoAPM } from './cargoAPM';
+import { FormacaoAPM } from './formacaoAPM';
+import { CargoAPMTEnum } from 'src/app/enums/CargoAPMEnum';
 
-export interface ServidorApm {
+export interface ServidorAPM {
   servidorId: number;
-  apmId: number;
-  cargoAPMId: number;
-  Servidor?: Servidor;
-  APM?: APM;
-  CargoAPM?: CargoAPM;
+  formacaoId: number;
+  cargoAPMId: CargoAPMTEnum;
+  Servidor: Servidor;
+  FormacaoAPM: FormacaoAPM;
 }

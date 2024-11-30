@@ -67,12 +67,12 @@
 
       <div class="form-grid">
         <div class="field">
-          <label for="documento">Documento:</label>
+          <label for="documento">Documento*:</label>
           <input type="file" (change)="onFileSelected($event)" />
         </div>
 
         <div class="field">
-          <label for="nome">Nome:</label>
+          <label for="nome">Nome*:</label>
           <input
             type="text"
             pInputText
@@ -104,12 +104,12 @@
             "
             class="error-message"
           >
-            Instituição é obrigatória.
+            Instituição é obrigatória*.
           </div>
         </div>
 
         <div class="field">
-          <label for="tipoId">Categoria:</label>
+          <label for="tipoId">Categoria*:</label>
           <p-dropdown
             formControlName="tipoId"
             [options]="categoriasCertificado"
@@ -129,7 +129,7 @@
         </div>
 
         <div class="field">
-          <label for="cargaHoraria">Carga Horária:</label>
+          <label for="cargaHoraria">Carga Horária*:</label>
           <input
             type="number"
             pInputText
@@ -148,7 +148,7 @@
         </div>
 
         <div class="field">
-          <label for="dataConclusao">Data de Conclusão:</label>
+          <label for="dataConclusao">Data de Conclusão*:</label>
           <input type="date" formControlName="dataConclusao" pInputText />
           <div
             *ngIf="
